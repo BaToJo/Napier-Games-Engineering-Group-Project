@@ -17,6 +17,28 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 add_subdirectory("lib/sfml")
 set(SFML_INCS "lib/sfml/include")
 link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
+add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
+    -E copy_directory
+    "${PROJECT_SOURCE_DIR}/res"
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/res
+)
+
+# # Tile loader lib
+file(GLOB_RECURSE SOURCE_FILES lib_tile_level_loader/*.cpp lib_tile_level_loader/*.h)
+add_library(lib_tile_level_loader STATIC ${SOURCE_FILES})
+target_include_directories(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib_tile_level_loader/")
+target_link_libraries(lib_tile_level_loader sfml-graphics)
+
+# # Entity Component Model library
+file(GLOB_RECURSE SOURCE_FILES lib_ecm/*.cpp lib_ecm/*.h)
+add_library(lib_ecm STATIC ${SOURCE_FILES})
+target_include_directories(lib_ecm INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm/")
+target_link_libraries(lib_ecm PRIVATE lib_maths)
+
+# Maths lib
+add_library(lib_maths INTERFACE)
+target_sources(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib_maths/maths.h")
+target_include_directories(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib_maths" SYSTEM INTERFACE ${SFML_INCS})
 
 function(copy_sfml_dll MyTarget)
     add_custom_command(TARGET ${MyTarget} POST_BUILD # Adds a post-build event to MyTest
@@ -29,10 +51,11 @@ endfunction()
 file(GLOB_RECURSE SOURCES code/*.cpp code/*.h)
 add_executable(CARTHARSIS ${SOURCES})
 target_include_directories(CARTHARSIS PRIVATE ${SFML_INCS})
-target_link_libraries(CARTHARSIS sfml-graphics)
+target_link_libraries(CARTHARSIS lib_tile_level_loader lib_ecm lib_maths sfml-graphics)
 set_target_properties(CARTHARSIS
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
 )
 
 copy_sfml_dll(CARTHARSIS)
+add_dependencies(CARTHARSIS copy_resources)
