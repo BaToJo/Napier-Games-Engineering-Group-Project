@@ -28,8 +28,10 @@ void Update()
 {
     static Clock clock;
     float dt = clock.restart().asSeconds();
+
+    // The view's center is set to the player's position so the camera will center the player.
     playerCamera.setCenter(player->getPosition());
-    //playerCamera.move(Vector2f(dt * 250.f, 0));
+
     ents.Update(dt);
 }
 
@@ -50,7 +52,7 @@ int main()
     playerCamera.setSize(Vector2f(500.f, 500.f));
 
     Renderer::Initialise(window);
-
+        
     while (window.isOpen())
     {
         Event event;
@@ -64,7 +66,6 @@ int main()
         window.clear();
 
         Update();
-
         // View is set to the window after update (I assume you do camera calculations in the update)
         window.setView(playerCamera);
         Render(window);
