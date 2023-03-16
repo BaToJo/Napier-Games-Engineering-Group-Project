@@ -4,12 +4,15 @@
 #include "Cmp_player_movement.h"
 #include "Cmp_Sprite.h"
 #include "System_Renderer.h"
+#include "Box2D/Box2D.h"
+
 using namespace sf;
 using namespace std;
 
 shared_ptr<Entity> player;
 View playerCamera;
 EntityManager ents;
+b2World* world;
 void Load()
 {
     ls::loadLevelFile("res/levels/pacman.txt", 50.f);

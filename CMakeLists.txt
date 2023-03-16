@@ -23,6 +23,10 @@ add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/res
 )
 
+add_subdirectory("lib/b2d/Box2D")
+set(B2D_INCS "lib/b2d/Box2D")
+link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
+
 # # Tile loader lib
 file(GLOB_RECURSE SOURCE_FILES lib_tile_level_loader/*.cpp lib_tile_level_loader/*.h)
 add_library(lib_tile_level_loader STATIC ${SOURCE_FILES})
@@ -50,8 +54,8 @@ endfunction()
 # ### Practical 1 ####
 file(GLOB_RECURSE SOURCES code/*.cpp code/*.h)
 add_executable(CARTHARSIS ${SOURCES})
-target_include_directories(CARTHARSIS PRIVATE ${SFML_INCS})
-target_link_libraries(CARTHARSIS lib_tile_level_loader lib_ecm lib_maths sfml-graphics)
+target_include_directories(CARTHARSIS PRIVATE ${SFML_INCS} ${B2D_INCS})
+target_link_libraries(CARTHARSIS lib_tile_level_loader lib_ecm lib_maths sfml-graphics Box2D)
 set_target_properties(CARTHARSIS
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
