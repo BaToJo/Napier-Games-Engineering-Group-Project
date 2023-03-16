@@ -30,7 +30,10 @@ void Update()
     float dt = clock.restart().asSeconds();
 
     // The view's center is set to the player's position so the camera will center the player.
-    playerCamera.setCenter(player->getPosition());
+    Vector2f movement = player->getPosition() - playerCamera.getCenter();
+    playerCamera.move(movement * dt * 5.f);
+
+    
 
     ents.Update(dt);
 }
