@@ -92,7 +92,7 @@ bool Component::is_forDeletion() const
 
 void EntityManager::Update(double dt)
 {
-	for each (auto& e in list)
+	for(auto& e : list)
 	{
 		e->Update(dt);
 	}
@@ -101,7 +101,7 @@ void EntityManager::Update(double dt)
 void EntityManager::Render()
 {
 	
-	for each (auto& e in list)
+	for(auto& e : list)
 	{
 		e->Render();
 	}
