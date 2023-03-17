@@ -31,7 +31,7 @@ link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
 file(GLOB_RECURSE SOURCE_FILES lib_tile_level_loader/*.cpp lib_tile_level_loader/*.h)
 add_library(lib_tile_level_loader STATIC ${SOURCE_FILES})
 target_include_directories(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib_tile_level_loader/")
-target_link_libraries(lib_tile_level_loader sfml-graphics)
+target_link_libraries(lib_tile_level_loader sfml-graphics lib_maths)
 
 # # Entity Component Model library
 file(GLOB_RECURSE SOURCE_FILES lib_ecm/*.cpp lib_ecm/*.h)
@@ -44,6 +44,12 @@ add_library(lib_maths INTERFACE)
 target_sources(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib_maths/maths.h")
 target_include_directories(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib_maths" SYSTEM INTERFACE ${SFML_INCS})
 
+# # Engine Code
+file(GLOB_RECURSE SOURCE_FILES lib_engine/*.cpp lib_engine/*.h)
+add_library(lib_engine STATIC ${SOURCE_FILES})
+target_include_directories(lib_engine INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm" PUBLIC SYSTEM ${B2D_INCS})
+target_link_libraries(lib_engine PRIVATE lib_tile_level_loader lib_maths lib_ecm Box2D sfml-graphics sfml-audio)
+
 function(copy_sfml_dll MyTarget)
     add_custom_command(TARGET ${MyTarget} POST_BUILD # Adds a post-build event to MyTest
         COMMAND ${CMAKE_COMMAND} -E copy_directory # which executes "cmake - E copy_if_different..."
@@ -51,15 +57,21 @@ function(copy_sfml_dll MyTarget)
         $<TARGET_FILE_DIR:${MyTarget}>) # <--this is out-file path
 endfunction()
 
-# ### Practical 1 ####
+# ### GAME ####
 file(GLOB_RECURSE SOURCES code/*.cpp code/*.h)
+file(GLOB_RECURSE CMPNTS code/components/*.cpp code/components/*.h)
+file(GLOB_RECURSE SCENES code/scenes/*.cpp code/scenes/*.h)
 add_executable(CARTHARSIS ${SOURCES})
+source_group("components" FILES ${CMPNTS})
+source_group("scenes" FILES ${SCENES})
+
 target_include_directories(CARTHARSIS PRIVATE ${SFML_INCS} ${B2D_INCS})
-target_link_libraries(CARTHARSIS lib_tile_level_loader lib_ecm lib_maths sfml-graphics Box2D)
+target_link_libraries(CARTHARSIS lib_engine)
+
+copy_sfml_dll(CARTHARSIS)
+add_dependencies(CARTHARSIS copy_resources)
+
 set_target_properties(CARTHARSIS
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
 )
-
-copy_sfml_dll(CARTHARSIS)
-add_dependencies(CARTHARSIS copy_resources)
