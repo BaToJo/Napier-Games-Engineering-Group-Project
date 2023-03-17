@@ -44,6 +44,12 @@ add_library(lib_maths INTERFACE)
 target_sources(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib_maths/maths.h")
 target_include_directories(lib_maths INTERFACE "${CMAKE_SOURCE_DIR}/lib_maths" SYSTEM INTERFACE ${SFML_INCS})
 
+# # Engine Code
+file(GLOB_RECURSE SOURCE_FILES lib_engine/*.cpp lib_engine/*.h)
+add_library(lib_engine STATIC ${SOURCE_FILES})
+target_include_directories(lib_engine INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm" PUBLIC SYSTEM ${B2D_INCS})
+target_link_libraries(lib_engine PRIVATE lib_tile_level_loader lib_maths lib_ecm sfml-graphics sfml-audio Box2D)
+
 function(copy_sfml_dll MyTarget)
     add_custom_command(TARGET ${MyTarget} POST_BUILD # Adds a post-build event to MyTest
         COMMAND ${CMAKE_COMMAND} -E copy_directory # which executes "cmake - E copy_if_different..."
