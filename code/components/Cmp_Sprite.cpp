@@ -1,5 +1,5 @@
 #include "Cmp_Sprite.h"
-#include "System_Renderer.h"
+#include "..\lib_engine\System_Renderer.h"
 
 void ShapeComponent::Update(double dt)
 {

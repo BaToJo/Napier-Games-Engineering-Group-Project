@@ -1,12 +1,12 @@
 #pragma once
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <Ecm.h>
-#include <maths.h>
+#include "..\lib_maths\maths.h"
 
 class Scene
 {
 public:
-	Scene() = delete;
+	Scene() = default;
 	virtual ~Scene();
 	virtual void Load() = 0;
 	virtual void Unload();

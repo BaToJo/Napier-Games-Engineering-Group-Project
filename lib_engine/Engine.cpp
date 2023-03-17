@@ -22,6 +22,7 @@ void Engine::Update()
 
 void Engine::Render(RenderWindow& window)
 {
+	_activeScene->Render();
 	Renderer::Render();
 }
 
@@ -30,6 +31,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName);
 	_gameName = gameName;
 	_window = &window;
+	ChangeScene(scn);
 	Renderer::Initialise(window);
 	Physics::Initialise();
 	while (window.isOpen())
@@ -41,24 +43,24 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 			{
 				window.close();
 			}
+			if (Keyboard::isKeyPressed(Keyboard::Escape))
+			{
+				window.close();
+			}
 		}
 
-		if (Keyboard::isKeyPressed(Keyboard::Escape))
-		{
-			window.close();
-		}
-
-		if (_activeScene != nullptr)
-		{
-			_activeScene->Unload();
-			_activeScene = nullptr;
-		}
 		window.clear();
 		Update();
 		Render(window);
 		window.display();
+
 	}
 
+	if (_activeScene != nullptr)
+	{
+		_activeScene->Unload();
+		_activeScene = nullptr;
+	}
 	window.close();
 	Physics::Shutdown();
 }

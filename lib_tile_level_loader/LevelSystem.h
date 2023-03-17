@@ -61,7 +61,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <maths.h>
+#include "..\lib_maths\maths.h"
 #include <memory>
 #include <string>
 #include <vector>

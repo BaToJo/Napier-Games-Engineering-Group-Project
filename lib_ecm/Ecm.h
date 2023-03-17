@@ -1,5 +1,5 @@
 #pragma once
-#include "maths.h"
+#include "..\lib_maths\maths.h"
 #include <algorithm>
 #include <memory>
 #include <typeindex>
@@ -95,20 +95,5 @@ public:
 		return std::move(ret);
 	}
 };
-
-//class Component
-//{
-//protected:
-//	Entity* const _parent;
-//	bool _forDeletion;
-//	explicit Component(Entity* const p);
-//
-//public:
-//	Component() = delete;
-//	bool is_forDeletion() const;
-//	virtual void Update(double dt) = 0;
-//	virtual void Render() = 0;
-//	virtual ~Component() = default;
-//};
 
 
