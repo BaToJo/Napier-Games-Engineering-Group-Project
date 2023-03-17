@@ -1,32 +1,57 @@
 #include "Ecm.h"
 
-Entity::Entity() {}
+Entity::Entity(Scene* const s) : _position({ 0.f, 0.f }), _rotation(0.f), _alive(true), _visible(true), scene(s), _forDeletion(false) {}
+
+Entity::~Entity()
+{
+// Components can inter-depend on each other, so deleting them may take
+// multiple passes. We Keep deleting components until we can't delete any
+// more
+	int deli = 0;
+	while (deli != _components.size()) 
+	{
+		deli = _components.size();
+		_components.erase(
+			remove_if(_components.begin(), _components.end(),[](auto& sp) { return (sp.use_count() <= 1); }),
+			_components.end());
+	}
+
+	if (_components.size() > 0) {
+		throw std::runtime_error(
+			"Can't delete entity, someone is grabbing a component!");
+	}
+
+	_components.clear();
+}
 
 void Entity::Update(double dt)
 {
-	if (_alive && !_forDeletion)
+	if (!_alive)
 	{
-		for (auto& c : _components)
+		return;
+	}
+
+	for (size_t i = 0; i < _components.size(); i++)
+	{
+		if (_components[i]->Is_forDeletion())
 		{
-			if (!c->is_forDeletion())
-			{
-				c->Update(dt);
-			}		
+			_components.erase(_components.begin() + i);
+			i--;
 		}
+
+		_components[i]->Update(dt);
 	}
 
 }
 void Entity::Render()
 {
-	if (_visible && !_forDeletion)
+	if (!_visible)
 	{
-		for (auto& c : _components)
-		{
-			if (!c->is_forDeletion())
-			{
-				c->Render();
-			}
-		}
+		return;
+	}
+	for (auto& c : _components)
+	{
+		c->Render();
 	}
 }
 
@@ -85,16 +110,29 @@ void Entity::setVisible(bool _visible)
 
 Component::Component(Entity* const p) : _parent(p), _forDeletion(false) {}
 
-bool Component::is_forDeletion() const
+bool Component::Is_forDeletion() const
 {
 	return _forDeletion;
 }
 
+Component::~Component()
+{
+}
+
 void EntityManager::Update(double dt)
 {
-	for(auto& e : list)
+	for (size_t i = 0; i < list.size(); i++) 
 	{
-		e->Update(dt);
+		if (list[i]->is_forDeletion()) 
+		{
+			list.erase(list.begin() + i);
+			--i;
+			continue;
+		}
+		if (list[i]->_alive) 
+		{
+			list[i]->Update(dt);
+		}
 	}
 }
 

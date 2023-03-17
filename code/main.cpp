@@ -15,16 +15,16 @@ EntityManager ents;
 b2World* world;
 void Load()
 {
-    ls::loadLevelFile("res/levels/pacman.txt", 50.f);
+    ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
-    player = make_shared<Entity>();
-    auto s = player->addComponent<ShapeComponent>();
-    s->setShape<sf::CircleShape>(12.f);
-    s->getShape().setFillColor(Color::Yellow);
-    s->getShape().setOrigin(Vector2f(12.f, 12.f));
+    //player = make_shared<Entity>();
+    //auto s = player->addComponent<ShapeComponent>();
+    //s->setShape<sf::CircleShape>(12.f);
+    //s->getShape().setFillColor(Color::Yellow);
+    //s->getShape().setOrigin(Vector2f(12.f, 12.f));
 
-    player->addComponent<PlayerMovementComponent>();
-    ents.list.push_back(player);
+    //player->addComponent<PlayerMovementComponent>();
+    //ents.list.push_back(player);
 }
 
 void Update()
@@ -33,8 +33,8 @@ void Update()
     float dt = clock.restart().asSeconds();
 
     // The view's center is set to the player's position so the camera will center the player.
-    Vector2f movement = player->getPosition() - playerCamera.getCenter();
-    playerCamera.move(movement * dt * 5.f);
+    //Vector2f movement = player->getPosition() - playerCamera.getCenter();
+    //playerCamera.move(movement * dt * 5.f);
 
     
 
@@ -44,7 +44,7 @@ void Update()
 void Render(RenderWindow& window)
 {
     ls::Render(window);
-    ents.Render();
+    //ents.Render();
     Renderer::Render();
 }
 

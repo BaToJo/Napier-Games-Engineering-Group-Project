@@ -30,8 +30,8 @@ link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
 # # Tile loader lib
 file(GLOB_RECURSE SOURCE_FILES lib_tile_level_loader/*.cpp lib_tile_level_loader/*.h)
 add_library(lib_tile_level_loader STATIC ${SOURCE_FILES})
-target_include_directories(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib_tile_level_loader/")
-target_link_libraries(lib_tile_level_loader sfml-graphics)
+target_include_directockries(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib_tile_level_loader/")
+target_link_libraries(lib_tile_level_loader sfml-graphics lib_maths)
 
 # # Entity Component Model library
 file(GLOB_RECURSE SOURCE_FILES lib_ecm/*.cpp lib_ecm/*.h)
@@ -57,7 +57,7 @@ function(copy_sfml_dll MyTarget)
         $<TARGET_FILE_DIR:${MyTarget}>) # <--this is out-file path
 endfunction()
 
-# ### Practical 1 ####
+# ### GAME ####
 file(GLOB_RECURSE SOURCES code/*.cpp code/*.h)
 add_executable(CARTHARSIS ${SOURCES})
 target_include_directories(CARTHARSIS PRIVATE ${SFML_INCS} ${B2D_INCS})
