@@ -1,14 +1,43 @@
 #pragma once
-#include "maths.h"
+#include "..\lib_maths\maths.h"
 #include <algorithm>
 #include <memory>
 #include <typeindex>
 #include <vector>
 
-class Component; //forward declare
+class Entity;
+class Scene;
+
+class Component 
+{
+	friend Entity;
+
+protected:
+	Entity* const _parent;
+	bool _forDeletion;
+	explicit Component(Entity* const p);
+
+public:
+	Component() = delete;
+
+	bool Is_forDeletion() const;
+	virtual void Update(double dt) = 0;
+	virtual void Render() = 0;
+
+	virtual ~Component();
+
+};
+
+struct EntityManager
+{
+	std::vector<std::shared_ptr<Entity>> list;
+	void Update(double dt);
+	void Render();
+};
 
 class Entity 
 {
+	friend struct EntityManager;
 
 protected:
 	std::vector<std::shared_ptr<Component>> _components;
@@ -17,9 +46,12 @@ protected:
 	bool _alive;       // should be updated
 	bool _visible;     // should be rendered
 	bool _forDeletion = false; // should be deleted
+
 public:
-	Entity();
-	virtual ~Entity() = default;
+	Scene* const scene;
+	Entity(Scene* const s);
+	Entity() = delete;
+	virtual ~Entity();
 	virtual void Update(double dt);
 	virtual void Render();
 
@@ -64,25 +96,4 @@ public:
 	}
 };
 
-class Component
-{
-protected:
-	Entity* const _parent;
-	bool _forDeletion;
-	explicit Component(Entity* const p);
 
-public:
-	Component() = delete;
-	bool is_forDeletion() const;
-	virtual void Update(double dt) = 0;
-	virtual void Render() = 0;
-	virtual ~Component() = default;
-};
-
-
-struct EntityManager
-{
-	std::vector<std::shared_ptr<Entity>> list;
-	void Update(double dt);
-	void Render();
-};
