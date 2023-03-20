@@ -6,9 +6,9 @@
 
 using namespace sf;
 using namespace std;
+
 Scene* Engine::_activeScene = nullptr;
 std::string Engine::_gameName;
-
 static RenderWindow* _window;
 
 void Engine::Update()
@@ -31,9 +31,12 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName);
 	_gameName = gameName;
 	_window = &window;
+
+
 	ChangeScene(scn);
 	Renderer::Initialise(window);
 	Physics::Initialise();
+
 	while (window.isOpen())
 	{
 		Event event;
@@ -51,6 +54,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 		window.clear();
 		Update();
+		window.setView(scn->PlayerCamera);
 		Render(window);
 		window.display();
 
@@ -61,6 +65,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 		_activeScene->Unload();
 		_activeScene = nullptr;
 	}
+
 	window.close();
 	Physics::Shutdown();
 }

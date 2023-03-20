@@ -16,7 +16,9 @@ public:
 	std::shared_ptr<Entity> MakeEntity();
 
 	EntityManager ents;
+	sf::View PlayerCamera;
 };
+
 class Engine 
 {
 public:
