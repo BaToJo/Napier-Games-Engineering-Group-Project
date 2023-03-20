@@ -32,10 +32,10 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	_gameName = gameName;
 	_window = &window;
 
-
-	ChangeScene(scn);
 	Renderer::Initialise(window);
 	Physics::Initialise();
+	ChangeScene(scn);
+
 
 	while (window.isOpen())
 	{
