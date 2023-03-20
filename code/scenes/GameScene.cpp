@@ -27,8 +27,8 @@ void GameScene::Load()
 	player->addComponent<PlayerPhysicsComponent>(Vector2f(20.f, 30.f));
 
 	// Camera setup
-	this->PlayerCamera.setCenter(player->getPosition());
-	this->PlayerCamera.zoom(0.8);
+	PlayerCamera.setCenter(player->getPosition());
+	PlayerCamera.zoom(0.8);
 }
 
 void GameScene::Unload()
@@ -46,5 +46,8 @@ void GameScene::Render()
 
 void GameScene::Update(const double& dt)
 {
+	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
+	PlayerCamera.move(movement * (float)dt * 5.f);
+	PlayerCamera.setCenter(player->getPosition());
 	Scene::Update(dt);
 }

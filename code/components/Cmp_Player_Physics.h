@@ -9,7 +9,9 @@ protected:
 	float _speed;
 
 	void HandleInput(double dt);
-
+	b2Vec2 getLateralVelocity();
+	b2Vec2 getHorizontalVelocity();
+	void UpdateFriction();
 public:
 	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size);
 	PlayerPhysicsComponent() = delete;
