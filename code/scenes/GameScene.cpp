@@ -2,6 +2,7 @@
 #include "..\lib_tile_level_loader\LevelSystem.h"
 #include "..\components\Cmp_Sprite.h"
 #include "..\components\Cmp_Actor_Physics.h"
+#include "..\components\Cmp_Player_Physics.h"
 using namespace std;
 using namespace sf;
 
@@ -23,7 +24,7 @@ void GameScene::Load()
 
 	
 	// Player Physics Component
-	player->addComponent<ActorPhysicsComponent>(true, Vector2f(20.f, 30.f));
+	player->addComponent<PlayerPhysicsComponent>(Vector2f(20.f, 30.f));
 
 	// Camera setup
 	this->PlayerCamera.setCenter(player->getPosition());
