@@ -8,9 +8,10 @@ protected:
 	sf::Vector2f _maxVelocity;
 	float _speed;
 
-	void HandleInput(double dt);
+	void HandleDriving();
+	void HandleSteering();
 	b2Vec2 getLateralVelocity();
-	b2Vec2 getHorizontalVelocity();
+	b2Vec2 getForwardVelocity();
 	void UpdateFriction();
 public:
 	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size);

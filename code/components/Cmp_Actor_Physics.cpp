@@ -14,6 +14,7 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 	b2FixtureDef FixtureDef;
 	FixtureDef.friction = _dynamic ? 0.1f : 0.8f;
 	FixtureDef.restitution = .2;
+	FixtureDef.density = 1.f;
 	FixtureDef.shape = &Shape;
 	_fixture = _body->CreateFixture(&FixtureDef);
 }
@@ -21,7 +22,8 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 void ActorPhysicsComponent::Update(double dt)
 {
 	_parent->setPosition(Physics::Invert_height(Physics::Bv2_to_sv2(_body->GetPosition())));
-	_parent->setRotation((180 / b2_pi) * _body->GetAngle());
+	_parent->setRotation(sf::degrees(-((180 / b2_pi) * _body->GetAngle())));
+
 }
 
 ActorPhysicsComponent::~ActorPhysicsComponent()

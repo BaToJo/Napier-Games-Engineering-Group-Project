@@ -18,13 +18,14 @@ void GameScene::Load()
 
 	// Player Shape Component
 	auto shapeComp = player->addComponent<ShapeComponent>();
-	shapeComp->setShape<sf::RectangleShape>(Vector2f(20.f, 30.f));
+	sf::Vector2f size = Vector2f(10.f, 30.f);
+	shapeComp->setShape<sf::RectangleShape>(size);
 	shapeComp->getShape().setFillColor(Color::Magenta);
 	shapeComp->getShape().setOrigin(Vector2f(10.f, 15.f));
 
 	
 	// Player Physics Component
-	player->addComponent<PlayerPhysicsComponent>(Vector2f(20.f, 30.f));
+	player->addComponent<PlayerPhysicsComponent>(size);
 
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
