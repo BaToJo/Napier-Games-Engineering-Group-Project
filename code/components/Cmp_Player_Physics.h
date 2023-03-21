@@ -5,16 +5,26 @@ class PlayerPhysicsComponent : public ActorPhysicsComponent
 {
 protected:
 	b2Vec2 _size;
-	sf::Vector2f _maxVelocity;
-	float _speed;
+
+	float _maxVelocity = 20.f;
+	float _maxForce = 50.f;
+	float _maxTorque = 10.f;
+
+	float _angularImpulseDamp = 0.12f;
+	float dragForceDamp = -2.f;
 	ActorPhysicsComponent* JointedBody;
 	b2RevoluteJointDef rjd;
 
+	// Functions
 	void HandleDriving();
 	void HandleSteering();
+	void UpdateFriction();
+
+	// Getters
 	b2Vec2 getLateralVelocity();
 	b2Vec2 getForwardVelocity();
-	void UpdateFriction();
+
+
 public:
 	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, ActorPhysicsComponent* Ball);
 	PlayerPhysicsComponent() = delete;

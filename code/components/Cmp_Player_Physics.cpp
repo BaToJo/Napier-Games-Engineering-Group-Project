@@ -18,11 +18,11 @@ void PlayerPhysicsComponent::HandleDriving()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		desiredSpeed = 20.f;
+		desiredSpeed = _maxVelocity;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		desiredSpeed = -20.f;
+		desiredSpeed = -_maxVelocity;
 	}
 
 	// Get current speed in fwd dir
@@ -31,9 +31,9 @@ void PlayerPhysicsComponent::HandleDriving()
 
 	float force = 0;
 	if (desiredSpeed > currSpeed)
-		force = 50.f;
+		force = _maxForce;
 	else if (desiredSpeed < currSpeed)
-		force = -50.f;
+		force = -_maxForce;
 	else
 		return;
 
@@ -47,11 +47,11 @@ void PlayerPhysicsComponent::HandleSteering()
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		desiredTorque = -10.f;
+		desiredTorque = -_maxTorque;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		desiredTorque = 10.f;
+		desiredTorque = _maxTorque;
 	}
 
 	_body->ApplyTorque(desiredTorque, true);
@@ -60,9 +60,6 @@ void PlayerPhysicsComponent::HandleSteering()
 PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, ActorPhysicsComponent* Ball) : ActorPhysicsComponent(p, true, size), JointedBody(Ball)
 {
 	_size = Sv2_to_bv2(size, true);
-	_maxVelocity = sf::Vector2f(200.f, 400.f);
-
-	_speed = 30.f;
 
 	_body->SetSleepingAllowed(false);
 	_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
@@ -100,11 +97,11 @@ void PlayerPhysicsComponent::UpdateFriction()
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
 
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
-	_body->ApplyAngularImpulse(0.12f * _body->GetInertia() * -_body->GetAngularVelocity(), true);
+	_body->ApplyAngularImpulse(_angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
 
 	b2Vec2 currentForwardNormal = getForwardVelocity();
 	float currentForwardSpeed = currentForwardNormal.Normalize();
 
-	float dragForceMagnitude = -2 * currentForwardSpeed;
+	float dragForceMagnitude = dragForceDamp * currentForwardSpeed;
 	_body->ApplyForce(dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
 }

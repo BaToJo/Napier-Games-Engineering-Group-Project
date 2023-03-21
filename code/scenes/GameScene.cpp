@@ -52,6 +52,7 @@ void GameScene::Load()
 void GameScene::Unload()
 {
 	player.reset();
+	wreckingBall.reset();
 	ls::Unload();
 	Scene::Unload();
 }
