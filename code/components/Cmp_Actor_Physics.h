@@ -16,7 +16,7 @@ public:
 	b2Fixture* const getFixture() const;
 	//std::vector<const b2Contact*> getTouching() const;
 	const sf::Vector2f getVelocity() const;
-
+	b2Body* const getBody() const;
 	// Setters
 	void setRestitution(float r);
 	void setFriction(float f);

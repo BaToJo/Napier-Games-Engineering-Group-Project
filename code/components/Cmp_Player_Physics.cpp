@@ -27,14 +27,13 @@ void PlayerPhysicsComponent::HandleDriving()
 
 	// Get current speed in fwd dir
 	b2Vec2 currentForwardNormal = _body->GetWorldVector(b2Vec2(0, 1));
-	std::cout << "Fwd " << currentForwardNormal.x << ", " << currentForwardNormal.y << std::endl;
 	float currSpeed = b2Dot(getForwardVelocity(), currentForwardNormal);
 
 	float force = 0;
 	if (desiredSpeed > currSpeed)
-		force = 10.f;
+		force = 50.f;
 	else if (desiredSpeed < currSpeed)
-		force = -10.f;
+		force = -50.f;
 	else
 		return;
 
@@ -48,7 +47,7 @@ void PlayerPhysicsComponent::HandleSteering()
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		desiredTorque = -15.f;
+		desiredTorque = -10.f;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
@@ -58,7 +57,7 @@ void PlayerPhysicsComponent::HandleSteering()
 	_body->ApplyTorque(desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size) : ActorPhysicsComponent(p, true, size)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, ActorPhysicsComponent* Ball) : ActorPhysicsComponent(p, true, size), JointedBody(Ball)
 {
 	_size = Sv2_to_bv2(size, true);
 	_maxVelocity = sf::Vector2f(200.f, 400.f);
@@ -67,6 +66,12 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 
 	_body->SetSleepingAllowed(false);
 	_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
+
+	rjd.bodyA = _body;
+	rjd.bodyB = JointedBody->getBody();
+	rjd.collideConnected = true;
+	rjd.localAnchorA = b2Vec2(0.f, -3.f);
+	Physics::GetWorld()->CreateJoint(&rjd);
 }
 
 void PlayerPhysicsComponent::Update(double dt)
@@ -95,10 +100,11 @@ void PlayerPhysicsComponent::UpdateFriction()
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
 
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
-	_body->ApplyAngularImpulse(0.1f * _body->GetInertia() * -_body->GetAngularVelocity(), true);
+	_body->ApplyAngularImpulse(0.12f * _body->GetInertia() * -_body->GetAngularVelocity(), true);
 
-	//b2Vec2 currentForwardNormal = getForwardVelocity();
-	//float currentForwardSpeed = currentForwardNormal.Normalize();
-	//float dragForceMagnitude = -2 * currentForwardSpeed;
-	//_body->ApplyForce(dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
+	b2Vec2 currentForwardNormal = getForwardVelocity();
+	float currentForwardSpeed = currentForwardNormal.Normalize();
+
+	float dragForceMagnitude = -2 * currentForwardSpeed;
+	_body->ApplyForce(dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
 }

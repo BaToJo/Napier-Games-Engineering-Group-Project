@@ -2,6 +2,7 @@
 #include "..\lib_engine\System_Physics.h"
 ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vector2f& size) : Component(p), _dynamic(dyn)
 {
+	// Body Definition
 	b2BodyDef BodyDef;
 	// Is it dynamic or static? (Maybe Kinetic for player movement?)
 	BodyDef.type = _dynamic ? b2_dynamicBody : b2_staticBody;
@@ -9,13 +10,17 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 	_body = Physics::GetWorld()->CreateBody(&BodyDef);
 	_body->SetActive(true);
 
+	// Shape Settings
 	b2PolygonShape Shape;
 	Shape.SetAsBox(Physics::Sv2_to_bv2(size).x * 0.5f, Physics::Sv2_to_bv2(size).y * 0.5f);
+
+	// Fixture Settings
 	b2FixtureDef FixtureDef;
 	FixtureDef.friction = _dynamic ? 0.1f : 0.8f;
 	FixtureDef.restitution = .2;
 	FixtureDef.density = 1.f;
 	FixtureDef.shape = &Shape;
+
 	_fixture = _body->CreateFixture(&FixtureDef);
 }
 
@@ -38,6 +43,11 @@ ActorPhysicsComponent::~ActorPhysicsComponent()
 b2Fixture* const ActorPhysicsComponent::getFixture() const{	return _fixture; }
 
 const sf::Vector2f ActorPhysicsComponent::getVelocity() const{ return Physics::Bv2_to_sv2(_body->GetLinearVelocity(), true);}
+
+b2Body* const ActorPhysicsComponent::getBody() const
+{
+	return _body;
+}
 
 // Setters
 void ActorPhysicsComponent::setRestitution(float r)

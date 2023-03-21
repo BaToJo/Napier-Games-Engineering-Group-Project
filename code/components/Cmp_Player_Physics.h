@@ -7,6 +7,8 @@ protected:
 	b2Vec2 _size;
 	sf::Vector2f _maxVelocity;
 	float _speed;
+	ActorPhysicsComponent* JointedBody;
+	b2RevoluteJointDef rjd;
 
 	void HandleDriving();
 	void HandleSteering();
@@ -14,8 +16,9 @@ protected:
 	b2Vec2 getForwardVelocity();
 	void UpdateFriction();
 public:
-	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size);
+	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, ActorPhysicsComponent* Ball);
 	PlayerPhysicsComponent() = delete;
 
 	void Update(double dt) override;
+	//void AddJointedBody(ActorPhysicsComponent& physicsComp);
 };
