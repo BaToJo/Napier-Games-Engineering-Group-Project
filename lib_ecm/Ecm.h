@@ -42,7 +42,7 @@ class Entity
 protected:
 	std::vector<std::shared_ptr<Component>> _components;
 	sf::Vector2f _position;
-	float _rotation;
+	sf::Angle _rotation;
 	bool _alive;       // should be updated
 	bool _visible;     // should be rendered
 	bool _forDeletion = false; // should be deleted
@@ -58,8 +58,8 @@ public:
 	const sf::Vector2f& getPosition() const;
 	void setPosition(const sf::Vector2f& _position);
 	bool is_forDeletion() const;
-	float getRotation() const;
-	void setRotation(float _rotation);
+	sf::Angle getRotation() const;
+	void setRotation(sf::Angle _rotation);
 	bool isAlive() const;
 	void setAlive(bool _alive);
 	void setForDelete();

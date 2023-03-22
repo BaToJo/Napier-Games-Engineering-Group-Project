@@ -1,6 +1,6 @@
 #include "Ecm.h"
 
-Entity::Entity(Scene* const s) : _position({ 0.f, 0.f }), _rotation(0.f), _alive(true), _visible(true), scene(s), _forDeletion(false) {}
+Entity::Entity(Scene* const s) : _position({ 0.f, 0.f }), _rotation(sf::degrees(0.f)), _alive(true), _visible(true), scene(s), _forDeletion(false) {}
 
 Entity::~Entity()
 {
@@ -71,12 +71,12 @@ bool Entity::is_forDeletion() const
 	return _forDeletion;
 }
 
-float Entity::getRotation() const
+sf::Angle Entity::getRotation() const
 {
 	return _rotation;
 }
 
-void Entity::setRotation(float _rotation)
+void Entity::setRotation(sf::Angle _rotation)
 {
 	this->_rotation = _rotation;
 }

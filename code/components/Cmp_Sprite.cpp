@@ -4,6 +4,7 @@
 void ShapeComponent::Update(double dt)
 {
 	_shape->setPosition(_parent->getPosition());
+	_shape->setRotation(_parent->getRotation());
 }
 
 void ShapeComponent::Render() { Renderer::Queue(_shape.get()); };
