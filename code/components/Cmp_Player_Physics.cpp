@@ -43,7 +43,6 @@ void PlayerPhysicsComponent::HandleDriving()
 void PlayerPhysicsComponent::HandleSteering()
 {
 	float desiredTorque = 0;
-
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
@@ -52,23 +51,18 @@ void PlayerPhysicsComponent::HandleSteering()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
 		desiredTorque = _maxTorque;
+
 	}
 
 	_body->ApplyTorque(desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, ActorPhysicsComponent* Ball) : ActorPhysicsComponent(p, true, size), JointedBody(Ball)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size) : ActorPhysicsComponent(p, true, size)
 {
 	_size = Sv2_to_bv2(size, true);
 
 	_body->SetSleepingAllowed(false);
 	_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
-
-	rjd.bodyA = _body;
-	rjd.bodyB = JointedBody->getBody();
-	rjd.collideConnected = true;
-	rjd.localAnchorA = b2Vec2(0.f, -3.f);
-	Physics::GetWorld()->CreateJoint(&rjd);
 }
 
 void PlayerPhysicsComponent::Update(double dt)
@@ -93,15 +87,20 @@ b2Vec2 PlayerPhysicsComponent::getForwardVelocity()
 
 void PlayerPhysicsComponent::UpdateFriction()
 {
-
+	// Lateral Velocity
+	float maxLateralImpulse = 0.04f;
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
-
+	if (impulse.Length() > maxLateralImpulse)
+		impulse *= maxLateralImpulse / impulse.Length();
+	
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
+
+	// Angular Impulse
 	_body->ApplyAngularImpulse(_angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
 
+	// Forward Linear Velocity
 	b2Vec2 currentForwardNormal = getForwardVelocity();
 	float currentForwardSpeed = currentForwardNormal.Normalize();
-
-	float dragForceMagnitude = dragForceDamp * currentForwardSpeed;
+	float dragForceMagnitude = _dragForceDamp * currentForwardSpeed;
 	_body->ApplyForce(dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
 }

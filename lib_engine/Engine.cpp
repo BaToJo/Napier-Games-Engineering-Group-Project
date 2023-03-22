@@ -15,7 +15,6 @@ void Engine::Update()
 {
 	static sf::Clock clock;
 	float dt = clock.restart().asSeconds();
-
 	Physics::Update(dt);
 	_activeScene->Update(dt);
 }
@@ -31,12 +30,9 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName);
 	_gameName = gameName;
 	_window = &window;
-
 	Renderer::Initialise(window);
 	Physics::Initialise();
 	ChangeScene(scn);
-
-
 	while (window.isOpen())
 	{
 		Event event;
