@@ -24,6 +24,26 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 	_fixture = _body->CreateFixture(&FixtureDef);
 }
 
+ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const float& radius) : Component(p), _dynamic(dyn)
+{
+	b2BodyDef BodyDef;
+	BodyDef.type = _dynamic ? b2_dynamicBody : b2_staticBody;
+	BodyDef.position = Physics::Sv2_to_bv2(Physics::Invert_height(p->getPosition()));
+	_body = Physics::GetWorld()->CreateBody(&BodyDef);
+	_body->SetActive(true);
+
+	b2CircleShape CircleShape;
+	CircleShape.m_radius = radius * Physics::physics_scale_inv;
+	b2FixtureDef FixtureDef;
+
+	FixtureDef.friction = _dynamic ? 0.1f : 0.8f;
+	FixtureDef.restitution = .2;
+	FixtureDef.density = 1.f;
+	FixtureDef.shape = &CircleShape;
+
+	_fixture = _body->CreateFixture(&FixtureDef);
+}
+
 void ActorPhysicsComponent::Update(double dt)
 {
 	_parent->setPosition(Physics::Invert_height(Physics::Bv2_to_sv2(_body->GetPosition())));

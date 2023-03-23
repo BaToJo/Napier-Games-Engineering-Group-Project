@@ -8,6 +8,8 @@ using namespace std;
 using namespace sf;
 
 static shared_ptr<Entity> player;
+static shared_ptr<Entity> wreckingBall;
+static vector<shared_ptr<Entity>> chains;
 VertexArray line;
 
 void GameScene::Load()
@@ -15,7 +17,7 @@ void GameScene::Load()
 	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
 	// Player Setup
-	player = MakeEntity();	
+	player = MakeEntity();
 	player->setPosition(Vector2f(0.f, 0.f));
 
 	// Player Shape Component
@@ -27,6 +29,41 @@ void GameScene::Load()
 
 	// Player Physics Component
 	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size);
+
+	for (int i = 0; i < 3; i++)
+	{
+		// Chain Setup
+		auto chain = MakeEntity();
+		chain->setPosition(Vector2f(player->getPosition().x, player->getPosition().y + 25.f + i * 20.f));
+
+		// Chain Shape Component
+		auto chainShape = chain->addComponent<ShapeComponent>();
+		Vector2f size = Vector2f(5.f, 15.f);
+		chainShape->setShape<RectangleShape>(size);
+		chainShape->getShape().setFillColor(Color::Green);
+		chainShape->getShape().setOrigin(size / 2.f);
+
+		// Chain Physics
+		auto chainPhysics = chain->addComponent<ActorPhysicsComponent>(true, size);
+
+		chains.push_back(chain);
+	}
+
+
+	// Ball Setup
+	wreckingBall = MakeEntity();
+	wreckingBall->setPosition(Vector2f(player->getPosition().x, chains[chains.size() - 1]->getPosition().y + 25.f));
+
+	// Ball Shape Component
+	auto ballShape = wreckingBall->addComponent<ShapeComponent>();
+	float radius = 10.f;
+	ballShape->setShape<sf::CircleShape>(radius);
+	ballShape->getShape().setFillColor(Color::Red);
+	ballShape->getShape().setOrigin(Vector2f(radius, radius));
+
+	// Ball Physics Component
+	auto wreckingBallPhysics = wreckingBall->addComponent<ActorPhysicsComponent>(true, radius);
+	
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
@@ -35,6 +72,9 @@ void GameScene::Load()
 void GameScene::Unload()
 {
 	player.reset();
+	wreckingBall.reset();
+	for (auto& e : chains)
+		e.reset();
 	ls::Unload();
 	Scene::Unload();
 }
