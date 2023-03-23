@@ -27,9 +27,6 @@ void GameScene::Load()
 	shapeComp->getShape().setFillColor(Color::Magenta);
 	shapeComp->getShape().setOrigin(Vector2f(5.f, 15.f));
 
-	// Player Physics Component
-	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size);
-
 	for (int i = 0; i < 3; i++)
 	{
 		// Chain Setup
@@ -64,6 +61,9 @@ void GameScene::Load()
 	// Ball Physics Component
 	auto wreckingBallPhysics = wreckingBall->addComponent<ActorPhysicsComponent>(true, radius);
 	
+	// Player Physics Component
+	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
+
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);

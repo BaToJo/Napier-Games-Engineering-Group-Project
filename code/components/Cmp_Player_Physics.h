@@ -22,9 +22,11 @@ protected:
 	b2Vec2 getLateralVelocity();
 	b2Vec2 getForwardVelocity();
 
+	std::shared_ptr<Entity> _wreckingBall;
+	std::vector<std::shared_ptr<Entity>> _chain;
 
 public:
-	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size);
+	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain);
 	PlayerPhysicsComponent() = delete;
 
 	void Update(double dt) override;

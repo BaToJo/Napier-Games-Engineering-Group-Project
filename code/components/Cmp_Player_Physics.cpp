@@ -57,12 +57,42 @@ void PlayerPhysicsComponent::HandleSteering()
 	_body->ApplyTorque(desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size) : ActorPhysicsComponent(p, true, size)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _wreckingBall(wreckingBall), _chain(chain)
 {
 	_size = Sv2_to_bv2(size, true);
 
 	_body->SetSleepingAllowed(false);
 	_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
+
+
+	b2RevoluteJointDef rjd;
+	rjd.localAnchorA.Set(0, -0.5);
+	rjd.localAnchorB.Set(0, 0.5);
+
+	rjd.bodyA = _body;
+	rjd.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	rjd.enableLimit = true;
+	Physics::GetWorld()->CreateJoint(&rjd);
+
+	for (int i = 1; i < 3; i++)
+	{
+		rjd.bodyA = chain[i-1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		rjd.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		rjd.enableLimit = false;
+		rjd.upperAngle = (b2_pi / 180) * 90.f;
+		rjd.lowerAngle = (b2_pi / 180) * -90.f;
+		Physics::GetWorld()->CreateJoint(&rjd);
+	}
+
+	b2RevoluteJointDef ballJoint;
+	ballJoint.localAnchorA.Set(0, 0);
+	ballJoint.localAnchorB.Set(0, 1.4);
+
+	ballJoint.bodyA = chain[chain.size() - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	ballJoint.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	Physics::GetWorld()->CreateJoint(&ballJoint);
+
 }
 
 void PlayerPhysicsComponent::Update(double dt)
