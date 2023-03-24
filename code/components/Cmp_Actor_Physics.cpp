@@ -16,7 +16,7 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 
 	// Fixture Settings
 	b2FixtureDef FixtureDef;
-	FixtureDef.friction = _dynamic ? 0.1f : 0.8f;
+	FixtureDef.friction = _dynamic ? 0.3f : 0.8f;
 	FixtureDef.restitution = .2;
 	FixtureDef.density = 1.f;
 	FixtureDef.shape = &Shape;
@@ -35,8 +35,7 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const float& r
 	b2CircleShape CircleShape;
 	CircleShape.m_radius = radius * Physics::physics_scale_inv;
 	b2FixtureDef FixtureDef;
-
-	FixtureDef.friction = _dynamic ? 0.1f : 0.8f;
+	FixtureDef.friction = _dynamic ? 0.3f : 0.8f;
 	FixtureDef.restitution = .2;
 	FixtureDef.density = 1.f;
 	FixtureDef.shape = &CircleShape;

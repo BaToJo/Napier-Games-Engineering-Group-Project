@@ -51,55 +51,109 @@ void PlayerPhysicsComponent::HandleSteering()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
 		desiredTorque = _maxTorque;
-
+		
 	}
-
+	
 	_body->ApplyTorque(desiredTorque, true);
 }
 
 PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _wreckingBall(wreckingBall), _chain(chain)
 {
 	_size = Sv2_to_bv2(size, true);
-
 	_body->SetSleepingAllowed(false);
-	_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
+	//_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
+	
 
-
-	b2RevoluteJointDef rjd;
-	rjd.localAnchorA.Set(0, -0.5);
-	rjd.localAnchorB.Set(0, 0.5);
-
-	rjd.bodyA = _body;
-	rjd.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	rjd.enableLimit = true;
-	Physics::GetWorld()->CreateJoint(&rjd);
+	// Setting the first two dampings for the first two bodies.
+	_body->SetAngularDamping(800.f);
+	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(600.f);
+	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f);
+	// Defining the generic Joint Definition
+	b2RevoluteJointDef chainRevoluteJointDef;
+	chainRevoluteJointDef.localAnchorA.Set(0, -0.40);
+	chainRevoluteJointDef.localAnchorB.Set(0, 0.40);
+	chainRevoluteJointDef.collideConnected = false;
+	
+	// Defining the first Joint that will anchor the chain to the car
+	chainRevoluteJointDef.bodyA = _body;
+	chainRevoluteJointDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainRevoluteJointDef.enableLimit = true;
+	Physics::GetWorld()->CreateJoint(&chainRevoluteJointDef);
 
 	for (int i = 1; i < 3; i++)
 	{
-		rjd.bodyA = chain[i-1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-		rjd.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-		rjd.enableLimit = false;
-		rjd.upperAngle = (b2_pi / 180) * 90.f;
-		rjd.lowerAngle = (b2_pi / 180) * -90.f;
-		Physics::GetWorld()->CreateJoint(&rjd);
+		// Setting the up the chain bodies
+		chainRevoluteJointDef.bodyA = chain[i-1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		chainRevoluteJointDef.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+		// Setting the chain damping
+		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(600.f - i * 200.f);
+		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f - i * 2.f);
+
+		// Limiting the angle - this makes the chain fixed
+		chainRevoluteJointDef.enableLimit = true;
+		chainRevoluteJointDef.upperAngle = (b2_pi / 180) * 0;
+		chainRevoluteJointDef.lowerAngle = (b2_pi / 180) * 0;
+
+		// Storing the joint
+		_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainRevoluteJointDef)));
 	}
 
-	b2RevoluteJointDef ballJoint;
-	ballJoint.localAnchorA.Set(0, 0);
-	ballJoint.localAnchorB.Set(0, 1.4);
+	// Creating the ball joint
+	b2RevoluteJointDef ballJointDef;
+	ballJointDef.localAnchorA.Set(0, 0);
+	ballJointDef.localAnchorB.Set(0, 0.75);
 
-	ballJoint.bodyA = chain[chain.size() - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	ballJoint.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	// Setting the ball's damping
+	wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(100.f);
 
-	Physics::GetWorld()->CreateJoint(&ballJoint);
+	// Setting up the chain and the ball in the joint
+	ballJointDef.bodyA = chain[chain.size() - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	ballJointDef.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
+	// Limiting the ball so it won't spin around the anchor point
+	ballJointDef.enableLimit = true;
+
+	// Storing the joint
+	_ballJoint = static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&ballJointDef));
 }
 
 void PlayerPhysicsComponent::Update(double dt)
 {
+
+
 	HandleDriving();
 	HandleSteering();
 	UpdateFriction();
+
+	// This checks if we are drifting or not. If we stop drifting the chains will go back to rest
+
+	if (getLateralVelocity().Length() >= 1.f)
+	{
+		for (auto& j : _chainJoints)
+		{
+			j->EnableLimit(false);
+		}
+
+	}
+	else
+	{
+		for (auto& j : _chainJoints)
+		{
+			j->EnableLimit(true);
+		}
+
+		//_body->SetAngularVelocity(0.f);
+	}
+
+	/*std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
+	std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
+	std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
+
+	std::cout << "Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
+	std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;*/
+
+	std::cout << std::endl;
 	ActorPhysicsComponent::Update(dt);
 }
 
@@ -120,13 +174,26 @@ void PlayerPhysicsComponent::UpdateFriction()
 	// Lateral Velocity
 	float maxLateralImpulse = 0.04f;
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
+
+	if (getLateralVelocity().Length() >= 5.f)
+	{
+		_body->SetLinearDamping(1000.f);
+	}
+	else
+	{
+		_body->SetLinearDamping(5.f);
+	}
+
 	if (impulse.Length() > maxLateralImpulse)
+	{
 		impulse *= maxLateralImpulse / impulse.Length();
+	}
 	
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 
 	// Angular Impulse
 	_body->ApplyAngularImpulse(_angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
+
 
 	// Forward Linear Velocity
 	b2Vec2 currentForwardNormal = getForwardVelocity();

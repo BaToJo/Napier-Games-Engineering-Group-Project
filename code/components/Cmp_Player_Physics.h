@@ -10,7 +10,7 @@ protected:
 	float _maxForce = 100.f;
 	float _maxTorque = 15.f;
 
-	float _angularImpulseDamp = 0.12f;
+	float _angularImpulseDamp = 0.1f;
 	float _dragForceDamp = -2.f;
 
 	// Functions
@@ -24,6 +24,9 @@ protected:
 
 	std::shared_ptr<Entity> _wreckingBall;
 	std::vector<std::shared_ptr<Entity>> _chain;
+
+	std::vector<b2RevoluteJoint*> _chainJoints;
+	b2RevoluteJoint* _ballJoint;
 
 public:
 	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain);

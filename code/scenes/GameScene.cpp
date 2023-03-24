@@ -10,6 +10,7 @@ using namespace sf;
 static shared_ptr<Entity> player;
 static shared_ptr<Entity> wreckingBall;
 static vector<shared_ptr<Entity>> chains;
+
 VertexArray line;
 
 void GameScene::Load()
@@ -42,7 +43,6 @@ void GameScene::Load()
 
 		// Chain Physics
 		auto chainPhysics = chain->addComponent<ActorPhysicsComponent>(true, size);
-
 		chains.push_back(chain);
 	}
 
@@ -61,9 +61,10 @@ void GameScene::Load()
 	// Ball Physics Component
 	auto wreckingBallPhysics = wreckingBall->addComponent<ActorPhysicsComponent>(true, radius);
 	
+	wreckingBallPhysics->setMass(20.f);
 	// Player Physics Component
 	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
-
+	playerPhysics->setMass(200.f);
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
