@@ -34,5 +34,6 @@ private:
 	static std::string _gameName;
 	static void Update(double dt);
 	static void Render(sf::RenderWindow& window);
+	static void WindowResize(float x, float y);
 };
 

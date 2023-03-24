@@ -10,6 +10,8 @@ using namespace std;
 Scene* Engine::_activeScene = nullptr;
 std::string Engine::_gameName;
 static RenderWindow* _window;
+auto currentWindowStyle = sf::Style::Default;
+Vector2u persistentWindowSize = Vector2u(800, 600);
 
 void Engine::Update(double dt)
 {
@@ -25,14 +27,27 @@ void Engine::Render(RenderWindow& window)
 	Renderer::Render();
 }
 
+void Engine::WindowResize(float x, float y)
+{
+	sf::FloatRect visibleArea(Vector2f(0, 0), Vector2f(x, y));
+	_activeScene->PlayerCamera = sf::View(visibleArea);
+}
+
 void Engine::Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn)
 {
-	RenderWindow window(VideoMode(Vector2u(width, height)), gameName);
+
+	RenderWindow window(VideoMode(Vector2u(width, height)), gameName, currentWindowStyle);
+	// window.setFramerateLimit(60.0f);
 	_gameName = gameName;
 	_window = &window;
 	Renderer::Initialise(window);
 	Physics::Initialise();
 	ChangeScene(scn);
+	if (currentWindowStyle = sf::Style::Default)
+		WindowResize(window.getSize().x, window.getSize().y);
+	else
+		WindowResize(sf::VideoMode::getDesktopMode().size.y, sf::VideoMode::getDesktopMode().size.y);
+
 	
 
 	static sf::Clock clock;
@@ -42,6 +57,8 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 	double currentTime = clock.getElapsedTime().asSeconds();
 	double accumulator = 0.0f;
+
+	bool hotkeyDown_AltEnter = false;
 
 	while (window.isOpen())
 	{
@@ -59,10 +76,48 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 			{
 				window.close();
 			}
+			if (event.type == Event::Resized)
+			{
+				WindowResize(event.size.width, event.size.height);
+			}
 			if (Keyboard::isKeyPressed(Keyboard::Escape))
 			{
 				window.close();
 			}
+
+			if (event.type == Event::MouseWheelScrolled)
+			{
+				float zoomDelta = 1 + (event.mouseWheelScroll.delta * -0.1);
+				_activeScene->PlayerCamera.zoom(zoomDelta);
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+			{
+				if (!hotkeyDown_AltEnter)
+				{
+					hotkeyDown_AltEnter = true;
+					if (currentWindowStyle == sf::Style::Default)
+					{
+						persistentWindowSize = Vector2u(window.getSize());
+						currentWindowStyle = sf::Style::Fullscreen;
+					}
+					else
+					{
+						currentWindowStyle = sf::Style::Default;
+					}
+					window.create(VideoMode(persistentWindowSize), gameName, currentWindowStyle);
+					if (currentWindowStyle == sf::Style::Default)
+						WindowResize(window.getSize().x, window.getSize().y);
+					else
+						WindowResize(sf::VideoMode::getDesktopMode().size.y, sf::VideoMode::getDesktopMode().size.y);
+				}
+			}
+			else
+			{
+				hotkeyDown_AltEnter = false;
+			}
+
+
+
 		}
 
 		window.clear();
