@@ -66,7 +66,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 
 	// Setting the first two dampings for the first two bodies.
 	_body->SetAngularDamping(800.f);
-	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(600.f);
+	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(400.f);
 	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f);
 	// Defining the generic Joint Definition
 	b2RevoluteJointDef chainRevoluteJointDef;
@@ -87,7 +87,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 		chainRevoluteJointDef.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
 		// Setting the chain damping
-		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(600.f - i * 200.f);
+		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(400.f - i * 100.f);
 		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f - i * 2.f);
 
 		// Limiting the angle - this makes the chain fixed
@@ -106,7 +106,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 
 	// Setting the ball's damping
 	wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(100.f);
-
+	//wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f);
 	// Setting up the chain and the ball in the joint
 	ballJointDef.bodyA = chain[chain.size() - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 	ballJointDef.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
@@ -128,7 +128,7 @@ void PlayerPhysicsComponent::Update(double dt)
 
 	// This checks if we are drifting or not. If we stop drifting the chains will go back to rest
 
-	if (getLateralVelocity().Length() >= 1.f)
+	if (getLateralVelocity().Length() >= 0.1f)
 	{
 		for (auto& j : _chainJoints)
 		{
@@ -146,12 +146,12 @@ void PlayerPhysicsComponent::Update(double dt)
 		//_body->SetAngularVelocity(0.f);
 	}
 
-	/*std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
+	std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
 	std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
 	std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
 
 	std::cout << "Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
-	std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;*/
+	std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
 
 	std::cout << std::endl;
 	ActorPhysicsComponent::Update(dt);

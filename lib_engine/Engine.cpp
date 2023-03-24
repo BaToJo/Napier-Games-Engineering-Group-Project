@@ -11,10 +11,10 @@ Scene* Engine::_activeScene = nullptr;
 std::string Engine::_gameName;
 static RenderWindow* _window;
 
-void Engine::Update()
+void Engine::Update(double dt)
 {
-	static sf::Clock clock;
-	float dt = clock.restart().asSeconds();
+	//float dt = clock.restart().asSeconds();
+
 	Physics::Update(dt);
 	_activeScene->Update(dt);
 }
@@ -33,8 +33,25 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	Renderer::Initialise(window);
 	Physics::Initialise();
 	ChangeScene(scn);
+	
+
+	static sf::Clock clock;
+
+	double t = 0;
+	double dt = 1/60.f;
+
+	double currentTime = clock.getElapsedTime().asSeconds();
+	double accumulator = 0.0f;
+
 	while (window.isOpen())
 	{
+
+		double newTime = clock.getElapsedTime().asSeconds();
+		double frameTime = newTime - currentTime;
+		currentTime = newTime;
+
+		accumulator += frameTime;
+
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -49,7 +66,12 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 		}
 
 		window.clear();
-		Update();
+		while (accumulator >= dt)
+		{
+			Update(dt);
+			accumulator -= dt;
+			t += dt;
+		}
 		window.setView(scn->PlayerCamera);
 		Render(window);
 		window.display();

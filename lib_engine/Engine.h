@@ -32,7 +32,7 @@ public:
 private:
 	static Scene* _activeScene;
 	static std::string _gameName;
-	static void Update();
+	static void Update(double dt);
 	static void Render(sf::RenderWindow& window);
 };
 
