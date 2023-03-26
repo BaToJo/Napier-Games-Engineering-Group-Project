@@ -10,6 +10,7 @@ using namespace sf;
 static shared_ptr<Entity> player;
 static shared_ptr<Entity> wreckingBall;
 static vector<shared_ptr<Entity>> chains;
+static shared_ptr<Entity> bastard;
 
 VertexArray line;
 
@@ -43,6 +44,8 @@ void GameScene::Load()
 
 		// Chain Physics
 		auto chainPhysics = chain->addComponent<ActorPhysicsComponent>(true, size);
+		chainPhysics->setMass(20.f - (i * 5));
+		chainPhysics->setFriction(.1f);
 		chains.push_back(chain);
 	}
 
@@ -53,7 +56,7 @@ void GameScene::Load()
 
 	// Ball Shape Component
 	auto ballShape = wreckingBall->addComponent<ShapeComponent>();
-	float radius = 10.f;
+	float radius = 15.f;
 	ballShape->setShape<sf::CircleShape>(radius);
 	ballShape->getShape().setFillColor(Color::Red);
 	ballShape->getShape().setOrigin(Vector2f(radius, radius));
@@ -61,10 +64,21 @@ void GameScene::Load()
 	// Ball Physics Component
 	auto wreckingBallPhysics = wreckingBall->addComponent<ActorPhysicsComponent>(true, radius);
 	
-	wreckingBallPhysics->setMass(20.f);
+	wreckingBallPhysics->setMass(5.f);
 	// Player Physics Component
 	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
 	playerPhysics->setMass(200.f);
+
+	bastard = MakeEntity();
+	bastard->setPosition(Vector2f(player->getPosition().x + 200.f, player->getPosition().y - 400.f));
+	auto testShape = bastard->addComponent<ShapeComponent>();
+	Vector2f testSize = Vector2f(50.f, 50.f);
+	testShape->setShape<RectangleShape>(testSize);
+	testShape->getShape().setFillColor(sf::Color::Yellow);
+	testShape->getShape().setOrigin(Vector2f(testSize.x / 2.f, testSize.y / 2.f));
+
+	auto testPhysics = bastard->addComponent<ActorPhysicsComponent>(true, testSize);
+	testPhysics->setMass(100.f);
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
@@ -74,6 +88,7 @@ void GameScene::Unload()
 {
 	player.reset();
 	wreckingBall.reset();
+	bastard.reset();
 	for (auto& e : chains)
 		e.reset();
 	ls::Unload();
