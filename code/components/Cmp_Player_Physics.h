@@ -7,7 +7,7 @@ protected:
 	b2Vec2 _size;
 
 	float _maxVelocity = 100.f;
-	float _maxForce = 200.f;
+	float _maxForce = 150.f;
 	float _maxTorque = 10.f;
 
 	float _angularImpulseDamp = 0.1f;

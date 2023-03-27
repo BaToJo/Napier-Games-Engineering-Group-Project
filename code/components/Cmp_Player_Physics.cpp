@@ -40,7 +40,7 @@ void PlayerPhysicsComponent::HandleDriving()
 	else
 		return;
 
-	_body->ApplyForce(force * currentForwardNormal, _body->GetWorldCenter(), true);
+	_body->ApplyForce(0.5 * force * currentForwardNormal, _body->GetWorldCenter(), true);
 
 }
 
@@ -59,14 +59,15 @@ void PlayerPhysicsComponent::HandleSteering()
 		isPressed = true;
 	}
 	
-
+	if (desiredTorque == 0)
+		return;
 	_body->ApplyTorque(desiredTorque, true);
 	
-	for (int i = 0; i < _chain.size(); i++)
-	{
-		auto body = _chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-		body->ApplyTorque(desiredTorque, true);
-	}
+	//for (int i = 0; i < _chain.size(); i++)
+	//{
+	//	auto body = _chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//	body->ApplyTorque(desiredTorque, true);
+	//}
 
 }
 
@@ -76,8 +77,67 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 	_size = Sv2_to_bv2(size, true);
 	_body->SetSleepingAllowed(false);
 
-	// Setting the first two dampings for the first two bodies.
-	_body->SetAngularDamping(200.f); // Car's Angular Damping
+	////// Setting the first two dampings for the first two bodies.
+	//_body->SetAngularDamping(50.f); // Car's Angular Damping
+	//_body->SetLinearDamping(5.f); // Car's Linear Damping
+	//// Define Rope Joint
+	//b2RevoluteJointDef chainRevoluteJointDef;
+	//chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(50.f);
+
+	//chainRevoluteJointDef.collideConnected = true;
+	//chainRevoluteJointDef.bodyA = _body;
+	//chainRevoluteJointDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	//chainRevoluteJointDef.localAnchorA.Set(0, -0.35);
+	//chainRevoluteJointDef.localAnchorB.Set(0, 0.35);
+	//chainRevoluteJointDef.enableLimit = true;
+
+	//chainRevoluteJointDef.referenceAngle = 0;
+
+	//_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainRevoluteJointDef)));
+	////Physics::GetWorld()->CreateJoint(&frictionJointDef);
+	//
+	//for (int i = 1; i < 3; i++)
+	//{
+	//	chainRevoluteJointDef.bodyA = chain[i-1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//	chainRevoluteJointDef.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	//	chainRevoluteJointDef.localAnchorA.Set(0, -0.35);
+	//	chainRevoluteJointDef.localAnchorB.Set(0, 0.35);
+	//	chainRevoluteJointDef.enableLimit = true;
+
+	//	chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(50.f);
+
+	//	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainRevoluteJointDef)));
+	//}
+
+
+
+	//b2RevoluteJointDef ballRevoluteJoint;
+
+	//ballRevoluteJoint.bodyA = _chain[_chain.size() - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//ballRevoluteJoint.bodyB = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	//ballRevoluteJoint.localAnchorA.Set(0, 0);
+	//ballRevoluteJoint.localAnchorB.Set(0, 0.85);
+	//ballRevoluteJoint.enableLimit = true;
+
+	//_ballJoint = static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&ballRevoluteJoint));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	_body->SetLinearDamping(10.f);
 	//chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(400.f); // First Chain's Angular Damping.
 
@@ -109,8 +169,11 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 		chainRevoluteJointDef.bodyA = chain[i-1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 		chainRevoluteJointDef.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
+		chainRevoluteJointDef.localAnchorA.Set(0, -0.25);
+		chainRevoluteJointDef.localAnchorB.Set(0, 0.25);
+
 		// Setting the chain damping
-		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(10.f);
+		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(200.f);
 		//chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(5.f);
 
 		// Limiting the angle - this makes the chain fixed
@@ -144,74 +207,110 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 	{
 		auto body = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
 		sumOfMasses += body->GetMass();
-	}
+	};
 }
 
 void PlayerPhysicsComponent::Update(double dt)
 {
+	bool isAnyPressed = true;
+	for (auto& c : controls)
+	{
+		if (sf::Keyboard::isKeyPressed(c))
+		{
+			isAnyPressed = true;
+			break;
+		}
+		else
+		{
+			isAnyPressed = false;
+		}
+
+	}
+
+	if (!isAnyPressed)
+	{
+		//std::cout << "No pressing" << std::endl;
+
+		for (auto& c : _chain)
+		{
+			auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+			chainBody->SetAngularVelocity(0.f);
+		}
+		_body->SetAngularVelocity(0.f);
+		_wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularVelocity(0.f);
+
+	}
+
+	if (!sf::Keyboard::isKeyPressed(controls[2]) && !sf::Keyboard::isKeyPressed(controls[3]))
+	{
+		for (auto& c : _chain)
+		{
+			auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+			chainBody->SetAngularVelocity(0.f);
+			b2Vec2 impulseChain = chainBody->GetMass() * -getLateralVelocity(chainBody);
+			chainBody->ApplyLinearImpulseToCenter(impulseChain, true);
+		}
+
+		auto wreckingBallBody = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		b2Vec2 impulseBall = wreckingBallBody->GetMass() * -getLateralVelocity(wreckingBallBody);
+		wreckingBallBody->ApplyLinearImpulseToCenter(impulseBall, true);
+	}
 
 	HandleDriving();
 	HandleSteering();
 	UpdateFriction();
 
-	// This checks if we are skidding or not. If we stop skidding the chains will go back to rest
-	if (getLateralVelocity(_body).Length() >= 1.2f)
-	{
-		for (auto& j : _chainJoints)
-		{
-			j->EnableLimit(false);
-		}
-	}
-	else
-	{
-		for (auto& j : _chainJoints)
-		{
-			j->EnableLimit(true);
-		}
-	}
-	for (int i = 0; i < _chain.size(); i++)
-	{
-		auto body = _chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-		std::cout << "Chains lateral vel " << getLateralVelocity(body).Length() << std::endl;
-		std::cout << "Chains fwd vel " << getForwardVelocity(body).Length() << std::endl;
-		std::cout << "Chains angular vel " << body->GetAngularVelocity() << std::endl;
-		//if (!sf::Keyboard::isKeyPressed(controls[3]) && !sf::Keyboard::isKeyPressed(controls[2]))
-		//{
-		//	body->SetLinearVelocity(_body->GetLinearVelocity());
-		//	body->SetAngularVelocity(_body->GetAngularVelocity());
-		//	
-		//}
-
-	}
-
-	//if (!sf::Keyboard::isKeyPressed(controls[3]) && !sf::Keyboard::isKeyPressed(controls[2]))
+	//for (auto& c : _chain)
 	//{
-	//	_wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearVelocity(_body->GetLinearVelocity());
-	//	_wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularVelocity(_body->GetAngularVelocity());
+	//	std::cout << "Chain angular " << c->getComponents<ActorPhysicsComponent>()[0]->getBody()->GetAngularVelocity() << std::endl;
+	//	std::cout << "Chain lateral " << getLateralVelocity(c->getComponents<ActorPhysicsComponent>()[0]->getBody()).Length() << std::endl;
 	//}
 
-	//if(getLateralVelocity(_wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()) >)
-	//if (isPressed && 
-	//	(!sf::Keyboard::isKeyPressed(controls[3]) && !sf::Keyboard::isKeyPressed(controls[2])))
+
+
+
+	//// This checks if we are skidding or not. If we stop skidding the chains will go back to rest
+	//if (getLateralVelocity(_body).Length() >= .5f)
 	//{
-	//	for (auto& c : _chain)
+	//	for (auto& j : _chainJoints)
 	//	{
-	//		auto body = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	//		body->SetLinearVelocity(0.5f * body->GetLinearVelocity());
-	//		body->SetAngularVelocity(0.5f * body->GetAngularVelocity());
+	//		j->EnableLimit(false);
 	//	}
-
-	//	isPressed = true;
+	//}
+	//else
+	//{
+	//	for (auto& j : _chainJoints)
+	//	{
+	//		j->EnableLimit(true);
+	//	}
 	//}
 
-	std::cout << "Body: Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
-	std::cout << "Body: Lateral Velocity: " << getLateralVelocity(_body).Length() << std::endl;
-	std::cout << "Body: Forward Velocity: " << getForwardVelocity(_body).Length() << std::endl;
+	//for (int i = 0; i < _chain.size(); i++)
+	//{
+	//	auto body = _chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
-	std::cout << "Body: Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
-	std::cout << "Body: Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
+	//	std::cout << "Chain " << i << " lateral vel " << getLateralVelocity(body).Length() << std::endl;
+	//	std::cout << "Chains " << i << " fwd vel " << getForwardVelocity(body).Length() << std::endl;
+	//	std::cout << "Chains " << i << " angular vel " << body->GetAngularVelocity() << std::endl;
 
-	std::cout << std::endl;
+	//}
+
+	//std::cout << "Body: Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
+	//std::cout << "Body: Lateral Velocity: " << getLateralVelocity(_body).Length() << std::endl;
+	//std::cout << "Body: Forward Velocity: " << getForwardVelocity(_body).Length() << std::endl;
+
+
+	//std::cout << "Body: Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
+
+	//auto wreckingBallBody = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	//std::cout << "Wrecking Ball: Linear Velocity: " << wreckingBallBody->GetLinearVelocity().Length() << std::endl;
+	//std::cout << "Wrecking Ball: Lateral Velocity: " << getLateralVelocity(wreckingBallBody).Length() << std::endl;
+	//std::cout << "Wrecking Ball: Forward Velocity: " << getForwardVelocity(wreckingBallBody).Length() << std::endl;
+	//std::cout << "Wrecking Ball: Angular Velocity: " << wreckingBallBody->GetAngularVelocity() << std::endl;
+	//std::cout << std::endl;
+
+
 	ActorPhysicsComponent::Update(dt);
 }
 
@@ -230,7 +329,7 @@ b2Vec2 PlayerPhysicsComponent::getForwardVelocity(b2Body* body)
 void PlayerPhysicsComponent::UpdateFriction()
 {
 	// Skidding threshold
-	float maxLateralImpulse = 0.04f;
+	float maxLateralImpulse = 2.5f;
 
 	// Calculating the impulse to apply (this cancels out the lateral velocity)
 	b2Vec2 impulseCar = _body->GetMass() * -getLateralVelocity(_body);
@@ -243,46 +342,87 @@ void PlayerPhysicsComponent::UpdateFriction()
 	}
 
 	// Apply the linear impulse to the center of the car
-	_body->ApplyLinearImpulse(impulseCar, _body->GetWorldCenter(), true);
+	_body->ApplyLinearImpulse(0.1 * impulseCar, _body->GetWorldCenter(), true);
 
 	// Apply angular impulse damp
-	_body->ApplyAngularImpulse(_angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
+	_body->ApplyAngularImpulse(0.1 * _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
 
 
 	// Forward Linear Velocity
 	b2Vec2 currentForwardNormal = getForwardVelocity(_body);
 	float currentForwardSpeed = currentForwardNormal.Normalize();
 	float dragForceMagnitude = _dragForceDamp * currentForwardSpeed;
-	_body->ApplyForce(dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
+	_body->ApplyForce(0.1 * dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
+
+	//auto wreckingBallBody = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//wreckingBallBody->ApplyAngularImpulse(0.1 * wreckingBallBody->GetInertia() * -wreckingBallBody->GetAngularVelocity(), true);
+
+	//for (auto& c : _chain)
+	//{
+	//	auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//	chainBody->ApplyAngularImpulse(0.1 * chainBody->GetInertia() * -chainBody->GetAngularVelocity(), true);
+	//}
 
 
-	if (!sf::Keyboard::isKeyPressed(controls[3]) && !sf::Keyboard::isKeyPressed(controls[2]))
-	{
-		for (auto& c : _chain)
-		{
-			auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//if (wreckingBallBody->GetAngularVelocity() >= 10.f || wreckingBallBody->GetAngularVelocity() <= -10.f)
+	//{
+	//	for (auto& c : _chain)
+	//	{
+	//		auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//		chainBody->SetAngularDamping(20.f);
+	//		chainBody->SetLinearDamping(4.f);
+	//		/*b2Vec2 chainImpulse = chainBody->GetMass() * -getLateralVelocity(chainBody);
+	//		chainBody->ApplyLinearImpulse(chainImpulse, chainBody->GetWorldCenter(), true);*/
+	//	}
 
-			b2Vec2 chainImpulse = chainBody->GetMass() * -getLateralVelocity(chainBody);
-			chainBody->ApplyLinearImpulse(chainImpulse, chainBody->GetWorldCenter(), true);
-			b2Vec2 currentChainFwd = getForwardVelocity(chainBody);
+	//	wreckingBallBody->SetAngularDamping(40.f);
+	//	wreckingBallBody->SetLinearDamping(4.f);
+	//	/*b2Vec2 wreckingBallImpulse = wreckingBallBody->GetMass() * -getLateralVelocity(wreckingBallBody);
+	//	wreckingBallBody->ApplyLinearImpulse(wreckingBallImpulse, wreckingBallBody->GetWorldCenter(), true);*/
+	//	_body->SetAngularVelocity(0.f);
+	//}
+	//else 
+	//{
+	//	for (auto& c : _chain)
+	//	{
+	//		auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	//		chainBody->SetAngularDamping(10.f);
+	//		chainBody->SetLinearDamping(2.f);
+	//	}
+	//	wreckingBallBody->SetAngularDamping(20.f);
+	//	wreckingBallBody->SetLinearDamping(4.f);
+	//}
 
-			float currentChainFwdSpd = currentChainFwd.Normalize();
-			float dragForceMagnitudeChain = _dragForceDamp * currentChainFwdSpd;
-			chainBody->ApplyForce(dragForceMagnitudeChain * currentChainFwd, chainBody->GetWorldCenter(), true);
-		}
 
-		auto ballBody = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
-		
 
-		b2Vec2 ballImpulse = ballBody->GetMass() * -getLateralVelocity(ballBody);
-		ballBody->ApplyLinearImpulse(ballImpulse, ballBody->GetWorldCenter(), true);
-		b2Vec2 currentChainFwd = getForwardVelocity(ballBody);
 
-		float currentChainFwdSpd = currentChainFwd.Normalize();
-		float dragForceMagnitudeChain = _dragForceDamp * currentChainFwdSpd;
-		ballBody->ApplyForce(dragForceMagnitudeChain * currentChainFwd, ballBody->GetWorldCenter(), true);
+	//if (!sf::Keyboard::isKeyPressed(controls[3]) && !sf::Keyboard::isKeyPressed(controls[2]))
+	//{
+		//for (auto& c : _chain)
+		//{
+		//	auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
-	}
+		//	b2Vec2 chainImpulse = chainBody->GetMass() * -getLateralVelocity(chainBody);
+		//	chainBody->ApplyLinearImpulse(chainImpulse, chainBody->GetWorldCenter(), true);
+		//	b2Vec2 currentChainFwd = getForwardVelocity(chainBody);
+
+		//	//float currentChainFwdSpd = currentChainFwd.Normalize();
+		//	//float dragForceMagnitudeChain = _dragForceDamp * currentChainFwdSpd;
+		//	//chainBody->ApplyForce(dragForceMagnitudeChain * currentChainFwd, chainBody->GetWorldCenter(), true);
+		//}
+
+		//auto ballBody = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		//
+
+		//b2Vec2 ballImpulse = ballBody->GetMass() * -getLateralVelocity(ballBody);
+		//ballBody->ApplyLinearImpulse(ballImpulse, ballBody->GetWorldCenter(), true);
+		//b2Vec2 currentChainFwd = getForwardVelocity(ballBody);
+
+		//float currentChainFwdSpd = currentChainFwd.Normalize();
+		//float dragForceMagnitudeChain = _dragForceDamp * currentChainFwdSpd;
+		//ballBody->ApplyForce(dragForceMagnitudeChain * currentChainFwd, ballBody->GetWorldCenter(), true);
+
+	//}
 
 
 
