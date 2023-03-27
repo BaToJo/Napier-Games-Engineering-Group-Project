@@ -45,7 +45,7 @@ void GameScene::Load()
 		// Chain Physics
 		auto chainPhysics = chain->addComponent<ActorPhysicsComponent>(true, size);
 		chainPhysics->setMass(20.f - (i * 5));
-		chainPhysics->setFriction(.1f);
+		//chainPhysics->setFriction(.1f);
 		chains.push_back(chain);
 	}
 
