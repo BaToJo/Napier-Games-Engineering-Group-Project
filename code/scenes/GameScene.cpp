@@ -8,6 +8,7 @@ using namespace std;
 using namespace sf;
 
 static shared_ptr<Entity> player;
+static std::vector<shared_ptr<Entity>> all_vehicles;
 VertexArray line;
 
 void GameScene::Load()
@@ -15,7 +16,7 @@ void GameScene::Load()
 	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
 	// Player Setup
-	player = MakeEntity();	
+	player = MakeEntity();
 	player->setPosition(Vector2f(0.f, 0.f));
 
 	// Player Shape Component
