@@ -12,10 +12,11 @@ VertexArray line;
 
 void GameScene::Load()
 {
-	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
+	//ls::LoadLevelFile_OLD("res/levels/pacman.txt", 50.f);
+	ls::LoadLevelFile("res/levels/test_large_embeddedTileset.tmj", 50.f);
 
 	// Player Setup
-	player = MakeEntity();	
+	player = MakeEntity();
 	player->setPosition(Vector2f(0.f, 0.f));
 
 	// Player Shape Component

@@ -9,9 +9,6 @@ json game_map;
 
 namespace TileMap_Importer
 {
-	//const int positionIterations = 2;
-
-
 	/*
 	 * This in its current state takes JSON files exported by the software called Tiled. https://www.mapeditor.org/
 	 * You MUST set the options in Tiled as:
@@ -35,36 +32,6 @@ namespace TileMap_Importer
 
 		TileMap* tileMap = new TileMap();
 
-
-		// cout << allData;
-		//auto at = allData.at("layers");
-		//cout << at;
-		//auto find = allData.find("layers");
-		//auto find_at = find->at("height");
-		//cout << "\n\n" + find_at;
-
-
-
-		//cout << "\n\ncompressionlevel = " + allData["compressionlevel"];
-		//cout << "\n\nheight = " + allData["height"];
-		//cout << "\n\ninfinite = " + allData["infinite"];
-		//cout << "\n\nlayers = " + allData["layers"];
-
-
-		//// For each layers -> chunks...
-		//for (const auto& chunk : allData["layers"]["chunks"])
-		//{
-		//	// If the chunk contains a data region...
-		//	if (chunk.find("data") != chunk.end())
-		//	{
-		//		// For each 
-		//		for (const auto& data : chunk["data"])
-		//		{
-		//			std::cout << data << std::endl;
-		//		}
-		//	}
-		//}
-
 		tileMap->compressionlevel = game_map["compressionlevel"];
 		tileMap->height = game_map["height"];
 		tileMap->infinite = game_map["infinite"];
@@ -82,43 +49,89 @@ namespace TileMap_Importer
 		// tileMap.layers
 		for (const auto& layer : game_map["layers"])
 		{
-			TileMap::layer layer_instance;
+			string layer_type = layer["type"];
 
-			layer_instance.height = layer["height"];
-			layer_instance.id = layer["id"];
-			layer_instance.name = layer["name"];
-			layer_instance.opacity = layer["opacity"];
-			layer_instance.startx = layer["startx"];
-			layer_instance.starty = layer["starty"];
-			layer_instance.type = layer["type"];
-			layer_instance.visible = layer["visible"];
-			layer_instance.width = layer["width"];
-			layer_instance.x = layer["x"];
-			layer_instance.y = layer["y"];
-
-			for (const auto& chunk : layer["chunks"])
+			if (layer_type == "tilelayer")
 			{
-				TileMap::chunk chunk_instance;
+				// TileMap::tile_layer tile_layer_instance;
+				tileMap->tile_layer.type = layer_type;
+				tileMap->tile_layer.height = layer["height"];
+				tileMap->tile_layer.id = layer["id"];
+				tileMap->tile_layer.name = layer["name"];
+				tileMap->tile_layer.opacity = layer["opacity"];
+				tileMap->tile_layer.startx = layer["startx"];
+				tileMap->tile_layer.starty = layer["starty"];
+				tileMap->tile_layer.visible = layer["visible"];
+				tileMap->tile_layer.width = layer["width"];
+				tileMap->tile_layer.x = layer["x"];
+				tileMap->tile_layer.y = layer["y"];
 
-				for (const auto& element : chunk["data"])
+				for (const auto& chunk : layer["chunks"])
 				{
-					chunk_instance.data.push_back(element);
+					TileMap::Chunk chunk_instance;
+
+					for (const auto& element : chunk["data"])
+					{
+						chunk_instance.data.push_back(element);
+					}
+
+					chunk_instance.height = chunk["height"];
+					chunk_instance.width = chunk["width"];
+					chunk_instance.x = chunk["x"];
+					chunk_instance.y = chunk["y"];
+
+					tileMap->tile_layer.chunks.push_back(chunk_instance);
 				}
 
-				chunk_instance.height = chunk["height"];
-				chunk_instance.width = chunk["width"];
-				chunk_instance.x = chunk["x"];
-				chunk_instance.y = chunk["y"];
+				// tileMap->layers.push_back(tile_layer_instance);
 
-				layer_instance.chunks.push_back(chunk_instance);
 			}
+			else if (layer_type == "objectgroup")
+			{
+				// TileMap::waypoint_layer waypoint_layer_instance;
 
-			tileMap->layers.push_back(layer_instance);
+				tileMap->waypoint_layer.draworder = layer["draworder"];
+				tileMap->waypoint_layer.id = layer["id"];
+				tileMap->waypoint_layer.name = layer["name"];
+				tileMap->waypoint_layer.opacity = layer["opacity"];
+				tileMap->waypoint_layer.type = layer["type"];
+				tileMap->waypoint_layer.visible = layer["visible"];
+				tileMap->waypoint_layer.x = layer["x"];
+				tileMap->waypoint_layer.y = layer["y"];
+
+				for (const auto& waypoint : layer["objects"])
+				{
+					TileMap::Waypoint waypoint_instance;
+
+					waypoint_instance.ellipse = waypoint["ellipse"];
+					waypoint_instance.height = waypoint["height"];
+					waypoint_instance.id = waypoint["id"];
+					waypoint_instance.name = waypoint["name"];
+					waypoint_instance.rotation = waypoint["rotation"];
+					waypoint_instance.type = waypoint["type"];
+					waypoint_instance.visible = waypoint["visible"];
+					waypoint_instance.width = waypoint["width"];
+					waypoint_instance.x = waypoint["x"];
+					waypoint_instance.y = waypoint["y"];
+
+					for (const auto& waypoint_property_group : waypoint["properties"])
+					{
+						TileMap::Waypoint_property_group waypoint_property_group_instance;
+
+						waypoint_property_group_instance.name = waypoint_property_group["name"];
+						waypoint_property_group_instance.type = waypoint_property_group["type"];
+						waypoint_property_group_instance.value = waypoint_property_group["value"];
+
+						waypoint_instance.properties.push_back(waypoint_property_group_instance);
+					}
+					tileMap->waypoint_layer.waypoints.push_back(waypoint_instance);
+				}
+			}
 		}
 
 		for (const auto& tileset : game_map["tilesets"])
 		{
-			TileMap::tileset tileset_instance;
+			TileMap::Tileset tileset_instance;
 
 			tileset_instance.columns = tileset["columns"];
 			tileset_instance.firstgid = tileset["firstgid"];
@@ -129,7 +142,7 @@ namespace TileMap_Importer
 			tileset_instance.tileheight = tileset["tileheight"];
 			tileset_instance.tilewidth = tileset["tilewidth"];
 
-			TileMap::grid grid_instance;
+			TileMap::Grid grid_instance;
 
 			grid_instance.height = tileset["grid"]["height"];
 			grid_instance.orientation = tileset["grid"]["orientation"];
@@ -137,7 +150,7 @@ namespace TileMap_Importer
 
 			tileset_instance.grid = grid_instance;
 
-			TileMap::transformations transformations_instance;
+			TileMap::Transformations transformations_instance;
 
 			transformations_instance.hflip = tileset["transformations"]["hflip"];
 			transformations_instance.preferuntransformed = tileset["transformations"]["preferuntransformed"];
@@ -148,63 +161,45 @@ namespace TileMap_Importer
 
 			for (const auto& tile : tileset["tiles"])
 			{
-				TileMap::tile tile_instance;
+				TileMap::Tile tile_instance;
 
 				tile_instance.id = tile["id"];
 				tile_instance.image = tile["image"];
 				tile_instance.imageheight = tile["imageheight"];
 				tile_instance.imagewidth = tile["imagewidth"];
 
+				sf::Texture tile_texture = sf::Texture();
+				tile_texture.loadFromFile(tile_instance.image);
+				tile_instance.texture = tile_texture;
+
 				tileset_instance.tiles.push_back(tile_instance);
 			}
 
-
+			tileMap->tilesets.push_back(tileset_instance);
 		}
 
-
-		// tileMap.tilesets
-
-		//std::cout << "tileMap->height = " << tileMap->height << std::endl;
-		//std::cout << "tileMap->infinite = " << tileMap->infinite << std::endl;
-		//std::cout << "tileMap->layers[0].height = " << tileMap->layers[0].height << std::endl;
-		//std::cout << "tileMap->layers[0].chunks[0].height = " << tileMap->layers[0].chunks[0].height << std::endl;
-
-		//for (const auto& map_layer : game_map["layers"])
-		//{
-		//	std::cout << map_layer["height"] << std::endl;
-		//	//std::cout << layers["height"] << std::endl;
-		//}
-
 		return tileMap;
-
-		//for (const auto& item : game_map["items"]["item"])
-		//{
-		//	std::cout << item["ppu"] << std::endl;
-
-
-		//	// check if item["batters"]["batter"] exists
-
-		//	if (item.find("batters") != item.end() and
-		//		item["batters"].find("batter") != item["batters"].end())
-		//	{
-		//		for (const auto& batter : item["batters"]["batter"])
-		//		{
-		//			std::cout << batter["id"] << ", " << batter["type"] << std::endl;
-		//		}
-		//	}
-
-		//	// check if item["topping"] exists
-		//	if (item.find("topping") != item.end())
-		//	{
-		//		for (const auto& batter : item["topping"])
-		//		{
-		//			std::cout << batter["id"] << ", " << batter["type"] << std::endl;
-		//		}
-		//	}
-		//}
 	}
 
-
+	/*
+	 * Where this function asks for ID, that means the integer inside the data array of a map chunk.
+	 * The ID identifies what type of tile should be spawned, so we can ask for the corresponding texture.
+	 */
+	sf::Texture* GetTileTexture(TileMap* tileMap, int id)
+	{
+		if (tileMap->tilesets.size() <= 0)
+		{
+			throw std::logic_error("Tried to get a texture from a tileMap, but the tileMap didn't have a tileset!\n\nHas the tileMap been initialized correctly? Has the tileMap been lost after being created (eg. garbage collected when it goes out of scope)?");
+		}
+		for (TileMap::Tile& tile : tileMap->tilesets[0].tiles)
+		{
+			if (tile.id == id - 1)
+			{
+				return &tile.texture;
+			}
+		}
+		return nullptr;
+	}
 
 } // namespace Tilemap_Importer
 

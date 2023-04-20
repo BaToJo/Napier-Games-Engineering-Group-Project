@@ -1,28 +1,32 @@
 
 #include "LevelSystem.h"
 #include <fstream>
+#include "TileMap.h"
+#include "../lib_JSON_reader/TileMap_Importer.h"
 
 using namespace std;
 using namespace sf;
 
+TileMap tileMap;
+
 std::map<LevelSystem::Tile, sf::Color> LevelSystem::_colours
 {
-    {WALL, Color::White}, 
-    {END, Color::Red} 
+	{WALL, Color::White},
+	{END, Color::Red}
 };
 
-sf::Color LevelSystem::getColor(LevelSystem::Tile t) 
+sf::Color LevelSystem::getColor(LevelSystem::Tile t)
 {
-    auto it = _colours.find(t);
-    if (it == _colours.end()) {
-        _colours[t] = Color::Transparent;
-    }
-    return _colours[t];
+	auto it = _colours.find(t);
+	if (it == _colours.end()) {
+		_colours[t] = Color::Transparent;
+	}
+	return _colours[t];
 }
 
-void LevelSystem::setColor(LevelSystem::Tile t, sf::Color c) 
+void LevelSystem::setColor(LevelSystem::Tile t, sf::Color c)
 {
-    _colours[t] = c;
+	_colours[t] = c;
 }
 
 std::unique_ptr<LevelSystem::Tile[]> LevelSystem::_tiles;
@@ -34,194 +38,246 @@ Vector2f LevelSystem::_offset(0.0f, 30.0f);
 // Vector2f LevelSystem::_offset(0,0);
 vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
 
-void LevelSystem::LoadLevelFile(const std::string& path, float tileSize) 
+void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
 {
-    _tileSize = tileSize;
-    size_t w = 0, h = 0;
-    string buffer;
+	TileMap* tileMap_pointer = TileMap_Importer::LoadMap(path);
+	tileMap = *tileMap_pointer;
+	// We allocated heap memory for it with "new", so now that we've assigned it by value to our stack variable, we should free the heap memory. Yes, this is a bit of a waste of memory moving but we only do this once at the start.
+	delete(tileMap_pointer);
 
-    // Load in file to buffer
-    ifstream f(path);
-    if (f.good()) 
-    {
-        f.seekg(0, std::ios::end);
-        buffer.resize(f.tellg());
-        f.seekg(0);
-        f.read(&buffer[0], buffer.size());
-        f.close();
-    }
-    else 
-    {
-        throw string("Couldn't open level file: ") + path;
-    }
+	// The tilemap divides up its data into chunks. We have to iterate over them.
+	for (auto& chunk : tileMap.tile_layer.chunks)
+	{
+		// Each chunk stores its data as an array of integers, where each integer is the ID for the type of tile at that position.
+		// We have to go through this array of integers and spawn the correct type of tile at each position.
+		for (int i = 0; i < chunk.data.size(); ++i)
+		{
+			int tile_ID = chunk.data[i];
 
-    std::vector<Tile> temp_tiles;
-    int widthCheck = 0;
-    for (int i = 0; i < buffer.size(); ++i) 
-    {
-        const char c = buffer[i];
-        if (c == '\0') 
-        { 
-            break; 
-        }
-        if (c == '\n') 
-        { // newline
-            if (w == 0) 
-            {  // if we haven't written width yet
-                w = i;       // set width
-            }
-            else if (w != (widthCheck - 1)) 
-            {
-                throw string("non uniform width:" + to_string(h) + " ") + path;
-            }
-            widthCheck = 0;
-            h++; // increment height
-        }
-        else 
-        {
-            temp_tiles.push_back((Tile)c);
-        }
-        ++widthCheck;
-    }
+			// A zero means no tile should be placed at this coordinate, so we move on to the next tile instead.
+			if (tile_ID == 0) continue;
 
-    if (temp_tiles.size() != (w * h)) 
-    {
-        throw string("Can't parse level file") + path;
-    }
-    _tiles = std::make_unique<Tile[]>(w * h);
-    _width = w; // set static class vars
-    _height = h;
-    std::copy(temp_tiles.begin(), temp_tiles.end(), &_tiles[0]);
-    cout << "Level " << path << " Loaded. " << w << "x" << h << std::endl;
-    BuildSprites();
+			// The chunk has metadata showing its width and height, so we know how to wrap the array into a rectangle shape.
+			int tile_x = chunk.x + (i % chunk.width);
+			int tile_y = chunk.y + (i / chunk.width);
+
+			// Spawn a tile.
+			auto tile = make_unique<sf::RectangleShape>();
+			// Set its position and dimensions.
+			tile->setPosition(sf::Vector2f(tile_x * tileSize, tile_y * tileSize));
+			tile->setSize(sf::Vector2f(tileSize, tileSize));
+
+			// You can give the tile a solid color for debugging purposes.
+			//tile->setFillColor(Color::Red);
+			//tile->setFillColor(t.c);
+			//tile->setFillColor(Color(rand()%255,rand()%255,rand()%255));
+
+			// Ask the tileset to serve us the texture tied to this tile's ID.
+			sf::Texture* texture = TileMap_Importer::GetTileTexture(&tileMap, tile_ID);
+			if (texture != nullptr)
+			{
+				tile->setTexture(texture);
+			}
+			else
+			{
+				// For debugging, we colour red the tiles whose texture the tileset can't find.
+				tile->setFillColor(Color::Red);
+			}
+
+			_sprites.push_back(move(tile));
+		}
+	}
+
 }
 
-void LevelSystem::BuildSprites(bool optimise) 
+void LevelSystem::LoadLevelFile_OLD(const std::string& path, float tileSize)
 {
-    _sprites.clear();
+	_tileSize = tileSize;
+	size_t w = 0, h = 0;
+	string buffer;
 
-    struct tp 
-    {
-        sf::Vector2f p;
-        sf::Vector2f s;
-        sf::Color c;
-    };
-    vector<tp> tps;
-    const auto tls = Vector2f(_tileSize, _tileSize);
-    for (size_t y = 0; y < _height; ++y) 
-    {
-        for (size_t x = 0; x < _width; ++x) 
-        {
-            Tile t = getTile({ x, y });
-            if (t == EMPTY) 
-            {
-                continue;
-            }
-            tps.push_back({ getTilePosition({x, y}), tls, getColor(t) });
-        }
-    }
+	// Load in file to buffer
+	ifstream f(path);
+	if (f.good())
+	{
+		f.seekg(0, std::ios::end);
+		buffer.resize(f.tellg());
+		f.seekg(0);
+		f.read(&buffer[0], buffer.size());
+		f.close();
+	}
+	else
+	{
+		throw string("Couldn't open level file: ") + path;
+	}
 
-    const auto nonempty = tps.size();
+	std::vector<Tile> temp_tiles;
+	int widthCheck = 0;
+	for (int i = 0; i < buffer.size(); ++i)
+	{
+		const char c = buffer[i];
+		if (c == '\0')
+		{
+			break;
+		}
+		if (c == '\n')
+		{ // newline
+			if (w == 0)
+			{  // if we haven't written width yet
+				w = i;       // set width
+			}
+			else if (w != (widthCheck - 1))
+			{
+				throw string("non uniform width:" + to_string(h) + " ") + path;
+			}
+			widthCheck = 0;
+			h++; // increment height
+		}
+		else
+		{
+			temp_tiles.push_back((Tile)c);
+		}
+		++widthCheck;
+	}
 
-    // If tile of the same type are next to each other,
-    // We can use one large sprite instead of two.
-    if (optimise && nonempty) 
-    {
-
-        vector<tp> tpo;
-        tp last = tps[0];
-        size_t samecount = 0;
-
-        for (size_t i = 1; i < nonempty; ++i) 
-        {
-            // Is this tile compressible with the last?
-            bool same = ((tps[i].p.y == last.p.y) &&
-                (tps[i].p.x == last.p.x + (tls.x * (1 + samecount))) &&
-                (tps[i].c == last.c));
-            if (same) 
-            {
-                ++samecount; // Yes, keep going
-                // tps[i].c = Color::Green;
-            }
-            else 
-            {
-                if (samecount) 
-                {
-                    last.s.x = (1 + samecount) * tls.x; // Expand tile
-                }
-                // write tile to list
-                tpo.push_back(last);
-                samecount = 0;
-                last = tps[i];
-            }
-        }
-        // catch the last tile
-        if (samecount) 
-        {
-            last.s.x = (1 + samecount) * tls.x;
-            tpo.push_back(last);
-        }
-
-        // No scan down Y, using different algo now that compressible blocks may
-        // not be contiguous
-        const auto xsave = tpo.size();
-        samecount = 0;
-        vector<tp> tpox;
-        for (size_t i = 0; i < tpo.size(); ++i) {
-            last = tpo[i];
-            for (size_t j = i + 1; j < tpo.size(); ++j) 
-            {
-                bool same = ((tpo[j].p.x == last.p.x) && (tpo[j].s == last.s) &&
-                    (tpo[j].p.y == last.p.y + (tls.y * (1 + samecount))) &&
-                    (tpo[j].c == last.c));
-                if (same) 
-                {
-                    ++samecount;
-                    tpo.erase(tpo.begin() + j);
-                    --j;
-                }
-            }
-            if (samecount) 
-            {
-                last.s.y = (1 + samecount) * tls.y; // Expand tile
-            }
-            // write tile to list
-            tpox.push_back(last);
-            samecount = 0;
-        }
-
-        tps.swap(tpox);
-    }
-
-    for (auto& t : tps) 
-    {
-        auto s = make_unique<sf::RectangleShape>();
-        s->setPosition(t.p);
-        s->setSize(t.s);
-        s->setFillColor(Color::Red);
-        s->setFillColor(t.c);
-        // s->setFillColor(Color(rand()%255,rand()%255,rand()%255));
-        _sprites.push_back(move(s));
-    }
-
-    cout << "Level with " << (_width * _height) << " Tiles, With " << nonempty
-        << " Not Empty, using: " << _sprites.size() << " Sprites\n";
+	if (temp_tiles.size() != (w * h))
+	{
+		throw string("Can't parse level file") + path;
+	}
+	_tiles = std::make_unique<Tile[]>(w * h);
+	_width = w; // set static class vars
+	_height = h;
+	std::copy(temp_tiles.begin(), temp_tiles.end(), &_tiles[0]);
+	cout << "Level " << path << " Loaded. " << w << "x" << h << std::endl;
+	BuildSprites();
 }
 
-void LevelSystem::Render(RenderWindow& window) 
+void LevelSystem::BuildSprites(bool optimise)
 {
-    for (auto& t : _sprites) {
-        window.draw(*t);
-    }
+	_sprites.clear();
+
+	struct tp
+	{
+		sf::Vector2f p;
+		sf::Vector2f s;
+		sf::Color c;
+	};
+	vector<tp> tps;
+	const auto tls = Vector2f(_tileSize, _tileSize);
+	for (size_t y = 0; y < _height; ++y)
+	{
+		for (size_t x = 0; x < _width; ++x)
+		{
+			Tile t = getTile({ x, y });
+			if (t == EMPTY)
+			{
+				continue;
+			}
+			tps.push_back({ getTilePosition({x, y}), tls, getColor(t) });
+		}
+	}
+
+	const auto nonempty = tps.size();
+
+	// If tile of the same type are next to each other,
+	// We can use one large sprite instead of two.
+	if (optimise && nonempty)
+	{
+
+		vector<tp> tpo;
+		tp last = tps[0];
+		size_t samecount = 0;
+
+		for (size_t i = 1; i < nonempty; ++i)
+		{
+			// Is this tile compressible with the last?
+			bool same = ((tps[i].p.y == last.p.y) &&
+				(tps[i].p.x == last.p.x + (tls.x * (1 + samecount))) &&
+				(tps[i].c == last.c));
+			if (same)
+			{
+				++samecount; // Yes, keep going
+				// tps[i].c = Color::Green;
+			}
+			else
+			{
+				if (samecount)
+				{
+					last.s.x = (1 + samecount) * tls.x; // Expand tile
+				}
+				// write tile to list
+				tpo.push_back(last);
+				samecount = 0;
+				last = tps[i];
+			}
+		}
+		// catch the last tile
+		if (samecount)
+		{
+			last.s.x = (1 + samecount) * tls.x;
+			tpo.push_back(last);
+		}
+
+		// No scan down Y, using different algo now that compressible blocks may
+		// not be contiguous
+		const auto xsave = tpo.size();
+		samecount = 0;
+		vector<tp> tpox;
+		for (size_t i = 0; i < tpo.size(); ++i) {
+			last = tpo[i];
+			for (size_t j = i + 1; j < tpo.size(); ++j)
+			{
+				bool same = ((tpo[j].p.x == last.p.x) && (tpo[j].s == last.s) &&
+					(tpo[j].p.y == last.p.y + (tls.y * (1 + samecount))) &&
+					(tpo[j].c == last.c));
+				if (same)
+				{
+					++samecount;
+					tpo.erase(tpo.begin() + j);
+					--j;
+				}
+			}
+			if (samecount)
+			{
+				last.s.y = (1 + samecount) * tls.y; // Expand tile
+			}
+			// write tile to list
+			tpox.push_back(last);
+			samecount = 0;
+		}
+
+		tps.swap(tpox);
+	}
+
+	for (auto& t : tps)
+	{
+		auto s = make_unique<sf::RectangleShape>();
+		s->setPosition(t.p);
+		s->setSize(t.s);
+		s->setFillColor(Color::Red);
+		s->setFillColor(t.c);
+		// s->setFillColor(Color(rand()%255,rand()%255,rand()%255));
+		_sprites.push_back(move(s));
+	}
+
+	cout << "Level with " << (_width * _height) << " Tiles, With " << nonempty
+		<< " Not Empty, using: " << _sprites.size() << " Sprites\n";
 }
 
-LevelSystem::Tile LevelSystem::getTile(sf::Vector2ul p) 
+void LevelSystem::Render(RenderWindow& window)
 {
-    if (p.x > _width || p.y > _height) {
-        throw string("Tile out of range: ") + to_string(p.x) + "," +
-            to_string(p.y) + ")";
-    }
-    return _tiles[(p.y * _width) + p.x];
+	for (auto& t : _sprites) {
+		window.draw(*t);
+	}
+}
+
+LevelSystem::Tile LevelSystem::getTile(sf::Vector2ul p)
+{
+	if (p.x > _width || p.y > _height) {
+		throw string("Tile out of range: ") + to_string(p.x) + "," +
+			to_string(p.y) + ")";
+	}
+	return _tiles[(p.y * _width) + p.x];
 }
 
 size_t LevelSystem::getWidth() { return _width; }
@@ -230,57 +286,57 @@ size_t LevelSystem::getHeight() { return _height; }
 
 sf::Vector2f LevelSystem::getTilePosition(sf::Vector2ul p)
 {
-    return (Vector2f(p.x, p.y) * _tileSize) + _offset;
+	return (Vector2f(p.x, p.y) * _tileSize) + _offset;
 }
 
-std::vector<sf::Vector2ul> LevelSystem::findTiles(LevelSystem::Tile type) 
+std::vector<sf::Vector2ul> LevelSystem::findTiles(LevelSystem::Tile type)
 {
-    auto v = vector<sf::Vector2ul>();
-    for (size_t i = 0; i < _width * _height; ++i) {
-        if (_tiles[i] == type) {
-            v.push_back({ i % _width, i / _width });
-        }
-    }
+	auto v = vector<sf::Vector2ul>();
+	for (size_t i = 0; i < _width * _height; ++i) {
+		if (_tiles[i] == type) {
+			v.push_back({ i % _width, i / _width });
+		}
+	}
 
-    return v;
+	return v;
 }
 
-LevelSystem::Tile LevelSystem::getTileAt(Vector2f v) 
+LevelSystem::Tile LevelSystem::getTileAt(Vector2f v)
 {
-    auto a = v - _offset;
-    if (a.x < 0 || a.y < 0) {
-        throw string("Tile out of range ");
-    }
-    return getTile(Vector2ul((v - _offset) / (_tileSize)));
+	auto a = v - _offset;
+	if (a.x < 0 || a.y < 0) {
+		throw string("Tile out of range ");
+	}
+	return getTile(Vector2ul((v - _offset) / (_tileSize)));
 }
 
-bool LevelSystem::isOnGrid(sf::Vector2f v) 
+bool LevelSystem::isOnGrid(sf::Vector2f v)
 {
-    auto a = v - _offset;
-    if (a.x < 0 || a.y < 0) {
-        return false;
-    }
-    auto p = Vector2ul((v - _offset) / (_tileSize));
-    if (p.x > _width || p.y > _height) {
-        return false;
-    }
-    return true;
+	auto a = v - _offset;
+	if (a.x < 0 || a.y < 0) {
+		return false;
+	}
+	auto p = Vector2ul((v - _offset) / (_tileSize));
+	if (p.x > _width || p.y > _height) {
+		return false;
+	}
+	return true;
 }
 
-void LevelSystem::setOffset(const Vector2f& _offset) 
+void LevelSystem::setOffset(const Vector2f& _offset)
 {
-    LevelSystem::_offset = _offset;
-    BuildSprites();
+	LevelSystem::_offset = _offset;
+	BuildSprites();
 }
 
-void LevelSystem::Unload() 
+void LevelSystem::Unload()
 {
-    cout << "LevelSystem unloading\n";
-    _sprites.clear();
-    _tiles.reset();
-    _width = 0;
-    _height = 0;
-    _offset = { 0, 0 };
+	cout << "LevelSystem unloading\n";
+	_sprites.clear();
+	_tiles.reset();
+	_width = 0;
+	_height = 0;
+	_offset = { 0, 0 };
 }
 
 const Vector2f& LevelSystem::getOffset() { return _offset; }

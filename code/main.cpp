@@ -11,13 +11,14 @@ GameScene gameScene;
 
 int main()
 {
-	TileMap* tileMap = TileMap_Importer::LoadMap("C:\\Users\\Jonathan\\University\\GamesEng\\Napier-Games-Engineering-Group-Project\\res\\levels\\test_tile_reading_embeddedTileset.tmj");
+	//TileMap* tileMap = TileMap_Importer::LoadMap("C:\\Users\\Jonathan\\University\\GamesEng\\Napier-Games-Engineering-Group-Project\\res\\levels\\test_large_embeddedTileset.tmj");
 
-	std::cout << "tileMap->height = " << tileMap->height << std::endl;
-	std::cout << "tileMap->infinite = " << tileMap->infinite << std::endl;
-	std::cout << "tileMap->layers[0].height = " << tileMap->layers[0].height << std::endl;
-	std::cout << "tileMap->layers[0].chunks[0].height = " << tileMap->layers[0].chunks[0].height << std::endl;
+	//std::cout << "tileMap->height = " << tileMap->height << std::endl;
+	//std::cout << "tileMap->infinite = " << tileMap->infinite << std::endl;
+	//std::cout << "tileMap->tile_layer.height = " << tileMap->tile_layer.height << std::endl;
+	//std::cout << "tileMap->tile_layer.chunks[0].height = " << tileMap->tile_layer.chunks[0].height << std::endl;
+	//std::cout << "tileMap->waypoint_layer.waypoints[0].x = " << tileMap->waypoint_layer.waypoints[0].x << std::endl;
 
-	// Engine::Start(1280, 720, "Cartharsis", &gameScene);
+	Engine::Start(1280, 720, "Cartharsis", &gameScene);
 	return 0;
 }
