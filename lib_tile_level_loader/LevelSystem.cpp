@@ -52,10 +52,23 @@ void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
 		// We have to go through this array of integers and spawn the correct type of tile at each position.
 		for (int i = 0; i < chunk.data.size(); ++i)
 		{
-			int tile_ID = chunk.data[i];
+			uint32_t tile_ID = chunk.data[i];
 
 			// A zero means no tile should be placed at this coordinate, so we move on to the next tile instead.
 			if (tile_ID == 0) continue;
+
+
+			// Tiled stores information about rotations and mirroring using the 3 most significant bits of the unsigned 32-bit int that it's stored in.
+			bool mirrored = (tile_ID >> 31) & 1;
+			bool flipped = (tile_ID >> 30) & 1;
+			bool rotated_clockwise_once = (tile_ID >> 29) & 1;
+
+			// Set those bits to zero so we can compare the integer to things as a decimal later.
+			uint32_t tile_type = tile_ID;
+			tile_type &= ~(1 << 31);
+			tile_type &= ~(1 << 30);
+			tile_type &= ~(1 << 29);
+
 
 			// The chunk has metadata showing its width and height, so we know how to wrap the array into a rectangle shape.
 			int tile_x = chunk.x + (i % chunk.width);
@@ -64,8 +77,22 @@ void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
 			// Spawn a tile.
 			auto tile = make_unique<sf::RectangleShape>();
 			// Set its position and dimensions.
+			tile->setOrigin(Vector2f(tileSize / 2, tileSize / 2));
+
 			tile->setPosition(sf::Vector2f(tile_x * tileSize, tile_y * tileSize));
 			tile->setSize(sf::Vector2f(tileSize, tileSize));
+			if (mirrored)
+			{
+				tile->scale(sf::Vector2f(-1, 1));
+			}
+			if (flipped)
+			{
+				tile->scale(sf::Vector2f(1, -1));
+			}
+			if (rotated_clockwise_once)
+			{
+				tile->setRotation(sf::degrees(90));
+			}
 
 			// You can give the tile a solid color for debugging purposes.
 			//tile->setFillColor(Color::Red);
@@ -73,7 +100,7 @@ void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
 			//tile->setFillColor(Color(rand()%255,rand()%255,rand()%255));
 
 			// Ask the tileset to serve us the texture tied to this tile's ID.
-			sf::Texture* texture = TileMap_Importer::GetTileTexture(&tileMap, tile_ID);
+			sf::Texture* texture = TileMap_Importer::GetTileTexture(&tileMap, tile_type);
 			if (texture != nullptr)
 			{
 				tile->setTexture(texture);
