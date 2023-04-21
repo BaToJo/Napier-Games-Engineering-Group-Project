@@ -38,13 +38,8 @@ Vector2f LevelSystem::_offset(0.0f, 30.0f);
 // Vector2f LevelSystem::_offset(0,0);
 vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
 
-void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
+void LevelSystem::LoadTileMap(float tileSize)
 {
-	TileMap* tileMap_pointer = TileMap_Importer::LoadMap(path);
-	tileMap = *tileMap_pointer;
-	// We allocated heap memory for it with "new", so now that we've assigned it by value to our stack variable, we should free the heap memory. Yes, this is a bit of a waste of memory moving but we only do this once at the start.
-	delete(tileMap_pointer);
-
 	// The tilemap divides up its data into chunks. We have to iterate over them.
 	for (auto& chunk : tileMap.tile_layer.chunks)
 	{
@@ -116,6 +111,20 @@ void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
 	}
 
 }
+
+
+void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
+{
+	TileMap* tileMap_pointer = TileMap_Importer::LoadMap(path);
+	tileMap = *tileMap_pointer;
+	// We allocated heap memory for it with "new", so now that we've assigned it by value to our stack variable, we should free the heap memory. Yes, this is a bit of a waste of memory moving but we only do this once at the start. We want this LevelSystem to be the owner of the data.
+	delete(tileMap_pointer);
+
+	LoadTileMap(tileSize);
+	// LoadWaypoints(scene);
+
+}
+
 
 void LevelSystem::LoadLevelFile_OLD(const std::string& path, float tileSize)
 {

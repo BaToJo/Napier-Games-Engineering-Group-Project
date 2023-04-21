@@ -17,7 +17,7 @@
 //    {
 //        EMPTY,
 //        START,
-//        END,    
+//        END,
 //        WALL,
 //        ENEMY,
 //        WAYPOINT
@@ -47,7 +47,7 @@
 //    static std::map<TILE, sf::Color> _colours; // color to render each tile type
 //    static float _previousScore;
 //    static float _bestScore;
-//    
+//
 //
 //    // array of sfml sprites of each tile
 //    static std::vector<std::unique_ptr<sf::RectangleShape>> _sprites;
@@ -72,7 +72,8 @@
 class LevelSystem
 {
 public:
-	static void LoadLevelFile(const std::string&, float tileSize = 100.0f);
+	static void LoadTileMap(float tileSize);
+	static void LoadLevelFile(const std::string& path, float tileSize);
 	static void LoadLevelFile_OLD(const std::string&, float tileSize = 100.0f);
 	static void Unload();
 	static void Render(sf::RenderWindow& window);
