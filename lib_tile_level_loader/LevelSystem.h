@@ -66,6 +66,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "../lib_ecm/Ecm.h"
 
 #define ls LevelSystem
 
@@ -73,7 +74,7 @@ class LevelSystem
 {
 public:
 	static void LoadTileMap(float tileSize);
-	static void LoadLevelFile(const std::string& path, float tileSize);
+	static void LoadLevelFile(const std::string& path, Scene* scene_instance, float tileSize);
 	static void LoadLevelFile_OLD(const std::string&, float tileSize = 100.0f);
 	static void Unload();
 	static void Render(sf::RenderWindow& window);
@@ -112,6 +113,8 @@ public:
 	static const sf::Vector2f& getOffset();
 
 	static float getTileSize();
+
+	static std::vector<std::unique_ptr<Entity>> waypoints;
 
 protected:
 	static std::unique_ptr<Tile[]> _tiles;

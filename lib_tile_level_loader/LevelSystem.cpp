@@ -113,7 +113,7 @@ void LevelSystem::LoadTileMap(float tileSize)
 }
 
 
-void LevelSystem::LoadLevelFile(const std::string& path, float tileSize)
+void LevelSystem::LoadLevelFile(const std::string& path, Scene* scene_instance, float tileSize)
 {
 	TileMap* tileMap_pointer = TileMap_Importer::LoadMap(path);
 	tileMap = *tileMap_pointer;

@@ -8,12 +8,13 @@ using namespace std;
 using namespace sf;
 
 static shared_ptr<Entity> player;
+static shared_ptr<Entity> test_NPC;
 VertexArray line;
 
 void GameScene::Load()
 {
 	//ls::LoadLevelFile_OLD("res/levels/pacman.txt", 50.f);
-	ls::LoadLevelFile("res/levels/test_large_embeddedTileset.tmj", 50.f);
+	ls::LoadLevelFile("res/levels/test_large_embeddedTileset.tmj", this, 50.f);
 
 	// Player Setup
 	player = MakeEntity();
@@ -31,6 +32,23 @@ void GameScene::Load()
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
+
+	// Spawn a green circle on top of every waypoint for debugging purposes.
+
+
+
+	/*
+	// Make a test NPC
+	test_NPC = MakeEntity();
+	test_NPC->setPosition(sf::Vector2f(0.f, 0.f));
+
+	// Test NPC Shape Component
+	auto shapeCompNPC = test_NPC->addComponent<ShapeComponent>();
+	sf::Vector2f sizeNPC = Vector2f(10.f, 30.f);
+	shapeCompNPC->setShape<sf::RectangleShape>(size);
+	shapeCompNPC->getShape().setFillColor(Color::Red);
+	shapeCompNPC->getShape().setOrigin(Vector2f(5.f, 15.f));
+	*/
 }
 
 void GameScene::Unload()
