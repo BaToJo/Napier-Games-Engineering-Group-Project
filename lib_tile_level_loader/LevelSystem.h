@@ -14,9 +14,9 @@ class LevelSystem
 {
 public:
 	static void LoadTileMap(float tileSize);
-	static void LoadWaypoints(Scene* scene);
-  static void LoadLevelFile(const std::string& path, Scene* scene_instance, float tileSize);
-  static void LoadLevelFile_OLD(const std::string&, float tileSize = 100.0f);
+	static void LoadWaypoints(Scene* scene, float tileSize);
+	static void LoadLevelFile(const std::string& path, Scene* scene_instance, float tileSize);
+	static void LoadLevelFile_OLD(const std::string&, float tileSize = 100.0f);
 	static void Unload();
 	static void Render(sf::RenderWindow& window);
 
@@ -30,6 +30,8 @@ public:
 		ENEMY = 'n',
 		WAYPOINT = '+'
 	};
+
+	static std::map<int, std::shared_ptr<Entity>> GetWaypoints();
 
 	static Tile getTile(sf::Vector2ul);
 
@@ -54,8 +56,6 @@ public:
 	static const sf::Vector2f& getOffset();
 
 	static float getTileSize();
-
-	static std::vector<std::unique_ptr<Entity>> waypoints;
 
 protected:
 	static std::unique_ptr<Tile[]> _tiles;

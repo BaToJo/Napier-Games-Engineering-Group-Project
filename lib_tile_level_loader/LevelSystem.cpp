@@ -11,7 +11,13 @@ using namespace std;
 using namespace sf;
 
 TileMap tileMap;
-map<int, std::shared_ptr<Entity>> waypoint_lookup_table; // Matches a waypoint's ID to its pointer.
+
+std::map<int, std::shared_ptr<Entity>> waypoint_lookup_table; // Matches a waypoint's ID to its pointer.
+
+std::map<int, std::shared_ptr<Entity>> LevelSystem::GetWaypoints()
+{
+	return waypoint_lookup_table;
+}
 
 std::map<LevelSystem::Tile, sf::Color> LevelSystem::_colours
 {
@@ -42,7 +48,7 @@ Vector2f LevelSystem::_offset(0.0f, 30.0f);
 // Vector2f LevelSystem::_offset(0,0);
 vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
 
-void LevelSystem::LoadWaypoints(Scene* scene)
+void LevelSystem::LoadWaypoints(Scene* scene, float tileSize)
 {
 	// Create every waypoint first with no destinations, to allow us to refer them to each other afterwards.
 	for (auto& waypoint_data : tileMap.waypoint_layer.waypoints)
@@ -177,7 +183,7 @@ void LevelSystem::LoadLevelFile(const std::string& path, Scene* scene, float til
 	delete(tileMap_pointer);
 
 	LoadTileMap(tileSize);
-	LoadWaypoints(scene);
+	LoadWaypoints(scene, tileSize);
 
 }
 

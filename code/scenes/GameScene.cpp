@@ -3,6 +3,7 @@
 #include "..\components\Cmp_Sprite.h"
 #include "..\components\Cmp_Actor_Physics.h"
 #include "..\components\Cmp_Player_Physics.h"
+#include "../code/components/Cmp_Waypoint.h"
 #include <SFML/Graphics.hpp>
 using namespace std;
 using namespace sf;
@@ -15,6 +16,18 @@ void GameScene::Load()
 {
 	//ls::LoadLevelFile_OLD("res/levels/pacman.txt", 50.f);
 	ls::LoadLevelFile("res/levels/test_large_embeddedTileset.tmj", this, 50.f);
+
+	// TODO: Remove this debugging to visualise waypoints before release.
+	// Spawn a green circle on top of every waypoint for debugging purposes.
+	for (auto& waypoint : ls::GetWaypoints())
+	{
+		// Create a component
+		auto waypoint_shape = waypoint.second->addComponent<ShapeComponent>();
+		float waypoint_trigger_radius = waypoint.second->getComponents<AIWaypointComponent>()[0]->trigger_radius;
+		waypoint_shape->setShape<sf::CircleShape>(waypoint_trigger_radius);
+		waypoint_shape->getShape().setFillColor(Color::Green);
+		waypoint_shape->getShape().setOrigin(Vector2f(waypoint_trigger_radius, waypoint_trigger_radius));
+	}
 
 	// Player Setup
 	player = MakeEntity();
@@ -33,7 +46,6 @@ void GameScene::Load()
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
 
-	// Spawn a green circle on top of every waypoint for debugging purposes.
 
 
 
