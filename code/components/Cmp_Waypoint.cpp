@@ -34,3 +34,8 @@ int AIWaypointComponent::GetID() const
 	return _id;
 }
 
+// Destructor
+AIWaypointComponent::~AIWaypointComponent()
+{
+
+}

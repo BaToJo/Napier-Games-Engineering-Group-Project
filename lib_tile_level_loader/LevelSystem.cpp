@@ -3,11 +3,15 @@
 #include <fstream>
 #include "TileMap.h"
 #include "../lib_JSON_reader/TileMap_Importer.h"
+#include "../lib_engine/Engine.h"
+#include "../code/components/Cmp_Waypoint.h"
+// #include "../code/components/Cmp_Sprite.h"
 
 using namespace std;
 using namespace sf;
 
 TileMap tileMap;
+map<int, std::shared_ptr<Entity>> waypoint_lookup_table; // Matches a waypoint's ID to its pointer.
 
 std::map<LevelSystem::Tile, sf::Color> LevelSystem::_colours
 {
@@ -37,6 +41,59 @@ float LevelSystem::_tileSize(100.f);
 Vector2f LevelSystem::_offset(0.0f, 30.0f);
 // Vector2f LevelSystem::_offset(0,0);
 vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
+
+void LevelSystem::LoadWaypoints(Scene* scene)
+{
+	// Create every waypoint first with no destinations, to allow us to refer them to each other afterwards.
+	for (auto& waypoint_data : tileMap.waypoint_layer.waypoints)
+	{
+		// Create a new entity.
+		std::shared_ptr<Entity> waypoint = scene->MakeEntity();
+
+		// Position the waypoint in the correct place.
+		waypoint->setPosition(sf::Vector2f(waypoint_data.x, waypoint_data.y));
+
+		// Get its ID and radius.
+		int id = waypoint_data.id;
+		float trigger_radius = (waypoint_data.height + waypoint_data.width) / 4; // Currently we assume all triggers are circles. If a waypoint is put in Tiled as elliptical, this will take its radius as the average of its width and height.
+
+		// TODO: Not yet implemented in Tiled. Waypoints in Tiled do not yet contain this information. When implemented, this boolean should come from the waypoint data imported from the JSON file.
+		bool allow_multiple_vehicles_to_come_here_simultaneously = true;
+
+		// Give our new waypoint its Waypoint component.
+		waypoint->addComponent<AIWaypointComponent>(id, trigger_radius, allow_multiple_vehicles_to_come_here_simultaneously);
+
+		// Add our new waypoint to the lookup table so we can access it quickly later from its ID.
+		waypoint_lookup_table.insert(pair<int, std::shared_ptr<Entity>>(id, waypoint));
+
+
+		// For debugging purposes, give every waypoint a green circle representing its radius.
+		//auto shapeComponent = waypoint->addComponent<ShapeComponent>();
+		//sf::Vector2f size = Vector2f(trigger_radius * 2, trigger_radius * 2);
+		//shapeComponent->setShape<sf::CircleShape>(size);
+		//shapeComponent->getShape().setFillColor(Color::Green);
+		//shapeComponent->getShape().setOrigin(Vector2f(trigger_radius, trigger_radius));
+
+	}
+
+	// Give each waypoint its correct destinations.
+	std::vector<std::shared_ptr<Entity>> destinations;
+	// For each waypoint...
+	for (auto& waypoint_data : tileMap.waypoint_layer.waypoints)
+	{
+		// For each destination...
+		for (auto& waypoint_data_destination : waypoint_data.properties)
+		{
+			// Get a pointer to this destination.
+			int destination_id = waypoint_data_destination.value;
+			shared_ptr<Entity> destination = waypoint_lookup_table.at(destination_id);
+
+			// Add this destination to this waypoint.
+			waypoint_lookup_table.at(waypoint_data.id)->getComponents<AIWaypointComponent>()[0]->AddDestination(destination);
+		}
+	}
+
+}
 
 void LevelSystem::LoadTileMap(float tileSize)
 {
@@ -112,8 +169,7 @@ void LevelSystem::LoadTileMap(float tileSize)
 
 }
 
-
-void LevelSystem::LoadLevelFile(const std::string& path, Scene* scene_instance, float tileSize)
+void LevelSystem::LoadLevelFile(const std::string& path, Scene* scene, float tileSize)
 {
 	TileMap* tileMap_pointer = TileMap_Importer::LoadMap(path);
 	tileMap = *tileMap_pointer;
@@ -121,10 +177,9 @@ void LevelSystem::LoadLevelFile(const std::string& path, Scene* scene_instance, 
 	delete(tileMap_pointer);
 
 	LoadTileMap(tileSize);
-	// LoadWaypoints(scene);
+	LoadWaypoints(scene);
 
 }
-
 
 void LevelSystem::LoadLevelFile_OLD(const std::string& path, float tileSize)
 {

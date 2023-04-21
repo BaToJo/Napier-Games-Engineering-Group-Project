@@ -29,6 +29,8 @@ public:
 	AIWaypointComponent() = delete;
 
 	void Update(double dt) override;
+	void Render() {};
+	~AIWaypointComponent() override;
 
 	std::shared_ptr<Entity> GetRandomDestination();
 	void AddDestination(std::shared_ptr<Entity> destination);

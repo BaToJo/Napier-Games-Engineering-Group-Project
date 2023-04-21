@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <Ecm.h>
+//#include <Ecm.h>
+#include "../lib_ecm/Ecm.h"
 #include "..\lib_maths\maths.h"
 
 class Scene
@@ -19,7 +20,7 @@ public:
 	sf::View PlayerCamera;
 };
 
-class Engine 
+class Engine
 {
 public:
 	Engine() = delete;
@@ -28,7 +29,7 @@ public:
 	static sf::RenderWindow& getWindow();
 	static sf::Vector2u getWindowSize();
 	static void ChangeScene(Scene*);
-	
+
 private:
 	static Scene* _activeScene;
 	static std::string _gameName;
