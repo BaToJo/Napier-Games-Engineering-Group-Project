@@ -53,15 +53,23 @@ void LevelSystem::LoadWaypoints(Scene* scene, float tileSize)
 	// Create every waypoint first with no destinations, to allow us to refer them to each other afterwards.
 	for (auto& waypoint_data : tileMap.waypoint_layer.waypoints)
 	{
+
+		int tileMap_tile_width = tileMap.tilesets[0].tilewidth;
+		int tileMap_tile_height = tileMap.tilesets[0].tileheight;
+
 		// Create a new entity.
 		std::shared_ptr<Entity> waypoint = scene->MakeEntity();
 
-		// Position the waypoint in the correct place.
-		waypoint->setPosition(sf::Vector2f(waypoint_data.x, waypoint_data.y));
+		int tile_position_x = ((waypoint_data.x / tileMap_tile_width) + 0.5) * tileSize;
+		int tile_position_y = ((waypoint_data.y / tileMap_tile_height) + 0.5) * tileSize;
 
 		// Get its ID and radius.
 		int id = waypoint_data.id;
-		float trigger_radius = (waypoint_data.height + waypoint_data.width) / 4; // Currently we assume all triggers are circles. If a waypoint is put in Tiled as elliptical, this will take its radius as the average of its width and height.
+		float trigger_radius = (((waypoint_data.height / tileMap_tile_height) + (waypoint_data.width / tileMap_tile_width)) / 4) * tileSize; // Currently we assume all triggers are circles. If a waypoint is put in Tiled as elliptical, this will take its radius as the average of its width and height.
+
+
+		// Position the waypoint in the correct place.
+		waypoint->setPosition(sf::Vector2f(tile_position_x, tile_position_y));
 
 		// TODO: Not yet implemented in Tiled. Waypoints in Tiled do not yet contain this information. When implemented, this boolean should come from the waypoint data imported from the JSON file.
 		bool allow_multiple_vehicles_to_come_here_simultaneously = true;
