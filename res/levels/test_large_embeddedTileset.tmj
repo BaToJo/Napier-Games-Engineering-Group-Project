@@ -355,7 +355,7 @@
                  "visible":true,
                  "width":32,
                  "x":0,
-                 "y":0
+                 "y":-32
                 },
                 {
                  "ellipse":true,
@@ -400,7 +400,7 @@
                  "type":"",
                  "visible":true,
                  "width":32,
-                 "x":32,
+                 "x":0,
                  "y":-64
                 },
                 {
@@ -447,7 +447,7 @@
                  "visible":true,
                  "width":32,
                  "x":-32,
-                 "y":-96
+                 "y":-64
                 },
                 {
                  "ellipse":true,
@@ -492,7 +492,7 @@
                  "type":"",
                  "visible":true,
                  "width":32,
-                 "x":-64,
+                 "x":-32,
                  "y":-32
                 },
                 {

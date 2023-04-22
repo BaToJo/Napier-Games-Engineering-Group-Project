@@ -19,6 +19,8 @@ int main()
 	//std::cout << "tileMap->tile_layer.chunks[0].height = " << tileMap->tile_layer.chunks[0].height << std::endl;
 	//std::cout << "tileMap->waypoint_layer.waypoints[0].x = " << tileMap->waypoint_layer.waypoints[0].x << std::endl;
 
+
+	srand(time(0));
 	Engine::Start(1280, 720, "Cartharsis", &gameScene);
 	return 0;
 }
