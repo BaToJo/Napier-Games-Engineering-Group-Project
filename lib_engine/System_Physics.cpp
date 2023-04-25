@@ -7,8 +7,8 @@ using namespace sf;
 namespace Physics 
 {
     static shared_ptr<b2World> world;
-    const int32 velocityIterations = 6;
-    const int32 positionIterations = 2;
+    const int32 velocityIterations = 8;
+    const int32 positionIterations = 3;
 
     void Initialise() 
     {

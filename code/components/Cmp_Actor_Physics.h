@@ -10,6 +10,7 @@ protected:
 
 public:
 	explicit ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vector2f& size);
+	explicit ActorPhysicsComponent(Entity* p, bool dyn, const float& radius);
 	ActorPhysicsComponent() = delete;
 
 	// Getters
