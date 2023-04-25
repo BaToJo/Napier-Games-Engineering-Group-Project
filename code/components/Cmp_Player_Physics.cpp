@@ -51,9 +51,9 @@ void PlayerPhysicsComponent::HandleSteering()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
 		desiredTorque = _maxTorque;
-		
+
 	}
-	
+
 	_body->ApplyTorque(desiredTorque, true);
 }
 
@@ -62,7 +62,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 	_size = Sv2_to_bv2(size, true);
 	_body->SetSleepingAllowed(false);
 	//_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
-	
+
 
 	// Setting the first two dampings for the first two bodies.
 	_body->SetAngularDamping(800.f);
@@ -73,7 +73,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 	chainRevoluteJointDef.localAnchorA.Set(0, -0.40);
 	chainRevoluteJointDef.localAnchorB.Set(0, 0.40);
 	chainRevoluteJointDef.collideConnected = false;
-	
+
 	// Defining the first Joint that will anchor the chain to the car
 	chainRevoluteJointDef.bodyA = _body;
 	chainRevoluteJointDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
@@ -83,7 +83,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 	for (int i = 1; i < 3; i++)
 	{
 		// Setting the up the chain bodies
-		chainRevoluteJointDef.bodyA = chain[i-1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		chainRevoluteJointDef.bodyA = chain[i - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 		chainRevoluteJointDef.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
 		// Setting the chain damping
@@ -146,14 +146,14 @@ void PlayerPhysicsComponent::Update(double dt)
 		//_body->SetAngularVelocity(0.f);
 	}
 
-	std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
-	std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
-	std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
+	// std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
+	// std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
+	/*std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
 
 	std::cout << "Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
 	std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
 
-	std::cout << std::endl;
+	std::cout << std::endl;*/
 	ActorPhysicsComponent::Update(dt);
 }
 
@@ -188,7 +188,7 @@ void PlayerPhysicsComponent::UpdateFriction()
 	{
 		impulse *= maxLateralImpulse / impulse.Length();
 	}
-	
+
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 
 	// Angular Impulse

@@ -10,6 +10,7 @@
 using namespace std;
 using namespace sf;
 
+static std::vector<shared_ptr<Entity>> actors;
 static shared_ptr<Entity> player;
 static shared_ptr<Entity> test_NPC;
 static std::vector<shared_ptr<Entity>> traffic_NPCs;
@@ -161,6 +162,7 @@ void GameScene::Load()
 
 	// Player Setup
 	player = MakeEntity();
+	actors.push_back(player);
 	player->setPosition(sf::Vector2f(2.f * tileSize, -5.0f * tileSize));
 
 	// Player Shape Component
@@ -191,6 +193,7 @@ void GameScene::Load()
 
 	// Ball Setup
 	wreckingBall = MakeEntity();
+	actors.push_back(wreckingBall);
 	wreckingBall->setPosition(Vector2f(player->getPosition().x, chains[chains.size() - 1]->getPosition().y + 25.f));
 
 	// Ball Shape Component
@@ -217,15 +220,16 @@ void GameScene::Load()
 
 	// Make a test NPC
 	test_NPC = MakeEntity();
+	actors.push_back(test_NPC);
 	test_NPC->setPosition(sf::Vector2f(10.f * tileSize, -3.5f * tileSize));
 	test_NPC->setRotation(sf::degrees(180));
 
 	// Test NPC Shape Component
 	auto shapeCompNPC = test_NPC->addComponent<ShapeComponent>();
-	sf::Vector2f sizeNPC = Vector2f(30.f, 10.f);
+	sf::Vector2f sizeNPC = Vector2f(100.f, 45.f);
 	shapeCompNPC->setShape<sf::RectangleShape>(sizeNPC);
 	shapeCompNPC->getShape().setFillColor(Color::Red);
-	shapeCompNPC->getShape().setOrigin(Vector2f(15.f, 5.f));
+	shapeCompNPC->getShape().setOrigin(Vector2f(sizeNPC.x / 2, sizeNPC.y / 2));
 
 	// Test NPC AI component
 	auto AIcompNPC = test_NPC->addComponent<AIBehaviourComponent>();
@@ -234,9 +238,10 @@ void GameScene::Load()
 	AIcompNPC->waypoint_destination = ls::GetWaypoints().at(3);
 	AIcompNPC->waypoint_most_recently_touched = ls::GetWaypoints().at(4);
 
+	/*
 	// Make extra traffic NPCs
 	shared_ptr<ShapeComponent> shapeCompTrafficNPC;
-	sf::Vector2f sizeTrafficNPC = Vector2f(30.f, 10.f);
+	sf::Vector2f sizeTrafficNPC = Vector2f(100.f, 45.f);
 	shared_ptr<AIBehaviourComponent> aiCompTrafficNPC;
 	for (auto& waypoint_pair : ls::GetWaypoints())
 	{
@@ -247,6 +252,7 @@ void GameScene::Load()
 
 		// Make a traffic NPC
 		shared_ptr<Entity> npc = MakeEntity();
+		actors.push_back(npc);
 		npc->setPosition(waypoint->getPosition());
 		npc->setRotation(sf::degrees((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 360));
 
@@ -259,7 +265,7 @@ void GameScene::Load()
 		lightness = 0.7;
 		HSPtoRGB(hue, saturation, lightness, &red, &green, &blue);
 		shapeCompTrafficNPC->getShape().setFillColor(Color(red * 255, green * 255, blue * 255));
-		shapeCompTrafficNPC->getShape().setOrigin(Vector2f(15.f, 5.f));
+		shapeCompTrafficNPC->getShape().setOrigin(Vector2f(sizeTrafficNPC.x / 2, sizeTrafficNPC.y / 2));
 
 		// Test NPC AI component
 		aiCompTrafficNPC = npc->addComponent<AIBehaviourComponent>();
@@ -270,7 +276,7 @@ void GameScene::Load()
 
 		traffic_NPCs.push_back(npc);
 	}
-
+	*/
 }
 
 void GameScene::Unload()
@@ -288,6 +294,11 @@ void GameScene::Render()
 	ls::Render(Engine::getWindow());
 	Engine::getWindow().draw(line);
 	Scene::Render();
+}
+
+std::vector<std::shared_ptr<Entity>> GameScene::GetAllActors()
+{
+	return actors;
 }
 
 void GameScene::Update(const double& dt)

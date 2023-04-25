@@ -1,11 +1,18 @@
 #include "Cmp_Actor_Behaviour.h"
 
+#include "Cmp_Actor_Physics.h"
 #include "Cmp_Waypoint.h"
+#include "Box2D/Collision/b2Collision.h"
+#include "Box2D/Dynamics/b2Fixture.h"
+#include "../lib_engine/System_Physics.h"
+#include "SFML/Graphics/Vertex.hpp"
+#include "../scenes/GameScene.h"
+#include "../../lib_engine/System_Renderer.h"
 
 
 //Entity* parent;
 sf::Angle angle_to_waypoint_absolute;
-
+sf::RectangleShape debug_line;
 
 AIBehaviourComponent::AIBehaviourComponent(Entity* p) : Component(p)
 {
@@ -19,6 +26,21 @@ AIBehaviourComponent::~AIBehaviourComponent()
 void AIBehaviourComponent::Update(double dt)
 {
 	float NPC_move_speed = 230;
+
+	// Raycast in front of the vehicle's direction it wants to travel in.
+	RayCast_hit rayCast_hit = RaycastTo(waypoint_destination->getPosition(), 200);
+	// RayCast_hit rayCast_hit = RaycastTo(_parent->getRotation(), 1000);
+	// RayCast_hit rayCast_hit = RaycastTo(sf::Vector2f(0, 0), 1000);
+	std::shared_ptr<Entity> actor_hit = rayCast_hit.actor_hit;
+	double rayCast_hit_distance = rayCast_hit.distance_to_hit;
+
+
+	if (rayCast_hit_distance < (100 * 0.9))
+	{
+		std::cout << actor_hit->getPosition();
+		NPC_move_speed = std::min(NPC_move_speed, (float)rayCast_hit_distance);
+	}
+
 
 	// The NPC attempts to drive directly towards its target waypoint.
 	MoveToTargetOneTick(waypoint_destination->getPosition(), NPC_move_speed, dt);
@@ -92,6 +114,66 @@ void AIBehaviourComponent::AimTowardsTargetOneTick(sf::Angle azimuth, double dt)
 		_parent->setRotation(newOrientation);
 	}
 }
+AIBehaviourComponent::RayCast_hit AIBehaviourComponent::RaycastTo(sf::Angle angle, float range)
+{
+	sf::Vector2f vector = sf::Vector2f(cos(angle.asRadians()), sin(angle.asRadians())) + _parent->getPosition();
+	return RaycastTo(vector, range);
+}
+AIBehaviourComponent::RayCast_hit AIBehaviourComponent::RaycastTo(sf::Vector2f target, float range)
+{
+	// This method was written with reference to the online tutorial https://www.iforce2d.net/b2dtut/raycasting (iforce2d, 2013)
+
+	b2RayCastInput rayCast_input;
+
+	// The position from which we cast the ray.
+	rayCast_input.p1 = Physics::Sv2_to_bv2(_parent->getPosition());
+
+	// The target we cast the ray at.
+	rayCast_input.p2 = Physics::Sv2_to_bv2(target);
+
+	// We need to take the absolute distance we want to cast out to and translate it into a percentage of the distance between the emitter and target, to give it to Box2D.
+	rayCast_input.maxFraction = range / sf::length(target - _parent->getPosition());
+
+	// For each car in the world, cast a ray against it, and remember the closest intersection we've seen from them all.
+	float closestIntersection = rayCast_input.maxFraction;
+	std::shared_ptr<Entity> actor_hit = nullptr;
+	b2Vec2 intersectionNormal(0, 0);
+	for (std::shared_ptr<Entity> actor : GameScene::GetAllActors())
+	{
+		// We don't want to check against ourselves.
+		if (actor.get() == _parent) continue;
+		auto components = actor->getComponents<ActorPhysicsComponent>();
+		// If the entity doesn't have a physics component, ignore it.
+		if (components.size() < 1) continue;
+		b2Body* body = components[0]->getBody();
+		// for (b2Body* body = Physics::GetWorld()->GetBodyList(); body; body = body->GetNext()) {
+		for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext()) {
+
+			b2RayCastOutput rayCast_output;
+			if (!f->RayCast(&rayCast_output, rayCast_input, 0 /*This parameter is only used for Box2D chain shapes, which we don't use.*/))
+				continue;
+			if (rayCast_output.fraction < closestIntersection) {
+				closestIntersection = rayCast_output.fraction;
+				actor_hit = actor;
+				intersectionNormal = rayCast_output.normal;
+			}
+		}
+	}
+
+	double intersection_length = sf::length(Physics::Bv2_to_sv2(closestIntersection * (rayCast_input.p2 - rayCast_input.p1)));
+
+	// TODO: This is for debugging. Disable or remove it before release.
+	debug_line = sf::RectangleShape(sf::Vector2f(intersection_length, 4));
+	debug_line.setFillColor(sf::Color::White);
+	debug_line.setOrigin(sf::Vector2f(0, debug_line.getSize().y / 2));
+	debug_line.setPosition(_parent->getPosition());
+	debug_line.setRotation((target - _parent->getPosition()).angle());
+	// debug_line.setRotation(_parent->getRotation());
+	// debug_line.setRotation(sf::degrees(90));
+	Renderer::Queue(&debug_line);
+
+	return RayCast_hit{ actor_hit,intersection_length };
+}
 void AIBehaviourComponent::AimTowardsTargetOneTick(sf::Vector2f target, double dt)
 {
 	// This should turn this vehicle towards the target location.
@@ -115,4 +197,3 @@ void AIBehaviourComponent::MoveToTargetOneTick(sf::Vector2f target, float move_s
 	);
 	_parent->setPosition(_parent->getPosition() + newPosition);
 }
-
