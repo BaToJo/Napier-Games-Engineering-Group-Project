@@ -177,7 +177,7 @@ namespace TileMap_Importer
 
 			tileMap->tilesets.push_back(tileset_instance);
 		}
-
+		f.close();
 		return tileMap;
 	}
 

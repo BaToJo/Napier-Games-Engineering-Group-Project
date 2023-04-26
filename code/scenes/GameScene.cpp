@@ -197,6 +197,7 @@ void GameScene::Load()
 	AIcompNPC->waypoint_destination = ls::GetWaypoints().at(3);
 	AIcompNPC->waypoint_most_recently_touched = ls::GetWaypoints().at(4);
 
+	/*
 	// Make extra traffic NPCs
 	shared_ptr<ShapeComponent> shapeCompTrafficNPC;
 	sf::Vector2f sizeTrafficNPC = Vector2f(30.f, 10.f);
@@ -233,7 +234,7 @@ void GameScene::Load()
 
 		traffic_NPCs.push_back(npc);
 	}
-
+	*/
 }
 
 void GameScene::Unload()

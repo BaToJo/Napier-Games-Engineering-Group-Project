@@ -6,6 +6,9 @@
 
 class Scene
 {
+protected:
+	bool F5Pressed = false;
+	bool F9Pressed = false;
 public:
 	Scene() = default;
 	virtual ~Scene();
@@ -14,9 +17,12 @@ public:
 	virtual void Update(const double& dt);
 	virtual void Render();
 
+	void SaveScene();
+	void LoadScene();
+
 	std::shared_ptr<Entity> MakeEntity();
 
-	EntityManager ents;
+	EntityManager ents, savedEnts;
 	sf::View PlayerCamera;
 };
 

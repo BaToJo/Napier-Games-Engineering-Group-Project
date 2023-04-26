@@ -10,4 +10,4 @@ namespace TileMap_Importer
 	TileMap* LoadMap(const std::string fileName);
 	sf::Texture* GetTileTexture(TileMap* tileMap, int id);
 
-} // namespace Physics
+} // namespace TileMap_Importer

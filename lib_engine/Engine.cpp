@@ -103,12 +103,56 @@ void Scene::Unload()
 
 void Scene::Update(const double& dt)
 {
+	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::F5)) && !F5Pressed)
+	{
+		F5Pressed = true;
+		SaveScene();
+	}
+	else if (!(sf::Keyboard::isKeyPressed(sf::Keyboard::F5)) && F5Pressed)
+	{
+		F5Pressed = false;
+	}
+	else if ((sf::Keyboard::isKeyPressed(sf::Keyboard::F9)) && !F9Pressed)
+	{
+		F9Pressed = true;
+		LoadScene();
+	}
+	else if (!(sf::Keyboard::isKeyPressed(sf::Keyboard::F9)) && F9Pressed)
+	{
+		F9Pressed = false;
+	}
 	ents.Update(dt);
 }
 
 void Scene::Render()
 {
 	ents.Render();
+}
+
+void Scene::SaveScene()
+{
+	while (savedEnts.list.size() > 0)
+	{
+		savedEnts.list.at(savedEnts.list.size() - 1)->setForDelete();
+		savedEnts.list.at(savedEnts.list.size() - 1)->setAlive(false);
+		savedEnts.list.pop_back();
+	}
+	savedEnts.list.clear();
+	for (auto& entity : ents.list)
+	{
+		// Make a copy of the object pointed to by the entity, and give it to savedEnts.
+		savedEnts.list.push_back(std::make_shared<Entity>(*entity));
+	}
+}
+
+void Scene::LoadScene()
+{
+	ents.list.clear();
+	for (auto& savedEntity : savedEnts.list)
+	{
+		// Make a copy of the object pointed to by the savedEntity, and give it to ents.
+		ents.list.push_back(std::make_shared<Entity>(*savedEntity));
+	}
 }
 
 std::shared_ptr<Entity> Scene::MakeEntity()
