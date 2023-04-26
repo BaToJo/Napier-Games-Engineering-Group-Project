@@ -237,7 +237,6 @@ void GameScene::Load()
 	// Tiled starts waypoints indexed from 1, not zero.
 	AIcompNPC->waypoint_destination = ls::GetWaypoints().at(3);
 	AIcompNPC->waypoint_most_recently_touched = ls::GetWaypoints().at(4);
-
 	/*
 	// Make extra traffic NPCs
 	shared_ptr<ShapeComponent> shapeCompTrafficNPC;
@@ -281,10 +280,13 @@ void GameScene::Load()
 
 void GameScene::Unload()
 {
+	test_NPC.reset();
 	player.reset();
-	wreckingBall.reset();
+	wreckingBall.reset();	
 	for (auto& e : chains)
 		e.reset();
+	for (auto& a : actors)
+		a.reset();
 	ls::Unload();
 	Scene::Unload();
 }

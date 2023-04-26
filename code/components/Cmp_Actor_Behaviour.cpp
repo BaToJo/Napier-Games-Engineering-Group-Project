@@ -28,8 +28,8 @@ void AIBehaviourComponent::Update(double dt)
 	float NPC_move_speed = 230;
 
 	// Raycast in front of the vehicle's direction it wants to travel in.
-	RayCast_hit rayCast_hit = RaycastTo(waypoint_destination->getPosition(), 200);
-	// RayCast_hit rayCast_hit = RaycastTo(_parent->getRotation(), 1000);
+	//RayCast_hit rayCast_hit = RaycastTo(waypoint_destination->getPosition(), 200);
+	RayCast_hit rayCast_hit = RaycastTo(_parent->getRotation(), 1000);
 	// RayCast_hit rayCast_hit = RaycastTo(sf::Vector2f(0, 0), 1000);
 	std::shared_ptr<Entity> actor_hit = rayCast_hit.actor_hit;
 	double rayCast_hit_distance = rayCast_hit.distance_to_hit;
