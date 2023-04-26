@@ -41,6 +41,7 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const float& r
 	FixtureDef.shape = &CircleShape;
 
 	_fixture = _body->CreateFixture(&FixtureDef);
+
 }
 
 void ActorPhysicsComponent::Update(double dt)

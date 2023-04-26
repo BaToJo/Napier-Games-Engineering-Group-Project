@@ -3,14 +3,14 @@
 #include "..\components\Cmp_Sprite.h"
 #include "..\components\Cmp_Actor_Physics.h"
 #include "..\components\Cmp_Player_Physics.h"
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>	
 using namespace std;
 using namespace sf;
 
 static shared_ptr<Entity> player;
 static shared_ptr<Entity> wreckingBall;
 static vector<shared_ptr<Entity>> chains;
-static shared_ptr<Entity> bastard;
+static shared_ptr<Entity> cube;
 
 VertexArray line;
 
@@ -29,7 +29,7 @@ void GameScene::Load()
 	shapeComp->getShape().setFillColor(Color::Magenta);
 	shapeComp->getShape().setOrigin(Vector2f(5.f, 15.f));
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		// Chain Setup
 		auto chain = MakeEntity();
@@ -67,17 +67,17 @@ void GameScene::Load()
 	wreckingBallPhysics->setMass(5.f);
 	// Player Physics Component
 	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
-	playerPhysics->setMass(200.f);
+	playerPhysics->setMass(20.f);
 
-	bastard = MakeEntity();
-	bastard->setPosition(Vector2f(player->getPosition().x + 200.f, player->getPosition().y - 400.f));
-	auto testShape = bastard->addComponent<ShapeComponent>();
+	cube = MakeEntity();
+	cube->setPosition(Vector2f(player->getPosition().x + 200.f, player->getPosition().y - 400.f));
+	auto testShape = cube->addComponent<ShapeComponent>();
 	Vector2f testSize = Vector2f(50.f, 50.f);
 	testShape->setShape<RectangleShape>(testSize);
 	testShape->getShape().setFillColor(sf::Color::Yellow);
 	testShape->getShape().setOrigin(Vector2f(testSize.x / 2.f, testSize.y / 2.f));
 
-	auto testPhysics = bastard->addComponent<ActorPhysicsComponent>(true, testSize);
+	auto testPhysics = cube->addComponent<ActorPhysicsComponent>(true, testSize);
 	testPhysics->setMass(100.f);
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
@@ -88,7 +88,7 @@ void GameScene::Unload()
 {
 	player.reset();
 	wreckingBall.reset();
-	bastard.reset();
+	cube.reset();
 	for (auto& e : chains)
 		e.reset();
 	ls::Unload();

@@ -6,14 +6,24 @@ class PlayerPhysicsComponent : public ActorPhysicsComponent
 protected:
 	b2Vec2 _size;
 
-	float _maxVelocity = 100.f;
-	float _maxForce = 150.f;
-	float _maxTorque = 10.f;
+	// Max velocity the car will go to
+	float _maxVelocity = 200.f;
 
+	// Maximum amount of force applied to the car
+	float _maxForce = 100.f;
+
+	// Forward velocity damping value
+	float linearDamping = 0.5f;
+	// Maximum amount of torque (how fast the car turns) applied to the car
+	float _maxTorque = 5.f;
+
+	// Damping constants for impulses and drag
 	float _angularImpulseDamp = 0.1f;
+
 	float _dragForceDamp = -2.f;
 
-	float sumOfMasses = 0.f;
+	// Skidding threshold
+	float maxLateralImpulse = 0.1f;
 	// Functions
 	void HandleDriving();
 	void HandleSteering();
