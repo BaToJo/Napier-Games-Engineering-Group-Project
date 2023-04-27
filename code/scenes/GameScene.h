@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "..\lib_engine\Engine.h"
+#include "../InputManager.h"
 
 class GameScene : public Scene
 {

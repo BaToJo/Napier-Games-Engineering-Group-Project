@@ -1,26 +1,18 @@
 #include "Cmp_Player_Physics.h"
 #include "..\lib_engine\System_Physics.h"
-#include <SFML/Window/Keyboard.hpp>
 
 using namespace Physics;
 
-const std::vector<sf::Keyboard::Key> controls
-{
-	sf::Keyboard::Up,
-	sf::Keyboard::Down,
-	sf::Keyboard::Left,
-	sf::Keyboard::Right
-};
 
 void PlayerPhysicsComponent::HandleDriving()
 {
 	float desiredSpeed = 0;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	if (_inputManager->IsMovingForward())
 	{
 		desiredSpeed = _maxVelocity;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	if (_inputManager->IsMovingBack())
 	{
 		desiredSpeed = -_maxVelocity;
 	}
@@ -44,11 +36,11 @@ void PlayerPhysicsComponent::HandleSteering()
 {
 	float desiredTorque = 0;
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	if (_inputManager->IsMovingRight())
 	{
 		desiredTorque = -_maxTorque;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	if (_inputManager->IsMovingLeft())
 	{
 		desiredTorque = _maxTorque;
 
@@ -57,10 +49,10 @@ void PlayerPhysicsComponent::HandleSteering()
 	_body->ApplyTorque(desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size) : ActorPhysicsComponent(p, true, size)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager)
 {
 	_size = Sv2_to_bv2(size, true);
-
+	
 	_body->SetSleepingAllowed(false);
 	_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
 }

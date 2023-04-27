@@ -1,6 +1,6 @@
 #pragma once
 #include "Cmp_Actor_Physics.h"
-
+#include "..\InputManager.h";
 class PlayerPhysicsComponent : public ActorPhysicsComponent
 {
 protected:
@@ -22,9 +22,9 @@ protected:
 	b2Vec2 getLateralVelocity();
 	b2Vec2 getForwardVelocity();
 
-
+	InputManager* _inputManager;
 public:
-	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size);
+	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager);
 	PlayerPhysicsComponent() = delete;
 
 	void Update(double dt) override;
