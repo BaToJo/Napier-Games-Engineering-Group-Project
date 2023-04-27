@@ -1,6 +1,7 @@
 #include "Cmp_Player_Physics.h"
 #include "..\lib_engine\System_Physics.h"
 #include <SFML/Window/Keyboard.hpp>
+#include "../lib_engine/Audio.h"
 
 using namespace Physics;
 
@@ -28,6 +29,14 @@ void PlayerPhysicsComponent::HandleDriving()
 	// Get current speed in fwd dir
 	b2Vec2 currentForwardNormal = _body->GetWorldVector(b2Vec2(0, 1));
 	float currSpeed = b2Dot(getForwardVelocity(), currentForwardNormal);
+
+	// You should specify volume in the range 0 to 1, where 0 is silent and 1 is full volume.
+	// You should specify pitch in the range 0 to 1, where 0.5 is half-pitch (lower/deeper) and 1.0 is normal.
+	Audio::Sound_Set_Volume("engine_rev", (currSpeed / _maxVelocity));
+	Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / _maxVelocity)) * 0.2);
+	Audio::Sound_Set_Pitch("engine_rev", (currSpeed / _maxVelocity) / 2 + 0.5);
+	Audio::Sound_Set_Pitch("engine_idle", (currSpeed / _maxVelocity) / 2 + 0.5);
+
 
 	float force = 0;
 	if (desiredSpeed > currSpeed)
@@ -92,7 +101,7 @@ void PlayerPhysicsComponent::UpdateFriction()
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
 	if (impulse.Length() > maxLateralImpulse)
 		impulse *= maxLateralImpulse / impulse.Length();
-	
+
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 
 	// Angular Impulse

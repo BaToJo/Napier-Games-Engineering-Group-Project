@@ -1,0 +1,36 @@
+#pragma once
+#include <map>
+#include <string>
+#include "SFML/Audio/Sound.hpp"
+#include "SFML/Audio/SoundBuffer.hpp"
+#include "SFML/Audio/Music.hpp"
+
+class Audio
+{
+public:
+
+	// You should specify volume in the range 0 to 1, where 0 is silent and 1 is full volume.
+	// You should specify pitch in the range 0 to 1, where 0.5 is half-pitch (lower/deeper) and 1.0 is normal.
+
+	static void Sound_Load_from_file(const std::string& file_name, const std::string& sound_name);
+	static void Sound_Play(const std::string& sound_name, float volume, float pitch);
+	static void Sound_Play_Looping(const std::string& sound_name, float volume, float pitch);
+	static void Sound_Stop(const std::string& sound_name);
+	static void Sound_Set_Volume(const std::string& sound_name, float volume);
+	static void Sound_Set_Pitch(const std::string& sound_name, float pitch);
+	static void Sound_Stop_all_sounds();
+	static void Sound_Adjust_volume_of_all_sounds(float coefficient);
+	static void Sound_Adjust_pitch_of_all_sounds(float coefficient);
+
+	static void Music_Load_from_file(const std::string& file_name, std::string music_name);
+	static void Music_Play(const std::string& music_name, float volume, float pitch);
+	static void Music_Stop(const std::string& music_name);
+	static void Music_Set_Volume(const std::string& music_name, float coefficient);
+	static void Music_Set_Pitch(const std::string& music_name, float coefficient);
+
+	static std::map<std::string, sf::SoundBuffer> SoundBuffers;
+	static std::map<std::string, sf::Sound> Sounds;
+protected:
+	//static std::map<std::string, sf::Music> Music;
+};
+

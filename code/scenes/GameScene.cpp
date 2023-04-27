@@ -4,6 +4,7 @@
 #include "..\components\Cmp_Actor_Physics.h"
 #include "..\components\Cmp_Player_Physics.h"
 #include <SFML/Graphics.hpp>
+#include "../lib_engine/Audio.h"
 using namespace std;
 using namespace sf;
 
@@ -15,7 +16,7 @@ void GameScene::Load()
 	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
 	// Player Setup
-	player = MakeEntity();	
+	player = MakeEntity();
 	player->setPosition(Vector2f(0.f, 0.f));
 
 	// Player Shape Component
@@ -30,6 +31,12 @@ void GameScene::Load()
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
+
+	Audio::Sound_Load_from_file("res/audio/sound_engine_rev_loop.ogg", "engine_rev");
+	Audio::Sound_Load_from_file("res/audio/sound_engine_idle_fastest_loop.ogg", "engine_idle");
+	Audio::Sound_Play_Looping("engine_rev", 0.0f, 1.0f);
+	Audio::Sound_Play_Looping("engine_idle", 0.0f, 1.0f);
+
 }
 
 void GameScene::Unload()
