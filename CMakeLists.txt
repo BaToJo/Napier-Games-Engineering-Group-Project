@@ -57,6 +57,13 @@ function(copy_sfml_dll MyTarget)
         $<TARGET_FILE_DIR:${MyTarget}>) # <--this is out-file path
 endfunction()
 
+function(copy_sfml_audio_dll MyTarget)
+    add_custom_command(TARGET ${MyTarget} POST_BUILD # Adds a post-build event to MyTest
+        COMMAND ${CMAKE_COMMAND} -E copy_directory # which executes "cmake - E copy_if_different..."
+        "${PROJECT_SOURCE_DIR}/lib/sfml/extlibs/bin/x64" # <--this is in-file
+        $<TARGET_FILE_DIR:${MyTarget}>) # <--this is out-file path
+endfunction()
+
 # ### GAME ####
 file(GLOB_RECURSE SOURCES code/*.cpp code/*.h)
 file(GLOB_RECURSE CMPNTS code/components/*.cpp code/components/*.h)
@@ -69,6 +76,7 @@ target_include_directories(CARTHARSIS PRIVATE ${SFML_INCS} ${B2D_INCS})
 target_link_libraries(CARTHARSIS lib_engine)
 
 copy_sfml_dll(CARTHARSIS)
+copy_sfml_audio_dll(CARTHARSIS)
 add_dependencies(CARTHARSIS copy_resources)
 
 set_target_properties(CARTHARSIS

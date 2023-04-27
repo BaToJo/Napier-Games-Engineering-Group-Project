@@ -8,6 +8,8 @@ using namespace sf;
 
 std::map<std::string, sf::SoundBuffer> Audio::SoundBuffers;
 std::map<std::string, sf::Sound> Audio::Sounds;
+std::map<std::string, std::unique_ptr<sf::Music>> Audio::Musics;
+// std::vector<sf::Music> Audio::Musics;
 
 
 void Audio::Sound_Load_from_file(const std::string& file_name, const std::string& sound_name)
@@ -35,6 +37,11 @@ void Audio::Sound_Load_from_file(const std::string& file_name, const std::string
 
 void Audio::Sound_Play(const std::string& sound_name, float volume, float pitch)
 {
+	if (!Sounds.contains(sound_name))
+	{
+		throw std::invalid_argument("No sound of that name has been loaded. Have you loaded the sound from file in advance properly?");
+		return;
+	}
 	Sounds.find(sound_name)->second.setLoop(false);
 	Sounds.find(sound_name)->second.setVolume(volume * 100.0f);
 	Sounds.find(sound_name)->second.setPitch(pitch);
@@ -43,6 +50,11 @@ void Audio::Sound_Play(const std::string& sound_name, float volume, float pitch)
 }
 void Audio::Sound_Play_Looping(const std::string& sound_name, float volume, float pitch)
 {
+	if (!Sounds.contains(sound_name))
+	{
+		throw std::invalid_argument("No sound of that name has been loaded. Have you loaded the sound from file in advance properly?");
+		return;
+	}
 	Sounds.find(sound_name)->second.setLoop(true);
 	Sounds.find(sound_name)->second.setVolume(volume * 100.0f);
 	Sounds.find(sound_name)->second.setPitch(pitch);
@@ -52,11 +64,21 @@ void Audio::Sound_Play_Looping(const std::string& sound_name, float volume, floa
 
 void Audio::Sound_Stop(const std::string& sound_name)
 {
+	if (!Sounds.contains(sound_name))
+	{
+		throw std::invalid_argument("No sound of that name has been loaded. Have you loaded the sound from file in advance properly?");
+		return;
+	}
 	Sounds.find(sound_name)->second.stop();
 }
 
 void Audio::Sound_Set_Volume(const std::string& sound_name, float volume)
 {
+	if (!Sounds.contains(sound_name))
+	{
+		throw std::invalid_argument("No sound of that name has been loaded. Have you loaded the sound from file in advance properly?");
+		return;
+	}
 	if (volume < 0)
 	{
 		volume = 0;
@@ -70,6 +92,11 @@ void Audio::Sound_Set_Volume(const std::string& sound_name, float volume)
 
 void Audio::Sound_Set_Pitch(const std::string& sound_name, float pitch)
 {
+	if (!Sounds.contains(sound_name))
+	{
+		throw std::invalid_argument("No sound of that name has been loaded. Have you loaded the sound from file in advance properly?");
+		return;
+	}
 	if (pitch < 0)
 	{
 		pitch = 0;
@@ -104,48 +131,121 @@ void Audio::Sound_Adjust_pitch_of_all_sounds(float coefficient)
 		sound.second.setPitch(sound.second.getPitch() * coefficient);
 	}
 }
-/*
-void Audio::Music_Load_from_file(const std::string& file_name, std::string music_name)
+
+
+void Audio::Music_Load_from_file(const std::string file_name, const std::string music_name)
 {
 	// If we have already loaded this music, exit immediately so we don't load a duplicate.
-	if (Music.find(music_name) != Music.end())
+	if (Musics.contains(music_name))
 	{
 		throw std::invalid_argument("Tried to overwrite an existing music of the same name!");
 		return;
 	}
-
-	sf::Music music;
-	if (!music.openFromFile(file_name))
+	std::unique_ptr<sf::Music> music = make_unique<sf::Music>();
+	if (!music->openFromFile(file_name))
 	{
 		throw std::invalid_argument("Tried to load a music file that wasn't valid!");
 		return;
 	}
-
-	Music.emplace(music_name,music);
+	Musics.emplace(music_name, std::move(music));
 }
 
-void Audio::Music_Play(const std::string& music_name, float volume, float pitch)
+void Audio::Music_Play(const std::string music_name, float volume, float pitch)
 {
-	Music.find(music_name)->second.setLoop(true);
-	Music.find(music_name)->second.setVolume(volume);
-	Music.find(music_name)->second.setPitch(pitch);
-	Music.find(music_name)->second.play();
+	if (!Musics.contains(music_name))
+	{
+		throw std::invalid_argument("No music of that name has been loaded. Have you loaded the music from file in advance properly?");
+		return;
+	}
+	Musics.find(music_name)->second->setLoop(true);
+	Musics.find(music_name)->second->setVolume(volume * 100);
+	Musics.find(music_name)->second->setPitch(pitch);
+	Musics.find(music_name)->second->play();
 }
 
-void Audio::Music_Stop(const std::string& music_name)
+void Audio::Music_Stop(const std::string music_name)
 {
-	Music.find(music_name)->second.stop();
+	if (!Musics.contains(music_name))
+	{
+		throw std::invalid_argument("No music of that name has been loaded. Have you loaded the music from file in advance properly?");
+		return;
+	}
+	Musics.find(music_name)->second->stop();
 }
 
-void Audio::Music_Set_Volume(const std::string& music_name, float coefficient)
+void Audio::Music_Set_Volume(const std::string music_name, float coefficient)
 {
-	Music.find(music_name)->second.setVolume(coefficient);
+	if (!Musics.contains(music_name))
+	{
+		throw std::invalid_argument("No music of that name has been loaded. Have you loaded the music from file in advance properly?");
+		return;
+	}
+	Musics.find(music_name)->second->setVolume(coefficient);
 }
 
-void Audio::Music_Set_Pitch(const std::string& music_name, float coefficient)
+void Audio::Music_Set_Pitch(const std::string music_name, float coefficient)
 {
-	Music.find(music_name)->second.setPitch(coefficient);
+	if (!Musics.contains(music_name))
+	{
+		throw std::invalid_argument("No music of that name has been loaded. Have you loaded the music from file in advance properly?");
+		return;
+	}
+	Musics.find(music_name)->second->setPitch(coefficient);
+}
+
+void Audio::Music_Stop_all_music()
+{
+	for (auto& music : Musics)
+	{
+		music.second->stop();
+	}
+}
+
+void Audio::Music_Adjust_volume_of_all_musics(float coefficient)
+{
+	for (auto& music : Musics)
+	{
+		music.second->setVolume(music.second->getVolume() * coefficient);
+	}
+}
+
+
+
+/*
+unsigned long long Audio::Music_Load_from_file(const std::string file_name)
+{
+	// If we have already loaded this music, exit immediately so we don't load a duplicate.
+	sf::Music music;
+	if (!music.openFromFile(file_name))
+	{
+		throw std::invalid_argument("Tried to load a music file that wasn't valid!");
+		return -1;
+	}
+	Musics.push_back(music);
+	return Musics.size() - 1;
+}
+
+void Audio::Music_Play(const int track_index, float volume, float pitch)
+{
+	Musics[track_index].setLoop(true);
+	Musics[track_index].setVolume(volume);
+	Musics[track_index].setPitch(pitch);
+	Musics[track_index].play();
+}
+
+void Audio::Music_Stop(const int track_index)
+{
+	Musics[track_index].stop();
+}
+
+void Audio::Music_Set_Volume(const int track_index, float coefficient)
+{
+	Musics[track_index].setVolume(coefficient);
+}
+
+void Audio::Music_Set_Pitch(const int track_index, float coefficient)
+{
+	Musics[track_index].setPitch(coefficient);
 }
 */
-
 

@@ -32,6 +32,9 @@ void GameScene::Load()
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
 
+	Audio::Music_Load_from_file("res/audio/music_ambience_city_2.ogg", "ambience_city_2");
+	Audio::Music_Play("ambience_city_2", 0.4, 1.0);
+
 	Audio::Sound_Load_from_file("res/audio/sound_engine_rev_loop.ogg", "engine_rev");
 	Audio::Sound_Load_from_file("res/audio/sound_engine_idle_fastest_loop.ogg", "engine_idle");
 	Audio::Sound_Play_Looping("engine_rev", 0.0f, 1.0f);
