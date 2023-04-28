@@ -12,8 +12,8 @@ class InputManager
 {
 private:
 	XINPUT_STATE state;
-	float deadzoneX;
-	float deadzoneY;
+	float deadzoneX = 0.2f;
+	float deadzoneY = 0.2f;
 
 	bool isControllerConnected = false;
 	
@@ -24,11 +24,13 @@ public:
 
 	void RebindKeyboard(const int index, const sf::Keyboard::Key key);
 
-	bool IsMovingForward();
-	bool IsMovingBack();
-	bool IsMovingLeft();
-	bool IsMovingRight();
+	float IsMovingForward();
+	float IsMovingBack();
+	float IsMovingLeft();
+	float IsMovingRight();
 
+	float CalculateYAxisValueWithDeadZone();
+	float CalculateXAxisValueWithDeadZone();
 
 	void IsControllerConnected();
 };

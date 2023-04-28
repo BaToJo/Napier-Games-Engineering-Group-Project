@@ -8,13 +8,17 @@ void PlayerPhysicsComponent::HandleDriving()
 {
 	float desiredSpeed = 0;
 
-	if (_inputManager->IsMovingForward())
+	float multiplierForward = _inputManager->IsMovingForward();
+	float multiplierBack = _inputManager->IsMovingBack();
+
+	if (multiplierForward)
 	{
-		desiredSpeed = _maxVelocity;
+		desiredSpeed = _maxVelocity * multiplierForward;
 	}
-	if (_inputManager->IsMovingBack())
+	if (multiplierBack)
 	{
-		desiredSpeed = -_maxVelocity;
+		multiplierBack = multiplierBack == 1 ? -1 : multiplierBack;
+		desiredSpeed = _maxVelocity * multiplierBack;
 	}
 
 	// Get current speed in fwd dir
@@ -36,17 +40,22 @@ void PlayerPhysicsComponent::HandleSteering()
 {
 	float desiredTorque = 0;
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
-	if (_inputManager->IsMovingRight())
-	{
-		desiredTorque = -_maxTorque;
-	}
-	if (_inputManager->IsMovingLeft())
-	{
-		desiredTorque = _maxTorque;
+	float multiplierRight = _inputManager->IsMovingRight();
+	float multiplierLeft = _inputManager->IsMovingLeft();
 
+	if (multiplierRight)
+	{
+		desiredTorque = _maxTorque * multiplierRight;
+	}
+	if (multiplierLeft)
+	{
+		multiplierLeft = multiplierLeft == 1 ? -1 : multiplierLeft;
+
+		desiredTorque = _maxTorque * multiplierLeft;
 	}
 
-	_body->ApplyTorque(desiredTorque, true);
+	
+	_body->ApplyTorque(-desiredTorque, true);
 }
 
 PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager)
@@ -80,7 +89,7 @@ b2Vec2 PlayerPhysicsComponent::getForwardVelocity()
 void PlayerPhysicsComponent::UpdateFriction()
 {
 	// Lateral Velocity
-	float maxLateralImpulse = 0.04f;
+	float maxLateralImpulse = 2.5f;
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
 	if (impulse.Length() > maxLateralImpulse)
 		impulse *= maxLateralImpulse / impulse.Length();
