@@ -16,7 +16,7 @@ private:
 	float deadzoneY = 0.2f;
 
 	bool isControllerConnected = false;
-	
+	bool isDPadEnabled = true;
 	int gamepadMovement;
 public:
 	InputManager();

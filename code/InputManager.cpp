@@ -32,7 +32,7 @@ float InputManager::IsMovingForward()
 		else
 			return 0;
 	}
-	else
+	else if(isControllerConnected && !isDPadEnabled)
 	{
 		float leftStickY = CalculateYAxisValueWithDeadZone();
 
@@ -45,7 +45,17 @@ float InputManager::IsMovingForward()
 			return 0;
 		}
 	}
-
+	else if (isControllerConnected && isDPadEnabled)
+	{
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 	return 0;
 }
 
@@ -58,13 +68,24 @@ float InputManager::IsMovingBack()
 		else
 			return 0;
 	}
-	else
+	else if (isControllerConnected && !isDPadEnabled)
 	{
 		float leftStickY = CalculateYAxisValueWithDeadZone();
 
 		if (leftStickY < 0)
 		{
 			return leftStickY;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (isControllerConnected && isDPadEnabled)
+	{
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0)
+		{
+			return 1;
 		}
 		else
 		{
@@ -84,13 +105,24 @@ float InputManager::IsMovingLeft()
 		else
 			return 0;
 	}
-	else
+	else if (isControllerConnected && !isDPadEnabled)
 	{
 		float leftStickX = CalculateXAxisValueWithDeadZone();
 
 		if (leftStickX < 0)
 		{
 			return leftStickX;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (isControllerConnected && isDPadEnabled)
+	{
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0)
+		{
+			return 1;
 		}
 		else
 		{
@@ -110,13 +142,24 @@ float InputManager::IsMovingRight()
 		else
 			return 0;
 	}
-	else
+	else if (isControllerConnected && !isDPadEnabled)
 	{
 		float leftStickX = CalculateXAxisValueWithDeadZone();
 
 		if (leftStickX > 0)
 		{
 			return leftStickX;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (isControllerConnected && isDPadEnabled)
+	{
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0)
+		{
+			return 1;
 		}
 		else
 		{
