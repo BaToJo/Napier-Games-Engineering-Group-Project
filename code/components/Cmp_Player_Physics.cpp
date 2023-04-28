@@ -86,56 +86,43 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 	_body->SetLinearDamping(5.f);
 
 	// Defining a generic definition of a chain
-	b2RevoluteJointDef chainJoinDef;
+	b2RevoluteJointDef chainJointDef;
 
 	// FIRST JOINT - Joint between car and the first piece of the chain.
-	chainJoinDef.bodyA = _body;
-	chainJoinDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJointDef.bodyA = _body;
+	chainJointDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
 	// Setting up the anchor points
-	chainJoinDef.localAnchorA.Set(0, -0.4);
-	chainJoinDef.localAnchorB.Set(0, 0.4);
+	chainJointDef.localAnchorA.Set(0, -0.4);
+	chainJointDef.localAnchorB.Set(0, 0.4);
 	// Setting up the limit to true so that the angle between the two bodies will stay 0
-	chainJoinDef.enableLimit = true;
+	chainJointDef.enableLimit = true;
 	// Pushing back the created joint so that we can edit the joint properties later.
-	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJoinDef)));
+	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJointDef)));
 
 	// SECOND JOINT - Joint between the first chain and the second chain
-	chainJoinDef.bodyA = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	chainJoinDef.bodyB = chain[1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJointDef.bodyA = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJointDef.bodyB = chain[1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
 	// Here I don't reset anchorA and B and the enableLimit property because they are already being set from the previous declaration.
-	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJoinDef)));
+	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJointDef)));
 
 
 	// THIRD JOINT - Joint between second chain and the wrecking ball
-	chainJoinDef.bodyA = chain[1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	chainJoinDef.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJointDef.bodyA = chain[1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJointDef.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
 	// Resetting the anchor points to suit the wrecking ball best
-	chainJoinDef.localAnchorA.Set(0, -0.5);
-	chainJoinDef.localAnchorB.Set(0, 0.5);
+	chainJointDef.localAnchorA.Set(0, -0.5);
+	chainJointDef.localAnchorB.Set(0, 0.5);
 
-	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJoinDef)));
+	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJointDef)));
 }
 
 void PlayerPhysicsComponent::Update(double dt)
 {
 	// Checking if any key is being pressed
-	bool isAnyPressed = true;
-	for (auto& c : controls)
-	{
-		if (sf::Keyboard::isKeyPressed(c))
-		{
-			isAnyPressed = true;
-			break;
-		}
-		else
-		{
-			isAnyPressed = false;
-		}
-
-	}
+	bool isAnyPressed = _inputManager->IsMoving();
 
 	// If no keys are being pressed
 	if (!isAnyPressed)
@@ -152,7 +139,9 @@ void PlayerPhysicsComponent::Update(double dt)
 	}
 
 	// If we're not pressing A and D
-	if (!sf::Keyboard::isKeyPressed(controls[2]) && !sf::Keyboard::isKeyPressed(controls[3]))
+	float movingLeft = _inputManager->IsMovingLeft();
+	float movingRight = _inputManager->IsMovingRight();
+	if (!movingLeft && !movingRight)
 	{
 		// Get every chain
 		for (auto& c : _chain)
@@ -240,7 +229,7 @@ void PlayerPhysicsComponent::UpdateFriction()
 {
 	// Lateral Velocity
 	float maxLateralImpulse = 2.5f;
-	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
+	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity(_body);
 	if (impulse.Length() > maxLateralImpulse)
 		impulse *= maxLateralImpulse / impulse.Length();
 
