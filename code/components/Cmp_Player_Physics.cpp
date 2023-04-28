@@ -78,7 +78,7 @@ void PlayerPhysicsComponent::HandleSteering()
 	_body->ApplyTorque(-desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager), _wreckingBall(wreckingBall), _chain(chain)
 {
 	// Setting up Car's Body
 	_size = Sv2_to_bv2(size, true);

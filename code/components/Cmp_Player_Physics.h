@@ -1,6 +1,8 @@
 #pragma once
 #include "Cmp_Actor_Physics.h"
-#include "..\InputManager.h";
+
+#include "../InputManager.h"
+
 class PlayerPhysicsComponent : public ActorPhysicsComponent
 {
 protected:
@@ -35,6 +37,8 @@ protected:
 
 	std::shared_ptr<Entity> _wreckingBall;
 	std::vector<std::shared_ptr<Entity>> _chain;
+
+
 
 	InputManager* _inputManager;	std::vector<b2RevoluteJoint*> _chainJoints;
 	b2RevoluteJoint* _ballJoint;
