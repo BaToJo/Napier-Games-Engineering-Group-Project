@@ -4,9 +4,9 @@
 using namespace std;
 
 GameScene gameScene;
-
+MenuScene menuScene;
 int main()
 {
-    Engine::Start(1280, 720, "Cartharsis", &gameScene);
+    Engine::Start(1280, 720, "Cartharsis", &menuScene);
     return 0;
 }

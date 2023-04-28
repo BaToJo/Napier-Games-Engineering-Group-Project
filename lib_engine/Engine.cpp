@@ -3,6 +3,7 @@
 #include "System_Physics.h"
 #include "System_Renderer.h"
 #include <SFML/Graphics.hpp>
+#include "../code/scenes/GameScene.h"
 
 using namespace sf;
 using namespace std;
@@ -78,7 +79,6 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 			accumulator -= dt;
 		}
 		const double alpha = accumulator / dt;
-		window.setView(scn->PlayerCamera);
 		Render(window);
 		window.display();
 
