@@ -79,7 +79,7 @@ void GameScene::Load()
 
 	wreckingBallPhysics->setMass(5.f);
 	// Player Physics Component
-	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
+	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, manager, wreckingBall, chains);
 	playerPhysics->setMass(20.f);
 
 	cube = MakeEntity();

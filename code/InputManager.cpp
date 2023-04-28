@@ -169,6 +169,66 @@ float InputManager::IsMovingRight()
 	return 0;
 }
 
+bool InputManager::IsMoving()
+{
+	if (!isControllerConnected)
+	{
+		for (int i = 0; i < keyboardControls[i]; i++)
+		{
+			if (sf::Keyboard::isKeyPressed(keyboardControls[i]))
+			{
+				return true;
+			}
+			
+		}
+
+		return false;
+	}
+	else if (isControllerConnected && !isDPadEnabled)
+	{
+		float leftStickX = CalculateXAxisValueWithDeadZone();
+		float leftstickY = CalculateYAxisValueWithDeadZone();
+
+		if (leftStickX == 0 && leftstickY == 0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+//bool InputManager::isDrifting()
+//{
+//	if (!isControllerConnected)
+//	{
+//		if (sf::Keyboard::isKeyPressed(keyboardControls[1]) || sf::Keyboard::isKeyPressed(keyboardControls[3]))
+//		{
+//			return true;
+//		}
+//		else 
+//		{
+//			return false;
+//		}
+//	}
+//	else if (isControllerConnected && !isDPadEnabled)
+//	{
+//		float leftStickX = CalculateXAxisValueWithDeadZone();
+//		if (leftStickX == 0)
+//		{
+//			return false;
+//		}
+//		else
+//		{
+//			return true;
+//		}
+//	}
+//	return false;
+//}
+
 void InputManager::IsControllerConnected()
 {
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
