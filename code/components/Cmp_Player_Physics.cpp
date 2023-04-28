@@ -1,31 +1,27 @@
 #include "Cmp_Player_Physics.h"
 #include "..\lib_engine\System_Physics.h"
-#include <SFML/Window/Keyboard.hpp>
 #include "../lib_engine/Audio.h"
+#include <SFML/Window/Keyboard.hpp>
 
 using namespace Physics;
-b2RevoluteJoint* ballJoint;
-const std::vector<sf::Keyboard::Key> controls
-{
-	sf::Keyboard::W,
-	sf::Keyboard::S,
-	sf::Keyboard::A,
-	sf::Keyboard::D
-};
+
 bool isPressed = false;
 
 void PlayerPhysicsComponent::HandleDriving()
 {
 	float desiredSpeed = 0;
 
-	// If any of the buttons are pressed, we set the desired speed to the max vel
-	if (sf::Keyboard::isKeyPressed(controls[0]))
+	float multiplierForward = _inputManager->IsMovingForward();
+	float multiplierBack = _inputManager->IsMovingBack();
+
+	if (multiplierForward)
 	{
-		desiredSpeed = _maxVelocity;
+		desiredSpeed = _maxVelocity * multiplierForward;
 	}
-	if (sf::Keyboard::isKeyPressed(controls[1]))
+	if (multiplierBack)
 	{
-		desiredSpeed = -_maxVelocity;
+		multiplierBack = multiplierBack == 1 ? -1 : multiplierBack;
+		desiredSpeed = _maxVelocity * multiplierBack;
 	}
 
 	// Get current speed in fwd dir
@@ -63,25 +59,26 @@ void PlayerPhysicsComponent::HandleDriving()
 void PlayerPhysicsComponent::HandleSteering()
 {
 	float desiredTorque = 0;
+	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
+	float multiplierRight = _inputManager->IsMovingRight();
+	float multiplierLeft = _inputManager->IsMovingLeft();
 
-	if (sf::Keyboard::isKeyPressed(controls[3]))
+	if (multiplierRight)
 	{
-		desiredTorque = -_maxTorque;
-		isPressed = true;
+		desiredTorque = _maxTorque * multiplierRight;
 	}
-	if (sf::Keyboard::isKeyPressed(controls[2]))
+	if (multiplierLeft)
 	{
-		desiredTorque = _maxTorque;
-		isPressed = true;
+		multiplierLeft = multiplierLeft == 1 ? -1 : multiplierLeft;
+
+		desiredTorque = _maxTorque * multiplierLeft;
 	}
 
-	if (desiredTorque == 0)
-		return;
-	_body->ApplyTorque(desiredTorque, true);
 
+	_body->ApplyTorque(-desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _wreckingBall(wreckingBall), _chain(chain)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager)
 {
 	// Setting up Car's Body
 	_size = Sv2_to_bv2(size, true);
@@ -241,22 +238,13 @@ b2Vec2 PlayerPhysicsComponent::getForwardVelocity(b2Body* body)
 
 void PlayerPhysicsComponent::UpdateFriction()
 {
+	// Lateral Velocity
+	float maxLateralImpulse = 2.5f;
+	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
+	if (impulse.Length() > maxLateralImpulse)
+		impulse *= maxLateralImpulse / impulse.Length();
 
-	// Calculating the impulse to apply (this cancels out the lateral velocity)
-	b2Vec2 impulseCar = _body->GetMass() * -getLateralVelocity(_body);
-
-	// If the impulse we apply is greater than the threshold
-	if (impulseCar.Length() > maxLateralImpulse)
-	{
-		// We modify the impulse of the car so it will start to skid
-		impulseCar *= maxLateralImpulse / impulseCar.Length();
-	}
-
-	// Apply the linear impulse to the center of the car
-	_body->ApplyLinearImpulse(0.1 * impulseCar, _body->GetWorldCenter(), true);
-
-	// Apply angular impulse damp
-	_body->ApplyAngularImpulse(0.1 * _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
+	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 
 
 	// Forward Linear Velocity

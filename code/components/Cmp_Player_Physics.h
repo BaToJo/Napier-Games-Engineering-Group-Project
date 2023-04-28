@@ -1,6 +1,6 @@
 #pragma once
 #include "Cmp_Actor_Physics.h"
-
+#include "..\InputManager.h";
 class PlayerPhysicsComponent : public ActorPhysicsComponent
 {
 protected:
@@ -36,11 +36,11 @@ protected:
 	std::shared_ptr<Entity> _wreckingBall;
 	std::vector<std::shared_ptr<Entity>> _chain;
 
-	std::vector<b2RevoluteJoint*> _chainJoints;
+	InputManager* _inputManager;	std::vector<b2RevoluteJoint*> _chainJoints;
 	b2RevoluteJoint* _ballJoint;
 
 public:
-	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain);
+	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain);
 	PlayerPhysicsComponent() = delete;
 
 	void Update(double dt) override;
