@@ -8,6 +8,9 @@ protected:
 	sf::Angle GetAngularOffset(sf::Vector2f target);
 	sf::Angle GetAngularOffset(sf::Angle azimuth);
 
+	void PhysicsDriveForwards(float desired_velocity, double dt);
+	void PhysicsTurnToAngle(sf::Angle delta_angle, double dt);
+
 public:
 
 	// The most recently touched waypoint

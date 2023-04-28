@@ -88,13 +88,15 @@ void AIBehaviourComponent::AimTowardsTargetOneTick(sf::Angle azimuth, double dt)
 	// This should turn this vehicle towards the specified azimuth.
 	if (nearest_azimuth < currentOrientation)
 	{
-		sf::Angle newOrientation = sf::degrees(currentOrientation - (turning_speed * dt));
-		_parent->setRotation(newOrientation);
+		PhysicsTurnToAngle(sf::degrees(nearest_azimuth - currentOrientation), dt);
+		//sf::Angle newOrientation = sf::degrees(currentOrientation - (turning_speed * dt));
+		//_parent->setRotation(newOrientation);
 	}
 	else if (nearest_azimuth > currentOrientation)
 	{
-		sf::Angle newOrientation = sf::degrees(currentOrientation + (turning_speed * dt));
-		_parent->setRotation(newOrientation);
+		PhysicsTurnToAngle(sf::degrees(nearest_azimuth - currentOrientation), dt);
+		//sf::Angle newOrientation = sf::degrees(currentOrientation + (turning_speed * dt));
+		//_parent->setRotation(newOrientation);
 	}
 }
 float AIBehaviourComponent::HowCloseIsNearestCar()
@@ -121,8 +123,8 @@ float AIBehaviourComponent::HowCloseIsNearestCar()
 		// We don't want to sense ourself.
 		if (vehicle.get() == _parent) continue;
 		// We only want to sense entities with a physics component.
-		// if (vehicle->getComponents<ActorPhysicsComponent>().size() < 1) continue;
-		if (vehicle->getComponents<AIBehaviourComponent>().size() < 1) continue; // DEBUGGING TODO: Remove this.
+		if (vehicle->getComponents<ActorPhysicsComponent>().size() < 1) continue;
+		// if (vehicle->getComponents<AIBehaviourComponent>().size() < 1) continue; // DEBUGGING TODO: Remove this.
 		if (sf::length(vehicle->getPosition() - sensor_position) < vision_radius)
 		{
 			float distance = sf::length(vehicle->getPosition() - sensor_position);
@@ -153,17 +155,64 @@ void AIBehaviourComponent::MoveToTargetOneTick(sf::Vector2f target, float move_s
 
 	// if (HowCloseIsNearestCar() < 50) return;
 	AimTowardsTargetOneTick(target, dt);
-	sf::Angle angularOffset = GetAngularOffset(target);
-	float distance_to_move = (move_speed * dt) / (1 + angle_to_waypoint_absolute.asRadians());
+	// sf::Angle angularOffset = GetAngularOffset(target);
+	float desired_speed = (move_speed * dt) / (1 + angle_to_waypoint_absolute.asRadians());
 	float nearestCarDistance = HowCloseIsNearestCar();
 	if (nearestCarDistance < 100)
 	{
-		distance_to_move = distance_to_move * ((nearestCarDistance - 30) / 70);
+		desired_speed = desired_speed * ((nearestCarDistance - 30) / 70);
 	}
-	sf::Vector2f newPosition = sf::Vector2f(
-		distance_to_move * cos(_parent->getRotation().asRadians()),
-		distance_to_move * sin(_parent->getRotation().asRadians())
-	);
-	_parent->setPosition(_parent->getPosition() + newPosition);
+
+	PhysicsDriveForwards(desired_speed, dt);
+
+	//sf::Vector2f newPosition = sf::Vector2f(
+	//	distance_to_move * cos(_parent->getRotation().asRadians()),
+	//	distance_to_move * sin(_parent->getRotation().asRadians())
+	//);
+	//_parent->setPosition(_parent->getPosition() + newPosition);
 }
 
+
+void AIBehaviourComponent::PhysicsDriveForwards(float desired_velocity, double dt)
+{
+	float movement_power = 1.0f;
+
+	desired_velocity = -desired_velocity * movement_power;
+
+	if (_parent->getComponents<ActorPhysicsComponent>().size() < 1) return;
+	b2Body* body = _parent->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	b2Vec2 current_forward_normal = body->GetWorldVector(b2Vec2(-1, 0));
+
+	/*sf::Angle orientation = _parent->getRotation();
+	b2Vec2 current_forward_normal = b2Vec2(cos(orientation.asRadians()), sin(orientation.asRadians()));*/
+
+	b2Vec2 current_velocity = b2Dot(current_forward_normal, body->GetLinearVelocity()) * current_forward_normal;
+
+	b2Vec2 desired_vector_velocity = desired_velocity * current_forward_normal;
+
+	b2Vec2 velocityDifference = desired_vector_velocity - current_velocity;
+
+	// F = ma
+	// a = st
+
+	b2Vec2 acceleration = b2Vec2(velocityDifference.x / dt, velocityDifference.y / dt);
+
+	b2Vec2 force = body->GetMass() * acceleration;
+
+	body->ApplyForceToCenter(force, true);
+}
+
+void AIBehaviourComponent::PhysicsTurnToAngle(sf::Angle delta_angle, double dt)
+{
+	if (_parent->getComponents<ActorPhysicsComponent>().size() < 1) return;
+	b2Body* body = _parent->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	// torque = r * F * sin(theta)
+
+	float radius = 10;
+	float lever_force = 20;
+	float torque = radius * lever_force * sin(delta_angle.asRadians());
+
+	body->ApplyTorque(-torque, true);
+}

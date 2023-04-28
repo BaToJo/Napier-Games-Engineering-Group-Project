@@ -43,6 +43,7 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const float& r
 	_fixture = _body->CreateFixture(&FixtureDef);
 }
 
+
 void ActorPhysicsComponent::Update(double dt)
 {
 	_parent->setPosition(Physics::Invert_height(Physics::Bv2_to_sv2(_body->GetPosition())));
@@ -59,9 +60,9 @@ ActorPhysicsComponent::~ActorPhysicsComponent()
 }
 
 // Getters
-b2Fixture* const ActorPhysicsComponent::getFixture() const{	return _fixture; }
+b2Fixture* const ActorPhysicsComponent::getFixture() const { return _fixture; }
 
-const sf::Vector2f ActorPhysicsComponent::getVelocity() const{ return Physics::Bv2_to_sv2(_body->GetLinearVelocity(), true);}
+const sf::Vector2f ActorPhysicsComponent::getVelocity() const { return Physics::Bv2_to_sv2(_body->GetLinearVelocity(), true); }
 
 b2Body* const ActorPhysicsComponent::getBody() const
 {

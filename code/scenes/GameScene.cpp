@@ -16,6 +16,10 @@ static std::vector<shared_ptr<Entity>> traffic_NPCs;
 static shared_ptr<Entity> wreckingBall;
 static vector<shared_ptr<Entity>> chains;
 
+float npc_traffic_linear_damping = 8.0f;
+float npc_traffic_angular_damping = 20.0f;
+
+
 VertexArray line;
 
 //  public domain function by Darel Rex Finley, 2006
@@ -195,7 +199,7 @@ void GameScene::Load()
 
 	// Ball Shape Component
 	auto ballShape = wreckingBall->addComponent<ShapeComponent>();
-	float radius = 10.f;
+	float radius = 20.f;
 	ballShape->setShape<sf::CircleShape>(radius);
 	ballShape->getShape().setFillColor(Color::Red);
 	ballShape->getShape().setOrigin(Vector2f(radius, radius));
@@ -228,7 +232,7 @@ void GameScene::Load()
 	shapeCompNPC->getShape().setOrigin(Vector2f(sizeNPC.x / 2, sizeNPC.y / 2));
 
 	// Test NPC Physics Body Component
-	// auto physicsCompNPC = test_NPC->addComponent<ActorPhysicsComponent>(true, sizeNPC);
+	auto physicsCompNPC = test_NPC->addComponent<ActorPhysicsComponent>(true, sizeNPC);
 
 	// Test NPC AI component
 	auto AIcompNPC = test_NPC->addComponent<AIBehaviourComponent>();
@@ -251,7 +255,7 @@ void GameScene::Load()
 		// Make a traffic NPC
 		shared_ptr<Entity> npc = MakeEntity();
 		npc->setPosition(waypoint->getPosition());
-		npc->setRotation(sf::degrees((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 360));
+		// npc->setRotation(sf::degrees((static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 360));
 
 		// Test NPC Shape Component
 		shapeCompTrafficNPC = npc->addComponent<ShapeComponent>();
@@ -264,8 +268,12 @@ void GameScene::Load()
 		shapeCompTrafficNPC->getShape().setFillColor(Color(red * 255, green * 255, blue * 255));
 		shapeCompTrafficNPC->getShape().setOrigin(Vector2f(sizeTrafficNPC.x / 2, sizeTrafficNPC.y / 2));
 
+		npc->setRotation(sf::degrees(90));
+
 		// Test NPC Physics Body Component
-		// auto physicsCompTrafficNPC = npc->addComponent<ActorPhysicsComponent>(true, sizeTrafficNPC);
+		auto physicsCompTrafficNPC = npc->addComponent<ActorPhysicsComponent>(true, sizeTrafficNPC);
+		physicsCompTrafficNPC->getBody()->SetAngularDamping(npc_traffic_angular_damping);
+		physicsCompTrafficNPC->getBody()->SetLinearDamping(npc_traffic_linear_damping);
 
 		// Test NPC AI component
 		aiCompTrafficNPC = npc->addComponent<AIBehaviourComponent>();
