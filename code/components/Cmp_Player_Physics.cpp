@@ -28,20 +28,21 @@ void PlayerPhysicsComponent::HandleDriving()
 		desiredSpeed = -_maxVelocity;
 	}
 
-	// If it's just 0, we return
-	if (desiredSpeed == 0)
-		return;
-
 	// Get current speed in fwd dir
 	b2Vec2 currentForwardNormal = _body->GetWorldVector(b2Vec2(0, 1));
 	float currSpeed = b2Dot(getForwardVelocity(_body), currentForwardNormal);
 
 	// You should specify volume in the range 0 to 1, where 0 is silent and 1 is full volume.
 	// You should specify pitch in the range 0 to 1, where 0.5 is half-pitch (lower/deeper) and 1.0 is normal.
-	Audio::Sound_Set_Volume("engine_rev", (currSpeed / _maxVelocity));
-	Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / _maxVelocity)) * 0.2);
-	Audio::Sound_Set_Pitch("engine_rev", (currSpeed / _maxVelocity) / 2 + 0.5);
-	Audio::Sound_Set_Pitch("engine_idle", (currSpeed / _maxVelocity) / 2 + 0.5);
+	float top_speed = 30;
+	Audio::Sound_Set_Volume("engine_rev", (currSpeed / top_speed));
+	Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / top_speed)) * 0.2);
+	Audio::Sound_Set_Pitch("engine_rev", (currSpeed / top_speed) / 2 + 0.5);
+	Audio::Sound_Set_Pitch("engine_idle", (currSpeed / top_speed) / 2 + 0.5);
+
+	// If it's just 0, we return
+	if (desiredSpeed == 0)
+		return;
 
 
 	// Set the force to 0, depending to the current speed of the car we set the force to the max force or to the negative of that
@@ -173,7 +174,7 @@ void PlayerPhysicsComponent::Update(double dt)
 		wreckingBallBody->ApplyLinearImpulseToCenter(impulseBall, true);
 
 
-		for(auto& j : _chainJoints)
+		for (auto& j : _chainJoints)
 			j->EnableLimit(true);
 
 	}
@@ -194,7 +195,7 @@ void PlayerPhysicsComponent::Update(double dt)
 		float angleDeg = _chainJoints[i]->GetJointAngle() * 180 / b2_pi;
 
 		// If nothing is being pressed AND the angle is above the limits defined
-		if(angleDeg > 25.f || angleDeg < -25.f && !isAnyPressed)
+		if (angleDeg > 25.f || angleDeg < -25.f && !isAnyPressed)
 		{
 			// Enable the motor and remove the limitation on the chain
 			_chainJoints[i]->EnableMotor(true);
@@ -203,10 +204,10 @@ void PlayerPhysicsComponent::Update(double dt)
 			// Decide the direction and set the speed based on the given angle
 			if (angleDeg > 0)
 				_chainJoints[i]->SetMaxMotorTorque(100.f);
-				_chainJoints[i]->SetMotorSpeed(50.f);
-			if(angleDeg < 0)
+			_chainJoints[i]->SetMotorSpeed(50.f);
+			if (angleDeg < 0)
 				_chainJoints[i]->SetMaxMotorTorque(-100.f);
-				_chainJoints[i]->SetMotorSpeed(-50.f);
+			_chainJoints[i]->SetMotorSpeed(-50.f);
 
 		}
 		else
