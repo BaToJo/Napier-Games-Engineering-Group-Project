@@ -8,15 +8,15 @@
 
 #pragma comment(lib, "XInput.lib")
 
-class InputManager 
+class InputManager
 {
 private:
 	XINPUT_STATE state;
 	float deadzoneX = 0.2f;
-	float deadzoneY = 0.2f;
+	float deadzoneY = 0.6f;
 
 	bool isControllerConnected = false;
-	bool isDPadEnabled = true;
+	bool isDPadEnabled = false;
 	int gamepadMovement;
 public:
 	InputManager();

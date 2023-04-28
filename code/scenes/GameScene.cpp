@@ -328,6 +328,11 @@ void GameScene::Unload()
 	cube.reset();
 	for (auto& e : chains)
 		e.reset();
+	test_NPC.reset();
+	for (auto& e : traffic_NPCs)
+	{
+		e.reset();
+	}
 	ls::Unload();
 	Scene::Unload();
 }
