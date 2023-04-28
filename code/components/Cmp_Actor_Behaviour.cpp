@@ -1,10 +1,15 @@
 #include "Cmp_Actor_Behaviour.h"
 
+#include "Cmp_Actor_Physics.h"
+#include "Cmp_Sprite.h"
 #include "Cmp_Waypoint.h"
+#include "SFML/Graphics/CircleShape.hpp"
+#include "../../lib_engine/System_Renderer.h"
 
 
 //Entity* parent;
 sf::Angle angle_to_waypoint_absolute;
+sf::CircleShape debug_sensor;
 
 
 AIBehaviourComponent::AIBehaviourComponent(Entity* p) : Component(p)
@@ -92,6 +97,46 @@ void AIBehaviourComponent::AimTowardsTargetOneTick(sf::Angle azimuth, double dt)
 		_parent->setRotation(newOrientation);
 	}
 }
+float AIBehaviourComponent::HowCloseIsNearestCar()
+{
+	float vision_radius = 50.0f;
+
+
+	float magnitude = vision_radius + 45.0f;
+	sf::Angle angle = _parent->getRotation();
+	sf::Vector2f offset = sf::Vector2f(magnitude * cos(angle.asRadians()), magnitude * sin(angle.asRadians()));
+	sf::Vector2f sensor_position = _parent->getPosition() + offset;
+
+	// TODO: Remove this debugging visualisation before release!
+	debug_sensor = sf::CircleShape(vision_radius);
+	debug_sensor.setFillColor(sf::Color::White);
+	debug_sensor.setOrigin(sf::Vector2f(vision_radius, vision_radius));
+	debug_sensor.setPosition(sensor_position);
+	Renderer::Queue(&debug_sensor);
+
+	float shortest_distance = std::numeric_limits<float>::infinity();
+
+	for (auto& vehicle : Engine::GetActiveScene()->ents.list)
+	{
+		// We don't want to sense ourself.
+		if (vehicle.get() == _parent) continue;
+		// We only want to sense entities with a physics component.
+		// if (vehicle->getComponents<ActorPhysicsComponent>().size() < 1) continue;
+		if (vehicle->getComponents<AIBehaviourComponent>().size() < 1) continue; // DEBUGGING TODO: Remove this.
+		if (sf::length(vehicle->getPosition() - sensor_position) < vision_radius)
+		{
+			float distance = sf::length(vehicle->getPosition() - sensor_position);
+			if (distance < shortest_distance)
+			{
+				shortest_distance = distance;
+			}
+		}
+	}
+
+	// std::cout << sf::length(vehicle->getPosition() - _parent->getPosition()) << std::endl;
+
+	return shortest_distance;
+}
 void AIBehaviourComponent::AimTowardsTargetOneTick(sf::Vector2f target, double dt)
 {
 	// This should turn this vehicle towards the target location.
@@ -106,9 +151,15 @@ void AIBehaviourComponent::MoveToTargetOneTick(sf::Vector2f target, float move_s
 {
 	// TODO: This is a placeholder that just turns towards the target and moves forwards. This should be updated with proper physics based movement.
 
+	// if (HowCloseIsNearestCar() < 50) return;
 	AimTowardsTargetOneTick(target, dt);
 	sf::Angle angularOffset = GetAngularOffset(target);
 	float distance_to_move = (move_speed * dt) / (1 + angle_to_waypoint_absolute.asRadians());
+	float nearestCarDistance = HowCloseIsNearestCar();
+	if (nearestCarDistance < 100)
+	{
+		distance_to_move = distance_to_move * ((nearestCarDistance - 30) / 70);
+	}
 	sf::Vector2f newPosition = sf::Vector2f(
 		distance_to_move * cos(_parent->getRotation().asRadians()),
 		distance_to_move * sin(_parent->getRotation().asRadians())

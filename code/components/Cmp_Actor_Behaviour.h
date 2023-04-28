@@ -1,5 +1,6 @@
 #pragma once
 #include "Ecm.h"
+#include "../scenes/GameScene.h"
 
 class AIBehaviourComponent : public Component
 {
@@ -23,6 +24,7 @@ public:
 	void AimTowardsTargetOneTick(sf::Vector2f target, double dt);
 	void AimTowardsTargetOneTick(sf::Angle azimuth, double dt);
 
+	float HowCloseIsNearestCar();
 
 	void Update(double dt) override;
 	void Render() {};

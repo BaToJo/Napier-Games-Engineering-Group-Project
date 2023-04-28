@@ -222,10 +222,13 @@ void GameScene::Load()
 
 	// Test NPC Shape Component
 	auto shapeCompNPC = test_NPC->addComponent<ShapeComponent>();
-	sf::Vector2f sizeNPC = Vector2f(30.f, 10.f);
+	sf::Vector2f sizeNPC = Vector2f(100.f, 45.f);
 	shapeCompNPC->setShape<sf::RectangleShape>(sizeNPC);
 	shapeCompNPC->getShape().setFillColor(Color::Red);
-	shapeCompNPC->getShape().setOrigin(Vector2f(15.f, 5.f));
+	shapeCompNPC->getShape().setOrigin(Vector2f(sizeNPC.x / 2, sizeNPC.y / 2));
+
+	// Test NPC Physics Body Component
+	// auto physicsCompNPC = test_NPC->addComponent<ActorPhysicsComponent>(true, sizeNPC);
 
 	// Test NPC AI component
 	auto AIcompNPC = test_NPC->addComponent<AIBehaviourComponent>();
@@ -236,7 +239,7 @@ void GameScene::Load()
 
 	// Make extra traffic NPCs
 	shared_ptr<ShapeComponent> shapeCompTrafficNPC;
-	sf::Vector2f sizeTrafficNPC = Vector2f(30.f, 10.f);
+	sf::Vector2f sizeTrafficNPC = Vector2f(100.f, 45.f);
 	shared_ptr<AIBehaviourComponent> aiCompTrafficNPC;
 	for (auto& waypoint_pair : ls::GetWaypoints())
 	{
@@ -259,7 +262,10 @@ void GameScene::Load()
 		lightness = 0.7;
 		HSPtoRGB(hue, saturation, lightness, &red, &green, &blue);
 		shapeCompTrafficNPC->getShape().setFillColor(Color(red * 255, green * 255, blue * 255));
-		shapeCompTrafficNPC->getShape().setOrigin(Vector2f(15.f, 5.f));
+		shapeCompTrafficNPC->getShape().setOrigin(Vector2f(sizeTrafficNPC.x / 2, sizeTrafficNPC.y / 2));
+
+		// Test NPC Physics Body Component
+		// auto physicsCompTrafficNPC = npc->addComponent<ActorPhysicsComponent>(true, sizeTrafficNPC);
 
 		// Test NPC AI component
 		aiCompTrafficNPC = npc->addComponent<AIBehaviourComponent>();

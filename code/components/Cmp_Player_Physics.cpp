@@ -146,14 +146,14 @@ void PlayerPhysicsComponent::Update(double dt)
 		//_body->SetAngularVelocity(0.f);
 	}
 
-	std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
-	std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
-	std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
+	//std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
+	//std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
+	//std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
 
-	std::cout << "Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
-	std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
+	//std::cout << "Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
+	//std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
 
-	std::cout << std::endl;
+	//std::cout << std::endl;
 	ActorPhysicsComponent::Update(dt);
 }
 

@@ -13,6 +13,8 @@ static RenderWindow* _window;
 auto currentWindowStyle = sf::Style::Default;
 Vector2u persistentWindowSize = Vector2u(800, 600);
 
+
+
 void Engine::Update(double dt)
 {
 	//float dt = clock.restart().asSeconds();
@@ -48,12 +50,12 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	else
 		WindowResize(sf::VideoMode::getDesktopMode().size.y, sf::VideoMode::getDesktopMode().size.y);
 
-	
+
 
 	static sf::Clock clock;
 
 	double t = 0;
-	double dt = 1/60.f;
+	double dt = 1 / 60.f;
 
 	double currentTime = clock.getElapsedTime().asSeconds();
 	double accumulator = 0.0f;
@@ -164,6 +166,11 @@ void Engine::ChangeScene(Scene* s)
 	}
 
 	_activeScene->Load();
+}
+
+Scene* Engine::GetActiveScene()
+{
+	return _activeScene;
 }
 
 

@@ -29,6 +29,7 @@ public:
 	static sf::RenderWindow& getWindow();
 	static sf::Vector2u getWindowSize();
 	static void ChangeScene(Scene*);
+	static Scene* GetActiveScene();
 
 private:
 	static Scene* _activeScene;
