@@ -18,7 +18,7 @@ Vector2u persistentWindowSize = Vector2u(800, 600);
 void Engine::Update(double dt)
 {
 	//float dt = clock.restart().asSeconds();
-
+	//std::cout << "Dt " << dt << std::endl;
 	Physics::Update(dt);
 	_activeScene->Update(dt);
 }
@@ -40,6 +40,8 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName, currentWindowStyle);
 	// window.setFramerateLimit(60.0f);
+	window.setFramerateLimit(60);
+
 	_gameName = gameName;
 	_window = &window;
 	Renderer::Initialise(window);
@@ -55,7 +57,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	static sf::Clock clock;
 
 	double t = 0;
-	double dt = 1 / 60.f;
+	double dt = 0.01;
 
 	double currentTime = clock.getElapsedTime().asSeconds();
 	double accumulator = 0.0f;
@@ -67,6 +69,8 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 		double newTime = clock.getElapsedTime().asSeconds();
 		double frameTime = newTime - currentTime;
+		if (frameTime > 0.25)
+			frameTime = 0.25;
 		currentTime = newTime;
 
 		accumulator += frameTime;
@@ -123,12 +127,14 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 		}
 
 		window.clear();
+
 		while (accumulator >= dt)
 		{
 			Update(dt);
-			accumulator -= dt;
 			t += dt;
+			accumulator -= dt;
 		}
+		const double alpha = accumulator / dt;
 		window.setView(scn->PlayerCamera);
 		Render(window);
 		window.display();

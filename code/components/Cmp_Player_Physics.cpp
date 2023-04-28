@@ -1,33 +1,47 @@
 #include "Cmp_Player_Physics.h"
 #include "..\lib_engine\System_Physics.h"
+#include "../lib_engine/Audio.h"
 #include <SFML/Window/Keyboard.hpp>
 
 using namespace Physics;
 
-const std::vector<sf::Keyboard::Key> controls
-{
-	sf::Keyboard::Up,
-	sf::Keyboard::Down,
-	sf::Keyboard::Left,
-	sf::Keyboard::Right
-};
+bool isPressed = false;
 
 void PlayerPhysicsComponent::HandleDriving()
 {
 	float desiredSpeed = 0;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	float multiplierForward = _inputManager->IsMovingForward();
+	float multiplierBack = _inputManager->IsMovingBack();
+
+	if (multiplierForward)
 	{
-		desiredSpeed = _maxVelocity;
+		desiredSpeed = _maxVelocity * multiplierForward;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	if (multiplierBack)
 	{
-		desiredSpeed = -_maxVelocity;
+		multiplierBack = multiplierBack == 1 ? -1 : multiplierBack;
+		desiredSpeed = _maxVelocity * multiplierBack;
 	}
 
 	// Get current speed in fwd dir
 	b2Vec2 currentForwardNormal = _body->GetWorldVector(b2Vec2(0, 1));
-	float currSpeed = b2Dot(getForwardVelocity(), currentForwardNormal);
+	float currSpeed = b2Dot(getForwardVelocity(_body), currentForwardNormal);
+
+	// You should specify volume in the range 0 to 1, where 0 is silent and 1 is full volume.
+	// You should specify pitch in the range 0 to 1, where 0.5 is half-pitch (lower/deeper) and 1.0 is normal.
+	float top_speed = 30;
+	Audio::Sound_Set_Volume("engine_rev", (currSpeed / top_speed));
+	Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / top_speed)) * 0.2);
+	Audio::Sound_Set_Pitch("engine_rev", (currSpeed / top_speed) / 2 + 0.5);
+	Audio::Sound_Set_Pitch("engine_idle", (currSpeed / top_speed) / 2 + 0.5);
+
+	// If it's just 0, we return
+	if (desiredSpeed == 0)
+		return;
+
+
+	// Set the force to 0, depending to the current speed of the car we set the force to the max force or to the negative of that
 
 	float force = 0;
 	if (desiredSpeed > currSpeed)
@@ -37,167 +51,206 @@ void PlayerPhysicsComponent::HandleDriving()
 	else
 		return;
 
-	_body->ApplyForce(force * currentForwardNormal, _body->GetWorldCenter(), true);
+	// Applying the force to the player
+	_body->ApplyForce(linearDamping * force * currentForwardNormal, _body->GetWorldCenter(), true);
+
 }
 
 void PlayerPhysicsComponent::HandleSteering()
 {
 	float desiredTorque = 0;
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		desiredTorque = -_maxTorque;
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		desiredTorque = _maxTorque;
+	float multiplierRight = _inputManager->IsMovingRight();
+	float multiplierLeft = _inputManager->IsMovingLeft();
 
+	if (multiplierRight)
+	{
+		desiredTorque = _maxTorque * multiplierRight;
+	}
+	if (multiplierLeft)
+	{
+		multiplierLeft = multiplierLeft == 1 ? -1 : multiplierLeft;
+
+		desiredTorque = _maxTorque * multiplierLeft;
 	}
 
-	_body->ApplyTorque(desiredTorque, true);
+
+	_body->ApplyTorque(-desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _wreckingBall(wreckingBall), _chain(chain)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager)
 {
+	// Setting up Car's Body
 	_size = Sv2_to_bv2(size, true);
 	_body->SetSleepingAllowed(false);
-	//_body->SetBullet(true); // Done for hi-res collision. Probably won't need it for the car
+	_body->SetLinearDamping(5.f);
+
+	// Defining a generic definition of a chain
+	b2RevoluteJointDef chainJoinDef;
+
+	// FIRST JOINT - Joint between car and the first piece of the chain.
+	chainJoinDef.bodyA = _body;
+	chainJoinDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	// Setting up the anchor points
+	chainJoinDef.localAnchorA.Set(0, -0.4);
+	chainJoinDef.localAnchorB.Set(0, 0.4);
+	// Setting up the limit to true so that the angle between the two bodies will stay 0
+	chainJoinDef.enableLimit = true;
+	// Pushing back the created joint so that we can edit the joint properties later.
+	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJoinDef)));
+
+	// SECOND JOINT - Joint between the first chain and the second chain
+	chainJoinDef.bodyA = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJoinDef.bodyB = chain[1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	// Here I don't reset anchorA and B and the enableLimit property because they are already being set from the previous declaration.
+	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJoinDef)));
 
 
-	// Setting the first two dampings for the first two bodies.
-	_body->SetAngularDamping(800.f);
-	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(400.f);
-	chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f);
-	// Defining the generic Joint Definition
-	b2RevoluteJointDef chainRevoluteJointDef;
-	chainRevoluteJointDef.localAnchorA.Set(0, -0.40);
-	chainRevoluteJointDef.localAnchorB.Set(0, 0.40);
-	chainRevoluteJointDef.collideConnected = false;
+	// THIRD JOINT - Joint between second chain and the wrecking ball
+	chainJoinDef.bodyA = chain[1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	chainJoinDef.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
 
-	// Defining the first Joint that will anchor the chain to the car
-	chainRevoluteJointDef.bodyA = _body;
-	chainRevoluteJointDef.bodyB = chain[0]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	chainRevoluteJointDef.enableLimit = true;
-	Physics::GetWorld()->CreateJoint(&chainRevoluteJointDef);
+	// Resetting the anchor points to suit the wrecking ball best
+	chainJoinDef.localAnchorA.Set(0, -0.5);
+	chainJoinDef.localAnchorB.Set(0, 0.5);
 
-	for (int i = 1; i < 3; i++)
-	{
-		// Setting the up the chain bodies
-		chainRevoluteJointDef.bodyA = chain[i - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-		chainRevoluteJointDef.bodyB = chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-
-		// Setting the chain damping
-		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(400.f - i * 100.f);
-		chain[i]->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f - i * 2.f);
-
-		// Limiting the angle - this makes the chain fixed
-		chainRevoluteJointDef.enableLimit = true;
-		chainRevoluteJointDef.upperAngle = (b2_pi / 180) * 0;
-		chainRevoluteJointDef.lowerAngle = (b2_pi / 180) * 0;
-
-		// Storing the joint
-		_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainRevoluteJointDef)));
-	}
-
-	// Creating the ball joint
-	b2RevoluteJointDef ballJointDef;
-	ballJointDef.localAnchorA.Set(0, 0);
-	ballJointDef.localAnchorB.Set(0, 0.75);
-
-	// Setting the ball's damping
-	wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularDamping(100.f);
-	//wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetLinearDamping(10.f);
-	// Setting up the chain and the ball in the joint
-	ballJointDef.bodyA = chain[chain.size() - 1]->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	ballJointDef.bodyB = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
-
-	// Limiting the ball so it won't spin around the anchor point
-	ballJointDef.enableLimit = true;
-
-	// Storing the joint
-	_ballJoint = static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&ballJointDef));
+	_chainJoints.push_back(static_cast<b2RevoluteJoint*>(Physics::GetWorld()->CreateJoint(&chainJoinDef)));
 }
 
 void PlayerPhysicsComponent::Update(double dt)
 {
+	// Checking if any key is being pressed
+	bool isAnyPressed = true;
+	for (auto& c : controls)
+	{
+		if (sf::Keyboard::isKeyPressed(c))
+		{
+			isAnyPressed = true;
+			break;
+		}
+		else
+		{
+			isAnyPressed = false;
+		}
 
+	}
+
+	// If no keys are being pressed
+	if (!isAnyPressed)
+	{
+		// We get all chains in the list of chains and we set the angular velocity to 0
+		for (auto& c : _chain)
+		{
+			auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+			chainBody->SetAngularVelocity(0.f);
+		}
+		// Same goes for body and wrecking ball
+		_body->SetAngularVelocity(0.f);
+		_wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->SetAngularVelocity(0.f);
+	}
+
+	// If we're not pressing A and D
+	if (!sf::Keyboard::isKeyPressed(controls[2]) && !sf::Keyboard::isKeyPressed(controls[3]))
+	{
+		// Get every chain
+		for (auto& c : _chain)
+		{
+			// Set angular velocity to 0
+			auto chainBody = c->getComponents<ActorPhysicsComponent>()[0]->getBody();
+			chainBody->SetAngularVelocity(0.f);
+			// And generate an impulse that will cancel out the lateral velocity
+			b2Vec2 impulseChain = chainBody->GetMass() * -getLateralVelocity(chainBody);
+			chainBody->ApplyLinearImpulseToCenter(impulseChain, true);
+		}
+
+		// Same applies to the wrecking ball
+		auto wreckingBallBody = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+		b2Vec2 impulseBall = wreckingBallBody->GetMass() * -getLateralVelocity(wreckingBallBody);
+		wreckingBallBody->ApplyLinearImpulseToCenter(impulseBall, true);
+
+
+		for (auto& j : _chainJoints)
+			j->EnableLimit(true);
+
+	}
+	else
+	{
+		// If these buttons are pressed, then we release the joints so we can get the chain-like behaviour
+		for (auto& j : _chainJoints)
+			j->EnableLimit(false);
+	}
 
 	HandleDriving();
 	HandleSteering();
 	UpdateFriction();
 
-	// This checks if we are drifting or not. If we stop drifting the chains will go back to rest
-
-	if (getLateralVelocity().Length() >= 0.1f)
+	for (int i = 0; i < _chainJoints.size(); i++)
 	{
-		for (auto& j : _chainJoints)
+		// Get the joint angle and convert it in degrees
+		float angleDeg = _chainJoints[i]->GetJointAngle() * 180 / b2_pi;
+
+		// If nothing is being pressed AND the angle is above the limits defined
+		if (angleDeg > 25.f || angleDeg < -25.f && !isAnyPressed)
 		{
-			j->EnableLimit(false);
-		}
+			// Enable the motor and remove the limitation on the chain
+			_chainJoints[i]->EnableMotor(true);
+			_chainJoints[i]->EnableLimit(false);
 
-	}
-	else
-	{
-		for (auto& j : _chainJoints)
+			// Decide the direction and set the speed based on the given angle
+			if (angleDeg > 0)
+				_chainJoints[i]->SetMaxMotorTorque(100.f);
+			_chainJoints[i]->SetMotorSpeed(50.f);
+			if (angleDeg < 0)
+				_chainJoints[i]->SetMaxMotorTorque(-100.f);
+			_chainJoints[i]->SetMotorSpeed(-50.f);
+
+		}
+		else
 		{
-			j->EnableLimit(true);
+			// Disable the motor
+			_chainJoints[i]->EnableMotor(false);
+			_chainJoints[i]->EnableLimit(true);
+			_chainJoints[i]->SetMaxMotorTorque(0.f);
+			_chainJoints[i]->SetMotorSpeed(0.f);
 		}
-
-		//_body->SetAngularVelocity(0.f);
 	}
 
-	//std::cout << "Lateral Velocity: " << getLateralVelocity().Length() << std::endl;
-	//std::cout << "Forward Velocity: " << getForwardVelocity().Length() << std::endl;
-	//std::cout << "Linear Velocity: " << _body->GetLinearVelocity().Length() << std::endl;
-
-	//std::cout << "Angular Velocity: " << _body->GetAngularVelocity() << std::endl;
-	//std::cout << "Angular Impulse: " << _angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity() << std::endl;
-
-	//std::cout << std::endl;
 	ActorPhysicsComponent::Update(dt);
 }
 
-b2Vec2 PlayerPhysicsComponent::getLateralVelocity()
+b2Vec2 PlayerPhysicsComponent::getLateralVelocity(b2Body* body)
 {
-	b2Vec2 currentRightNormal = _body->GetWorldVector(b2Vec2(1, 0));
-	return b2Dot(currentRightNormal, _body->GetLinearVelocity()) * currentRightNormal;
+	// Get the lateral direction
+	b2Vec2 currentRightNormal = body->GetWorldVector(b2Vec2(1, 0));
+	// Use the dotproduct to calculate the lateral velocity
+	return b2Dot(currentRightNormal, body->GetLinearVelocity()) * currentRightNormal;
 }
 
-b2Vec2 PlayerPhysicsComponent::getForwardVelocity()
+b2Vec2 PlayerPhysicsComponent::getForwardVelocity(b2Body* body)
 {
-	b2Vec2 currentForwardNormal = _body->GetWorldVector(b2Vec2(0, 1));
-	return b2Dot(currentForwardNormal, _body->GetLinearVelocity()) * currentForwardNormal;
+	// Get forward direction
+	b2Vec2 currentForwardNormal = body->GetWorldVector(b2Vec2(0, 1));
+	// Use the dotproduct to calculate the forward velocity
+	return b2Dot(currentForwardNormal, body->GetLinearVelocity()) * currentForwardNormal;
 }
 
 void PlayerPhysicsComponent::UpdateFriction()
 {
 	// Lateral Velocity
-	float maxLateralImpulse = 0.04f;
+	float maxLateralImpulse = 2.5f;
 	b2Vec2 impulse = _body->GetMass() * -getLateralVelocity();
-
-	if (getLateralVelocity().Length() >= 5.f)
-	{
-		_body->SetLinearDamping(1000.f);
-	}
-	else
-	{
-		_body->SetLinearDamping(5.f);
-	}
-
 	if (impulse.Length() > maxLateralImpulse)
-	{
 		impulse *= maxLateralImpulse / impulse.Length();
-	}
 
 	_body->ApplyLinearImpulse(impulse, _body->GetWorldCenter(), true);
 
-	// Angular Impulse
-	_body->ApplyAngularImpulse(_angularImpulseDamp * _body->GetInertia() * -_body->GetAngularVelocity(), true);
-
 
 	// Forward Linear Velocity
-	b2Vec2 currentForwardNormal = getForwardVelocity();
+	b2Vec2 currentForwardNormal = getForwardVelocity(_body);
 	float currentForwardSpeed = currentForwardNormal.Normalize();
 	float dragForceMagnitude = _dragForceDamp * currentForwardSpeed;
-	_body->ApplyForce(dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
+	_body->ApplyForce(0.1 * dragForceMagnitude * currentForwardNormal, _body->GetWorldCenter(), true);
+
 }
