@@ -9,6 +9,10 @@ using namespace std;
 using namespace sf;
 
 static shared_ptr<Entity> player;
+static shared_ptr<Entity> wreckingBall;
+static vector<shared_ptr<Entity>> chains;
+static shared_ptr<Entity> cube;
+
 VertexArray line;
 
 void GameScene::Load()
@@ -26,8 +30,56 @@ void GameScene::Load()
 	shapeComp->getShape().setFillColor(Color::Magenta);
 	shapeComp->getShape().setOrigin(Vector2f(5.f, 15.f));
 
+	for (int i = 0; i < 2; i++)
+	{
+		// Chain Setup
+		auto chain = MakeEntity();
+		chain->setPosition(Vector2f(player->getPosition().x, player->getPosition().y + 25.f + i * 20.f));
+
+		// Chain Shape Component
+		auto chainShape = chain->addComponent<ShapeComponent>();
+		Vector2f size = Vector2f(5.f, 15.f);
+		chainShape->setShape<RectangleShape>(size);
+		chainShape->getShape().setFillColor(Color::Green);
+		chainShape->getShape().setOrigin(size / 2.f);
+
+		// Chain Physics
+		auto chainPhysics = chain->addComponent<ActorPhysicsComponent>(true, size);
+		chainPhysics->setMass(20.f - (i * 5));
+		//chainPhysics->setFriction(.1f);
+		chains.push_back(chain);
+	}
+
+
+	// Ball Setup
+	wreckingBall = MakeEntity();
+	wreckingBall->setPosition(Vector2f(player->getPosition().x, chains[chains.size() - 1]->getPosition().y + 25.f));
+
+	// Ball Shape Component
+	auto ballShape = wreckingBall->addComponent<ShapeComponent>();
+	float radius = 15.f;
+	ballShape->setShape<sf::CircleShape>(radius);
+	ballShape->getShape().setFillColor(Color::Red);
+	ballShape->getShape().setOrigin(Vector2f(radius, radius));
+
+	// Ball Physics Component
+	auto wreckingBallPhysics = wreckingBall->addComponent<ActorPhysicsComponent>(true, radius);
+
+	wreckingBallPhysics->setMass(5.f);
 	// Player Physics Component
-	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size);
+	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
+	playerPhysics->setMass(20.f);
+
+	cube = MakeEntity();
+	cube->setPosition(Vector2f(player->getPosition().x + 200.f, player->getPosition().y - 400.f));
+	auto testShape = cube->addComponent<ShapeComponent>();
+	Vector2f testSize = Vector2f(50.f, 50.f);
+	testShape->setShape<RectangleShape>(testSize);
+	testShape->getShape().setFillColor(sf::Color::Yellow);
+	testShape->getShape().setOrigin(Vector2f(testSize.x / 2.f, testSize.y / 2.f));
+
+	auto testPhysics = cube->addComponent<ActorPhysicsComponent>(true, testSize);
+	testPhysics->setMass(100.f);
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 	PlayerCamera.zoom(0.8);
@@ -45,6 +97,10 @@ void GameScene::Load()
 void GameScene::Unload()
 {
 	player.reset();
+	wreckingBall.reset();
+	cube.reset();
+	for (auto& e : chains)
+		e.reset();
 	ls::Unload();
 	Scene::Unload();
 }

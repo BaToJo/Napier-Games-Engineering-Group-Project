@@ -11,10 +11,10 @@ Scene* Engine::_activeScene = nullptr;
 std::string Engine::_gameName;
 static RenderWindow* _window;
 
-void Engine::Update()
+void Engine::Update(double dt)
 {
-	static sf::Clock clock;
-	float dt = clock.restart().asSeconds();
+	//float dt = clock.restart().asSeconds();
+	//std::cout << "Dt " << dt << std::endl;
 	Physics::Update(dt);
 	_activeScene->Update(dt);
 }
@@ -28,13 +28,34 @@ void Engine::Render(RenderWindow& window)
 void Engine::Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn)
 {
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName);
+	window.setFramerateLimit(60);
+	
 	_gameName = gameName;
 	_window = &window;
 	Renderer::Initialise(window);
 	Physics::Initialise();
 	ChangeScene(scn);
+	
+
+	static sf::Clock clock;
+
+	double t = 0;
+	double dt = 0.01;
+
+	double currentTime = clock.getElapsedTime().asSeconds();
+	double accumulator = 0.0f;
+
 	while (window.isOpen())
 	{
+
+		double newTime = clock.getElapsedTime().asSeconds();
+		double frameTime = newTime - currentTime;
+		if (frameTime > 0.25)
+			frameTime = 0.25;
+		currentTime = newTime;
+
+		accumulator += frameTime;
+
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -49,7 +70,14 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 		}
 
 		window.clear();
-		Update();
+
+		while (accumulator >= dt)
+		{
+			Update(dt);
+			t += dt;
+			accumulator -= dt;
+		}
+		const double alpha = accumulator / dt;
 		window.setView(scn->PlayerCamera);
 		Render(window);
 		window.display();
