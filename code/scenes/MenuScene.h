@@ -5,8 +5,6 @@
 #include <SFML/Graphics.hpp>
 class MenuScene : public Scene
 {
-private:
-
 public:
 	void Load() override;
 

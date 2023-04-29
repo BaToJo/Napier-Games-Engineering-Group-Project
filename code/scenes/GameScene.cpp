@@ -24,8 +24,14 @@ VertexArray line;
 InputManager* manager;
 
 bool isRebind = false;
+bool hasBeenLoaded = false;
 void GameScene::Load()
 {
+	if (!hasBeenLoaded)
+	{
+		PlayerCamera.zoom(0.8);
+		hasBeenLoaded = true;
+	}
 	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
 
@@ -94,7 +100,7 @@ void GameScene::Load()
 	testPhysics->setMass(100.f);
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
-	PlayerCamera.zoom(0.8);
+
 
 	Audio::Music_Load_from_file("res/audio/music_ambience_city_2.ogg", "ambience_city_2");
 	Audio::Music_Play("ambience_city_2", 0.4, 1.0);
@@ -104,6 +110,8 @@ void GameScene::Load()
 	Audio::Sound_Play_Looping("engine_rev", 0.0f, 1.0f);
 	Audio::Sound_Play_Looping("engine_idle", 0.0f, 1.0f);
 
+
+	Engine::getWindow().setView(PlayerCamera);
 }
 
 void GameScene::Unload()
@@ -113,6 +121,9 @@ void GameScene::Unload()
 	cube.reset();
 	for (auto& e : chains)
 		e.reset();
+	chains.clear();
+
+	Audio::UnloadAll();
 	ls::Unload();
 	Scene::Unload();
 }
@@ -126,44 +137,7 @@ void GameScene::Render()
 
 void GameScene::Update(const double& dt)
 {
-	XINPUT_STATE state;
-	ZeroMemory(&state, sizeof(XINPUT_STATE));
-
-	XInputGetState(0, &state);
-
-	if (((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0))
-	{
-		std::cout << "A is pressed" << std::endl;
-	}
-
-	manager->IsControllerConnected();
-	//std::cout << "Left trigger pressing " << (float)state.Gamepad.bLeftTrigger / 255 << std::endl;
-	//std::cout << "Right trigger pressing " << (float)state.Gamepad.bRightTrigger / 255 << std::endl;
-
-	float leftStickXVal = fmaxf(-1, (float)state.Gamepad.sThumbLX / 32767);
-	float leftStickYVal = fmaxf(-1, (float)state.Gamepad.sThumbLY / 32767);
-
-	float deadzoneX = 0.4f;
-	float deadzoneY = 0.4f;
-
-	float finalLeftX = (abs(leftStickXVal) < deadzoneX ? 0 : leftStickXVal);
-	float finalLeftY = (abs(leftStickYVal) < deadzoneY ? 0 : leftStickYVal);
-
-	//std::cout << "Final x " << finalLeftX << std::endl;
-	//std::cout << "Final y " << finalLeftY << std::endl;
-
-
-	//for (int i = 0; i < sf::Joystick::getButtonCount(0); i++)
-	//{
-	//	if (sf::Joystick::isButtonPressed(0, i))
-	//		std::cout << "Button pressed, corresponding ID " << i << std::endl;
-	//}
-
-	//std::cout << "Position of X axis " << sf::Joystick::getAxisPosition(0, sf::Joystick::X) << std::endl;
-	//std::cout << "Position of Y axis " << sf::Joystick::getAxisPosition(0, sf::Joystick::Y) << std::endl;
-	//std::cout << "Position of Z axis " << sf::Joystick::getAxisPosition(0, sf::Joystick::Z) << std::endl;
-	//std::cout << "Position of R axis " << sf::Joystick::getAxisPosition(0, sf::Joystick::R) << std::endl;
-
+	Engine::getWindow().setView(PlayerCamera);
 
 	if (isRebind)
 	{

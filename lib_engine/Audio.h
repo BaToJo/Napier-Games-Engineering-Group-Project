@@ -32,7 +32,7 @@ public:
 	static void Music_Stop_all_music();
 	static void Music_Adjust_volume_of_all_musics(float coefficient);
 
-
+	static void UnloadAll();
 	/*
 	static unsigned long long Music_Load_from_file(const std::string file_name);
 	static void Music_Play(const int track_index, float volume, float pitch);

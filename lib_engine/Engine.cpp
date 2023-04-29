@@ -4,6 +4,7 @@
 #include "System_Renderer.h"
 #include <SFML/Graphics.hpp>
 #include "../code/scenes/GameScene.h"
+#include "../code/game.h"
 
 using namespace sf;
 using namespace std;
@@ -66,7 +67,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 			}
 			if (Keyboard::isKeyPressed(Keyboard::Escape))
 			{
-				window.close();
+				ChangeScene(&menuScene);
 			}
 		}
 
@@ -81,7 +82,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 		const double alpha = accumulator / dt;
 		Render(window);
 		window.display();
-
+		
 	}
 
 	if (_activeScene != nullptr)

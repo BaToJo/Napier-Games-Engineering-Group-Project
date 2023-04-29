@@ -209,6 +209,13 @@ void Audio::Music_Adjust_volume_of_all_musics(float coefficient)
 	}
 }
 
+void Audio::UnloadAll()
+{
+	Audio::SoundBuffers.clear();
+	Audio::Musics.clear();
+	Audio::Sounds.clear();
+}
+
 
 
 /*

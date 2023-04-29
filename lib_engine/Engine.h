@@ -17,6 +17,7 @@ public:
 
 	EntityManager ents;
 	sf::View PlayerCamera;
+
 };
 
 class Engine 

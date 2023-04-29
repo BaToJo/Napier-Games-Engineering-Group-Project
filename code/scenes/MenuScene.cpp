@@ -3,6 +3,8 @@
 #include "../../lib_engine/System_Renderer.h"
 #include "../components/Cmp_Sprite.h"
 #include <cmath>
+#include "..\game.h"
+
 // Text objects
 sf::Text _gameTitle;
 
@@ -41,8 +43,7 @@ sf::Clock menuClock;
 
 void MenuScene::Load()
 {
-	PlayerCamera.setCenter(sf::Vector2f(Engine::getWindowSize().x / 2.f, Engine::getWindowSize().y / 2.f));
-	PlayerCamera.zoom(1.f);
+	Engine::getWindow().setView(Engine::getWindow().getDefaultView());
 
 	menuClock = sf::Clock();
 
@@ -174,6 +175,11 @@ void MenuScene::Update(const double& dt)
 		{
 			const float outlineAlpha = alphaOffsetFromZero * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffsetFromZero;
 			_listOfTexts[i].setOutlineColor(sf::Color(255, 255, 255, outlineAlpha));
+
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			{
+				Engine::ChangeScene(&gameScene);
+			}
 		}
 		else
 		{
@@ -197,3 +203,4 @@ void MenuScene::Render()
 
 	Scene::Render();
 }
+
