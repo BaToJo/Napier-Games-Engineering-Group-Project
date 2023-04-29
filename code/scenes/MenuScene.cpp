@@ -5,41 +5,16 @@
 #include <cmath>
 #include "..\game.h"
 
-// Text objects
-sf::Text _gameTitle;
+void MenuScene::UpdatePositions()
+{
+	_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
 
-sf::Text _playText;
-sf::Text _settingsText;
-sf::Text _exitText;
-
-std::vector<sf::Text> _listOfTexts;
-// Fonts
-sf::Font _font;
-sf::Font _buttonFont;
-std::vector<sf::Font> _listOfFonts;
-
-
-sf::RectangleShape _buttonBlueprint;
-
-sf::RectangleShape _playButton;
-sf::RectangleShape _settingsButton;
-sf::RectangleShape _exitButton;
-
-std::vector<sf::RectangleShape> _listOfButtons;
-//sf::Color rustColor = { 183, 65, 14, 255 };
-sf::Color rustColor = { 188, 55, 48, 255 };
-
-
-// Animation variables
-const int alphaLowerBound = 150;
-const int alphaUpperBound = 255;
-const float alphaAmplitude = (alphaUpperBound - alphaLowerBound) / 2.f;
-const float alphaOffset = alphaAmplitude + alphaLowerBound;
-
-const float alphaOffsetFromZero = alphaUpperBound / 2.f;
-sf::Clock menuClock;
-
-
+	for (int i = 0; i < _listOfButtons.size(); i++)
+	{
+		_listOfButtons[i].setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (_buttonBlueprint.getSize().y + 50.f))));
+		_listOfTexts[i].setPosition(_listOfButtons[i].getPosition());
+	}
+}
 
 void MenuScene::Load()
 {
@@ -51,7 +26,7 @@ void MenuScene::Load()
 
 	_buttonBlueprint.setSize(sf::Vector2f(Engine::getWindowSize().x / 6.4f, Engine::getWindowSize().y / 9.6f));
 	_buttonBlueprint.setOrigin(sf::Vector2f(_buttonBlueprint.getSize().x / 2.f, _buttonBlueprint.getSize().y / 2.f));
-	_buttonBlueprint.setFillColor(sf::Color(32, 42, 68));
+	_buttonBlueprint.setFillColor(navyColor);
 
 
 	for (int i = 0; i < 3; i++)
@@ -64,22 +39,7 @@ void MenuScene::Load()
 		_listOfButtons.push_back(shape);
 	}
 
-	/*_playButton.setFillColor(_buttonBlueprint.getFillColor());
-	_playButton.setSize(_buttonBlueprint.getSize());
-	_playButton.setOrigin(_buttonBlueprint.getOrigin());
-	_playButton.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f));
 	
-	_settingsButton.setFillColor(_buttonBlueprint.getFillColor());
-	_settingsButton.setSize(_buttonBlueprint.getSize());
-	_settingsButton.setOrigin(_buttonBlueprint.getOrigin());
-	_settingsButton.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 
-		_playButton.getPosition().y + (_playButton.getSize().y / 2) + 50.f));
-
-	_exitButton.setFillColor(_buttonBlueprint.getFillColor());
-	_exitButton.setSize(_buttonBlueprint.getSize());
-	_exitButton.setOrigin(_buttonBlueprint.getOrigin());
-	_exitButton.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f,
-		_settingsButton.getPosition().y + (_settingsButton.getSize().y / 2) + 50.f));*/
 
 	if (_font.loadFromFile("res/fonts/ChakraPetch-Regular.ttf"))
 	{
@@ -123,50 +83,22 @@ void MenuScene::Load()
 		for (auto& t : _listOfTexts)
 			t.setOrigin(t.getGlobalBounds().getSize() / 2.f + t.getLocalBounds().getPosition());
 
-		//_playText.setFont(_buttonFont);
-
-		//_settingsText.setFont(_buttonFont);
-		//_exitText.setFont(_buttonFont);
-
-		//_playText.setString("PLAY");
-
-		//_settingsText.setString("SETTINGS");
-		//_exitText.setString("EXIT");
-
-		//_playText.setCharacterSize(26);
-		//_playText.setOutlineColor(sf::Color(255, 255, 255, 0));
-		//_playText.setOutlineThickness(1.2f);
-
-		//_settingsText.setCharacterSize(26);
-		//_exitText.setCharacterSize(26);
-
-		//_playText.setFillColor(rustColor);
-
-		//_settingsText.setFillColor(rustColor);
-		//_exitText.setFillColor(rustColor);
-
-		//_playText.setOrigin(_playText.getGlobalBounds().getSize() / 2.f + _playText.getLocalBounds().getPosition());
-
-
-		//_settingsText.setOrigin(_settingsText.getGlobalBounds().getSize() / 2.f + _settingsText.getLocalBounds().getPosition());
-		//_exitText.setOrigin(_exitText.getGlobalBounds().getSize() / 2.f + _exitText.getLocalBounds().getPosition());
-
-		//_playText.setPosition(sf::Vector2f(_playButton.getPosition()));
-
-		//_settingsText.setPosition(sf::Vector2f(_settingsButton.getPosition()));
-		//_exitText.setPosition(sf::Vector2f(_exitButton.getPosition()));
 	}
+
+	UpdatePositions();
 }
 
 void MenuScene::Unload()
 {
+	_listOfButtons.clear();
+	_listOfTexts.clear();
+	Scene::Unload();
 }
 
 void MenuScene::Update(const double& dt)
 {
 	const float alpha = alphaAmplitude * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffset;
 	_gameTitle.setFillColor(sf::Color(rustColor.r, rustColor.g, rustColor.b, alpha));
-
 
 	for (int i = 0; i < _listOfButtons.size(); i++)
 	{
@@ -178,7 +110,23 @@ void MenuScene::Update(const double& dt)
 
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
-				Engine::ChangeScene(&gameScene);
+				if (_listOfTexts[i].getString() == "PLAY")
+				{
+					Engine::ChangeScene(&gameScene);
+					return;
+				}
+					
+				if (_listOfTexts[i].getString() == "SETTINGS")
+				{
+					Engine::ChangeScene(&settingsScene);
+					return;
+				}
+				if (_listOfTexts[i].getString() == "EXIT")
+				{
+					Engine::getWindow().close();
+					return;
+				}
+					
 			}
 		}
 		else
@@ -187,6 +135,8 @@ void MenuScene::Update(const double& dt)
 		}
 	}
 
+
+	Scene::Update(dt);
 }
 
 void MenuScene::Render()
