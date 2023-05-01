@@ -3,22 +3,25 @@
 #include "..\lib_engine\Engine.h"
 #include "../InputManager.h"
 #include <SFML/Graphics.hpp>
+
+
 class MenuScene : public Scene
 {
 private:
 	// Text objects
 	sf::Text _gameTitle;
-	std::vector<sf::Text> _listOfTexts;
+	std::vector<std::string> _buttonNames{"PLAY", "SETTINGS", "EXIT"};
+
 	// Fonts
 	sf::Font _font;
 	sf::Font _buttonFont;
 
-	sf::RectangleShape _buttonBlueprint;
-	std::vector<sf::RectangleShape> _listOfButtons;
-	//sf::Color rustColor = { 183, 65, 14, 255 };
+	// Colors
 	sf::Color rustColor = { 188, 55, 48, 255 };
 	sf::Color navyColor = { 32, 42, 68 };
 
+	// List of ui elements
+	std::vector<std::pair<sf::RectangleShape, sf::Text>> _uiElements;
 
 	// Animation variables
 	const int alphaLowerBound = 150;

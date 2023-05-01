@@ -9,11 +9,12 @@ void MenuScene::UpdatePositions()
 {
 	_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
 
-	for (int i = 0; i < _listOfButtons.size(); i++)
+	for (int i = 0; i < _uiElements.size(); i++)
 	{
-		_listOfButtons[i].setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (_buttonBlueprint.getSize().y + 50.f))));
-		_listOfTexts[i].setPosition(_listOfButtons[i].getPosition());
+		_uiElements[i].first.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (_uiElements[i].first.getSize().y + 50.f))));
+		_uiElements[i].second.setPosition(_uiElements[i].first.getPosition());
 	}
+
 }
 
 void MenuScene::Load()
@@ -23,23 +24,10 @@ void MenuScene::Load()
 	menuClock = sf::Clock();
 
 
-
-	_buttonBlueprint.setSize(sf::Vector2f(Engine::getWindowSize().x / 6.4f, Engine::getWindowSize().y / 9.6f));
-	_buttonBlueprint.setOrigin(sf::Vector2f(_buttonBlueprint.getSize().x / 2.f, _buttonBlueprint.getSize().y / 2.f));
-	_buttonBlueprint.setFillColor(navyColor);
-
-
-	for (int i = 0; i < 3; i++)
-	{
-		sf::RectangleShape shape;
-		shape.setFillColor(_buttonBlueprint.getFillColor());
-		shape.setSize(_buttonBlueprint.getSize());
-		shape.setOrigin(_buttonBlueprint.getOrigin());
-		shape.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (_buttonBlueprint.getSize().y + 50.f))));
-		_listOfButtons.push_back(shape);
-	}
-
-	
+	sf::RectangleShape buttonBlueprint;
+	buttonBlueprint.setSize(sf::Vector2f(Engine::getWindowSize().x / 6.4f, Engine::getWindowSize().y / 9.6f));
+	buttonBlueprint.setOrigin(sf::Vector2f(buttonBlueprint.getSize().x / 2.f, buttonBlueprint.getSize().y / 2.f));
+	buttonBlueprint.setFillColor(navyColor);
 
 	if (_font.loadFromFile("res/fonts/ChakraPetch-Regular.ttf"))
 	{
@@ -57,12 +45,18 @@ void MenuScene::Load()
 
 		_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
 	}
-	
+
 
 	if (_buttonFont.loadFromFile("res/fonts/BrunoAce-Regular.ttf"))
 	{
 		for (int i = 0; i < 3; i++)
 		{
+			sf::RectangleShape shape;
+			shape.setFillColor(buttonBlueprint.getFillColor());
+			shape.setSize(buttonBlueprint.getSize());
+			shape.setOrigin(buttonBlueprint.getOrigin());
+			shape.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (buttonBlueprint.getSize().y + 50.f))));
+
 			sf::Text buttonText;
 			buttonText.setFont(_buttonFont);
 
@@ -72,16 +66,13 @@ void MenuScene::Load()
 
 			buttonText.setFillColor(rustColor);
 
-			buttonText.setPosition(sf::Vector2f(_listOfButtons[i].getPosition()));
-			_listOfTexts.push_back(buttonText);
+			buttonText.setPosition(sf::Vector2f(shape.getPosition()));
+			buttonText.setString(_buttonNames[i]);
+			_uiElements.push_back(std::pair<sf::RectangleShape, sf::Text>(shape, buttonText));
 		}
-		
-		_listOfTexts[0].setString("PLAY");
-		_listOfTexts[1].setString("SETTINGS");
-		_listOfTexts[2].setString("EXIT");
 
-		for (auto& t : _listOfTexts)
-			t.setOrigin(t.getGlobalBounds().getSize() / 2.f + t.getLocalBounds().getPosition());
+		for (auto& pair : _uiElements)
+			pair.second.setOrigin(pair.second.getGlobalBounds().getSize() / 2.f + pair.second.getLocalBounds().getPosition());
 
 	}
 
@@ -90,8 +81,7 @@ void MenuScene::Load()
 
 void MenuScene::Unload()
 {
-	_listOfButtons.clear();
-	_listOfTexts.clear();
+	_uiElements.clear();
 	Scene::Unload();
 }
 
@@ -100,56 +90,55 @@ void MenuScene::Update(const double& dt)
 	const float alpha = alphaAmplitude * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffset;
 	_gameTitle.setFillColor(sf::Color(rustColor.r, rustColor.g, rustColor.b, alpha));
 
-	for (int i = 0; i < _listOfButtons.size(); i++)
+	for (auto& pair : _uiElements)
 	{
-		
-		if (_listOfButtons[i].getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(Engine::getWindow()))))
+		if (pair.first.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(Engine::getWindow()))))
 		{
 			const float outlineAlpha = alphaOffsetFromZero * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffsetFromZero;
-			_listOfTexts[i].setOutlineColor(sf::Color(255, 255, 255, outlineAlpha));
+			pair.second.setOutlineColor(sf::Color(255, 255, 255, outlineAlpha));
 
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
-				if (_listOfTexts[i].getString() == "PLAY")
+				if (pair.second.getString() == "PLAY")
 				{
 					Engine::ChangeScene(&gameScene);
 					return;
 				}
-					
-				if (_listOfTexts[i].getString() == "SETTINGS")
+
+				if (pair.second.getString() == "SETTINGS")
 				{
 					Engine::ChangeScene(&settingsScene);
 					return;
 				}
-				if (_listOfTexts[i].getString() == "EXIT")
+				if (pair.second.getString() == "EXIT")
 				{
 					Engine::getWindow().close();
 					return;
 				}
-					
 			}
 		}
 		else
 		{
-			_listOfTexts[i].setOutlineColor(sf::Color(255, 255, 255, 0));
+			pair.second.setOutlineColor(sf::Color(255, 255, 255, 0));
 		}
 	}
 
 
+	UpdatePositions();
 	Scene::Update(dt);
 }
 
 void MenuScene::Render()
 {
-	//ls::Render(Engine::getWindow());
-
+	
 	Engine::getWindow().draw(_gameTitle);
 
-	for (auto& b : _listOfButtons)
-		Engine::getWindow().draw(b);
-
-	for (auto& t : _listOfTexts)
-		Engine::getWindow().draw(t);
+	for (auto& pair : _uiElements)
+	{
+		Engine::getWindow().draw(pair.first);
+		Engine::getWindow().draw(pair.second);
+	}
+		
 
 	Scene::Render();
 }

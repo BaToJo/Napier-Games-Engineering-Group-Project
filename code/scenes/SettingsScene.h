@@ -7,15 +7,16 @@ class SettingsScene : public Scene
 {
 private:
 	sf::Text _settingsTitle;
-	std::vector<sf::Text> _listOfTexts;
+	std::vector<std::string> _settingsNames{"FULLSCREEN: ", "VSYNC: ", "BGM: ", "EFFECTS: "};
 
 	sf::Font _font;
 	sf::Font _buttonFont;
+
 	sf::Color rustColor = { 188, 55, 48, 255 };
 	sf::Color navyColor = { 32, 42, 68 };
 
-	sf::RectangleShape _fullScreenButton;
-	std::vector<sf::RectangleShape> _listOfButtons;
+	// List of ui elements
+	std::vector<std::pair<sf::RectangleShape, sf::Text>> _uiElements;
 
 	// Animation variables
 	const int alphaLowerBound = 150;
