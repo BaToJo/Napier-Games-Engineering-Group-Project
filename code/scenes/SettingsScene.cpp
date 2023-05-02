@@ -1,5 +1,6 @@
 #include "SettingsScene.h"
 
+#include "../game.h"
 
 
 void SettingsScene::UpdatePositions()
@@ -45,7 +46,6 @@ void SettingsScene::Load()
 	}
 
 
-
 	if (_buttonFont.loadFromFile("res/fonts/BrunoAce-Regular.ttf"))
 	{
 		for (int i = 0; i < 4; i++)
@@ -56,6 +56,7 @@ void SettingsScene::Load()
 			buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
 			buttonText.setOutlineThickness(1.2f);
 
+			
 			buttonText.setString(_settingsNames[i]);
 			buttonText.setFillColor(rustColor);
 
@@ -98,21 +99,52 @@ void SettingsScene::Update(const double& dt)
 	{
 		if (pair.first.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(Engine::getWindow()))))
 		{
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			sf::Event event;
+			Engine::getWindow().waitEvent(event);
+			if (event.type == sf::Event::MouseButtonPressed)
 			{
-				pair.first.setFillColor(sf::Color::Red);
-				if (pair.second.getString() == "FULLSCREEN: ")
+				if (pair.second.getString() == _settingsNames[0])
 				{
-					Engine::getWindow().create(sf::VideoMode(Engine::getWindowSize()), "CARTHARSIS", sf::Style::Fullscreen);
+					if (_settings[_settingsNames[0]] == false)
+					{
+						_settings[pair.second.getString()] = true;
+						Engine::getWindow().create(sf::VideoMode(Engine::getWindowSize()), "CARTHARSIS", sf::Style::Fullscreen);
+					}
+					else
+					{
+						_settings[pair.second.getString()] = false;
+						Engine::getWindow().create(sf::VideoMode(Engine::getWindowSize()), "CARTHARSIS", sf::Style::Resize);
+					}
 				}
+
+				if (pair.second.getString() == _settingsNames[1])
+				{
+					_settings[_settingsNames[1]] = !_settings[_settingsNames[1]];
+					Engine::getWindow().setVerticalSyncEnabled(_settings[_settingsNames[1]]);
+				}
+
+				if (pair.second.getString() == _settingsNames[2])
+				{
+					_settings[_settingsNames[2]] = !_settings[_settingsNames[2]];
+				}
+
+				if (pair.second.getString() == _settingsNames[3])
+				{
+					_settings[_settingsNames[3]] = !_settings[_settingsNames[3]];
+				}
+
 			}
 		}
 		else
 		{
-			pair.first.setFillColor(sf::Color::Transparent);
+			if (_settings[pair.second.getString()] == false)
+				pair.first.setFillColor(sf::Color::Transparent);
+			else
+				pair.first.setFillColor(sf::Color::Red);
 		}
 	}
 
+	
 	UpdatePositions();
 }
 
@@ -126,3 +158,5 @@ void SettingsScene::Render()
 	}
 	
 }
+
+

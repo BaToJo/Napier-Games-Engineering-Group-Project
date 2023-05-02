@@ -2,12 +2,13 @@
 #include "..\lib_engine\Engine.h"
 #include "../InputManager.h"
 #include <SFML/Graphics.hpp>
-
+#include <map>
 class SettingsScene : public Scene
 {
 private:
 	sf::Text _settingsTitle;
-	std::vector<std::string> _settingsNames{"FULLSCREEN: ", "VSYNC: ", "BGM: ", "EFFECTS: "};
+
+	std::vector<std::string> _settingsNames{"FULLSCREEN", "VSYNC", "BGM", "EFFECTS"};
 
 	sf::Font _font;
 	sf::Font _buttonFont;

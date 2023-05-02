@@ -2,7 +2,7 @@
 #include "..\lib_engine\System_Physics.h"
 #include "../lib_engine/Audio.h"
 #include <SFML/Window/Keyboard.hpp>
-
+#include "..\game.h"
 using namespace Physics;
 
 bool isPressed = false;
@@ -30,11 +30,15 @@ void PlayerPhysicsComponent::HandleDriving()
 
 	// You should specify volume in the range 0 to 1, where 0 is silent and 1 is full volume.
 	// You should specify pitch in the range 0 to 1, where 0.5 is half-pitch (lower/deeper) and 1.0 is normal.
-	float top_speed = 30;
-	Audio::Sound_Set_Volume("engine_rev", (currSpeed / top_speed));
-	Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / top_speed)) * 0.2);
-	Audio::Sound_Set_Pitch("engine_rev", (currSpeed / top_speed) / 2 + 0.5);
-	Audio::Sound_Set_Pitch("engine_idle", (currSpeed / top_speed) / 2 + 0.5);
+	if (_settings["EFFECTS"])
+	{
+		float top_speed = 30;
+		Audio::Sound_Set_Volume("engine_rev", (currSpeed / top_speed));
+		Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / top_speed)) * 0.2);
+		Audio::Sound_Set_Pitch("engine_rev", (currSpeed / top_speed) / 2 + 0.5);
+		Audio::Sound_Set_Pitch("engine_idle", (currSpeed / top_speed) / 2 + 0.5);
+	}
+
 
 	// If it's just 0, we return
 	if (desiredSpeed == 0)

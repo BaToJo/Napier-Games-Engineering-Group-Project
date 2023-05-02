@@ -30,8 +30,8 @@ void Engine::Render(RenderWindow& window)
 void Engine::Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn)
 {
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName);
-	window.setFramerateLimit(60);
-	
+	//window.setFramerateLimit(60);
+	//window.setKeyRepeatEnabled(false);
 	_gameName = gameName;
 	_window = &window;
 	Renderer::Initialise(window);
@@ -49,7 +49,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 	while (window.isOpen())
 	{
-
+		
 		double newTime = clock.getElapsedTime().asSeconds();
 		double frameTime = newTime - currentTime;
 		if (frameTime > 0.25)

@@ -20,7 +20,7 @@ void MenuScene::UpdatePositions()
 void MenuScene::Load()
 {
 	Engine::getWindow().setView(Engine::getWindow().getDefaultView());
-
+	Engine::getWindow().setKeyRepeatEnabled(false);
 	menuClock = sf::Clock();
 
 
@@ -96,7 +96,6 @@ void MenuScene::Update(const double& dt)
 		{
 			const float outlineAlpha = alphaOffsetFromZero * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffsetFromZero;
 			pair.second.setOutlineColor(sf::Color(255, 255, 255, outlineAlpha));
-
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
 				if (pair.second.getString() == "PLAY")
