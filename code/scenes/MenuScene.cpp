@@ -7,11 +7,11 @@
 
 void MenuScene::UpdatePositions()
 {
-	_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
+	_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 80.f));
 
 	for (int i = 0; i < _uiElements.size(); i++)
 	{
-		_uiElements[i].first.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (_uiElements[i].first.getSize().y + 50.f))));
+		_uiElements[i].first.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 240.f + (i * (_uiElements[i].first.getSize().y + 50.f))));
 		_uiElements[i].second.setPosition(_uiElements[i].first.getPosition());
 	}
 
@@ -43,7 +43,7 @@ void MenuScene::Load()
 
 		_gameTitle.setOrigin(_gameTitle.getGlobalBounds().getSize() / 2.f + _gameTitle.getLocalBounds().getPosition());
 
-		_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
+		_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 80.f));
 	}
 
 
@@ -55,7 +55,7 @@ void MenuScene::Load()
 			shape.setFillColor(buttonBlueprint.getFillColor());
 			shape.setSize(buttonBlueprint.getSize());
 			shape.setOrigin(buttonBlueprint.getOrigin());
-			shape.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 200.f + (i * (buttonBlueprint.getSize().y + 50.f))));
+			shape.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 240.f + (i * (buttonBlueprint.getSize().y + 50.f))));
 
 			sf::Text buttonText;
 			buttonText.setFont(_buttonFont);

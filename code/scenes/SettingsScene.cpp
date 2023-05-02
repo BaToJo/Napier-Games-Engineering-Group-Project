@@ -5,7 +5,7 @@
 
 void SettingsScene::UpdatePositions()
 {
-	_settingsTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
+	_settingsTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 80.f));
 
 	for (int i = 0; i < _uiElements.size(); i++)
 	{
@@ -15,8 +15,8 @@ void SettingsScene::UpdatePositions()
 		);
 
 		_uiElements[i].second.setPosition(sf::Vector2f(
-			(Engine::getWindowSize().x / 2.f) - _settingsTitle.getGlobalBounds().width,
-			200.f + (i * (_uiElements[i].second.getGlobalBounds().height + 50.f)
+			(Engine::getWindowSize().x / 2.f) - _settingsTitle.getGlobalBounds().width / 2.f,
+			180.f + (i * (_uiElements[i].second.getGlobalBounds().height + 20.f)
 		)));
 	}
 
@@ -42,43 +42,60 @@ void SettingsScene::Load()
 
 		_settingsTitle.setOrigin(_settingsTitle.getGlobalBounds().getSize() / 2.f + _settingsTitle.getLocalBounds().getPosition());
 
-		_settingsTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 40.f));
+		_settingsTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 80.f));
 	}
 
 
-	if (_buttonFont.loadFromFile("res/fonts/BrunoAce-Regular.ttf"))
+	if (_buttonFont.loadFromFile("res/fonts/Kanit-Light.ttf"))
 	{
-		for (int i = 0; i < 4; i++)
-		{
-			sf::Text buttonText;
-			buttonText.setFont(_buttonFont);
-			buttonText.setCharacterSize(30);
-			buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
-			buttonText.setOutlineThickness(1.2f);
+		sf::Text buttonText;
+		buttonText.setFont(_buttonFont);
+		buttonText.setCharacterSize(30);
+		buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
+		buttonText.setOutlineThickness(1.2f);
+		buttonText.setFillColor(rustColor);
 
-			
-			buttonText.setString(_settingsNames[i]);
-			buttonText.setFillColor(rustColor);
+		sf::RectangleShape rect;
+		rect.setSize(sf::Vector2f(20.f, 20.f));
+		rect.setOrigin(sf::Vector2f(rect.getSize().x / 2.f, rect.getSize().y / 2.f));
+		rect.setOutlineColor(sf::Color::White);
+		rect.setOutlineThickness(1.2f);
 
-			buttonText.setPosition(sf::Vector2f(
-				(Engine::getWindowSize().x / 2.f) - _settingsTitle.getGlobalBounds().width,
-				100.f + (i * (buttonText.getGlobalBounds().height + 50.f)
-					)));
-
-			sf::RectangleShape rect;
-			rect.setSize(sf::Vector2f(20.f, 20.f));
-			rect.setOrigin(sf::Vector2f(rect.getSize().x / 2.f, rect.getSize().y / 2.f));
-			rect.setOutlineColor(sf::Color::White);
-			rect.setOutlineThickness(1.2f);
-			rect.setPosition(sf::Vector2f(
-				(Engine::getWindowSize().x / 2.f) + _settingsTitle.getGlobalBounds().width / 2.f,
-				buttonText.getPosition().y + buttonText.getGlobalBounds().height / 2.f + rect.getSize().y / 4.f)
-			);
-
+		for (int i = 0; i < 7; i++)
+		{	
+			buttonText.setString(_settings[i].first);
 			_uiElements.push_back(std::pair<sf::RectangleShape, sf::Text>(rect, buttonText));
 
 		}
 
+		//for (int i = 0; i < 3; i++)
+		//{
+		//	sf::Text buttonText;
+		//	buttonText.setFont(_buttonFont);
+		//	buttonText.setCharacterSize(25);
+		//	buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
+		//	buttonText.setOutlineThickness(1.2f);
+
+		//	buttonText.setString(_resolutions[i].first);
+		//	buttonText.setFillColor(rustColor);
+
+		//	buttonText.setPosition(sf::Vector2f(
+		//		_uiElements[i].first.getPosition().x + 50.f,
+		//		_uiElements[i].second.getPosition().y
+		//	));
+
+		//	sf::RectangleShape rect;
+		//	rect.setSize(sf::Vector2f(20, 20));
+		//	rect.setOrigin(sf::Vector2f(rect.getSize().x / 2.f, rect.getSize().y / 2.f));
+		//	rect.setOutlineColor(sf::Color::White);
+		//	rect.setOutlineThickness(1.2f);
+		//	rect.setPosition(sf::Vector2f(
+		//		buttonText.getGlobalBounds().top,
+		//		buttonText.getGlobalBounds().left
+		//	));
+
+		//	_uiElements.push_back(std::pair < sf::RectangleShape, sf::Text>(rect, buttonText));
+		//}
 	}
 
 
@@ -95,56 +112,82 @@ void SettingsScene::Update(const double& dt)
 	const float alpha = alphaAmplitude * std::sin(settingsClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffset;
 	_settingsTitle.setFillColor(sf::Color(rustColor.r, rustColor.g, rustColor.b, alpha));
 
+	int i = 0;
 	for (auto& pair : _uiElements)
 	{
+		
 		if (pair.first.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(Engine::getWindow()))))
 		{
 			sf::Event event;
 			Engine::getWindow().waitEvent(event);
 			if (event.type == sf::Event::MouseButtonPressed)
 			{
-				if (pair.second.getString() == _settingsNames[0])
+				if (pair.second.getString() == _settings[0].first)
 				{
-					if (_settings[_settingsNames[0]] == false)
+					if (_settings[0].second == false)
 					{
-						_settings[pair.second.getString()] = true;
+						_settings[0].second = true;
 						Engine::getWindow().create(sf::VideoMode(Engine::getWindowSize()), "CARTHARSIS", sf::Style::Fullscreen);
 					}
 					else
 					{
-						_settings[pair.second.getString()] = false;
+						_settings[0].second = false;
 						Engine::getWindow().create(sf::VideoMode(Engine::getWindowSize()), "CARTHARSIS", sf::Style::Resize);
 					}
 				}
 
-				if (pair.second.getString() == _settingsNames[1])
+				if (pair.second.getString() == _settings[1].first)
 				{
-					_settings[_settingsNames[1]] = !_settings[_settingsNames[1]];
-					Engine::getWindow().setVerticalSyncEnabled(_settings[_settingsNames[1]]);
+					_settings[1].second = !_settings[1].second;
+					Engine::getWindow().setVerticalSyncEnabled(_settings[1].second);
 				}
 
-				if (pair.second.getString() == _settingsNames[2])
+				if (pair.second.getString() == _settings[2].first)
 				{
-					_settings[_settingsNames[2]] = !_settings[_settingsNames[2]];
+					_settings[2].second = !_settings[2].second;
 				}
 
-				if (pair.second.getString() == _settingsNames[3])
+				if (pair.second.getString() == _settings[3].first)
 				{
-					_settings[_settingsNames[3]] = !_settings[_settingsNames[3]];
+					_settings[3].second = !_settings[3].second;
 				}
 
+				if (pair.second.getString() == _settings[4].first || pair.second.getString() == _settings[5].first || pair.second.getString() == _settings[6].first)
+				{
+					std::stringstream ss(pair.second.getString());
+					unsigned int width, height;
+					char x;
+					ss >> width >> x >> height;
+					sf::Vector2u newSize = sf::Vector2u(width, height);
+					Engine::getWindow().create(sf::VideoMode(newSize), "CARTHARSIS");
+					ss.clear();
+				}
 			}
 		}
 		else
 		{
-			if (_settings[pair.second.getString()] == false)
+			if (_settings[i].second == false)
 				pair.first.setFillColor(sf::Color::Transparent);
 			else
 				pair.first.setFillColor(sf::Color::Red);
 		}
+		i++;
 	}
 
-	
+	std::string currentWindowWidth = std::to_string(Engine::getWindowSize().x);
+	for (int i = _settings.size() - 3; i < _settings.size(); i++)
+	{
+		if (_settings[i].first.find(currentWindowWidth) != std::string::npos)
+		{
+			_settings[i].second = true;
+		}
+		else
+		{
+			_settings[i].second = false;
+		}
+
+	}
+
 	UpdatePositions();
 }
 

@@ -103,14 +103,14 @@ void GameScene::Load()
 	PlayerCamera.setCenter(player->getPosition());
 
 
-	if (_settings["BGM"])
+	if (_settings[2].second)
 	{
 		Audio::Music_Load_from_file("res/audio/music_ambience_city_2.ogg", "ambience_city_2");
 		Audio::Music_Play("ambience_city_2", 0.4, 1.0);
 	}
 
 
-	if (_settings["EFFECTS"])
+	if (_settings[3].second)
 	{
 		Audio::Sound_Load_from_file("res/audio/sound_engine_rev_loop.ogg", "engine_rev");
 		Audio::Sound_Load_from_file("res/audio/sound_engine_idle_fastest_loop.ogg", "engine_idle");

@@ -7,4 +7,5 @@
 extern GameScene gameScene;
 extern MenuScene menuScene;
 extern SettingsScene settingsScene;
-extern std::map<std::string, bool> _settings;
+
+extern std::vector < std::pair<std::string, bool>> _settings;

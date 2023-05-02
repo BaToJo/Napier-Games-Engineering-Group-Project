@@ -30,7 +30,7 @@ void PlayerPhysicsComponent::HandleDriving()
 
 	// You should specify volume in the range 0 to 1, where 0 is silent and 1 is full volume.
 	// You should specify pitch in the range 0 to 1, where 0.5 is half-pitch (lower/deeper) and 1.0 is normal.
-	if (_settings["EFFECTS"])
+	if (_settings[3].second)
 	{
 		float top_speed = 30;
 		Audio::Sound_Set_Volume("engine_rev", (currSpeed / top_speed));
