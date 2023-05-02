@@ -22,7 +22,6 @@ static vector<shared_ptr<Entity>> chains;
 static shared_ptr<Entity> cube;
 
 VertexArray line;
-InputManager* manager;
 
 bool isRebind = false;
 bool hasBeenLoaded = false;
@@ -36,7 +35,6 @@ void GameScene::Load()
 	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
 
-	manager = new InputManager();
 
 	// Player Setup
 	player = MakeEntity();
@@ -86,7 +84,7 @@ void GameScene::Load()
 
 	wreckingBallPhysics->setMass(5.f);
 	// Player Physics Component
-	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, manager, wreckingBall, chains);
+	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
 	playerPhysics->setMass(20.f);
 
 	cube = MakeEntity();
@@ -147,21 +145,21 @@ void GameScene::Update(const double& dt)
 {
 	Engine::getWindow().setView(PlayerCamera);
 
-	if (isRebind)
-	{
-		sf::Keyboard::Key rebind = sf::Keyboard::Unknown;
-		for (sf::Keyboard::Key k = (sf::Keyboard::Key)0; k != sf::Keyboard::KeyCount; k = (sf::Keyboard::Key)(k + 1))
-		{
-			if (sf::Keyboard::isKeyPressed(k) && sf::Keyboard::isKeyPressed(sf::Keyboard::Q) != true)
-			{
-				rebind = k;
-				isRebind = false;
-			}
+	//if (isRebind)
+	//{
+	//	sf::Keyboard::Key rebind = sf::Keyboard::Unknown;
+	//	for (sf::Keyboard::Key k = (sf::Keyboard::Key)0; k != sf::Keyboard::KeyCount; k = (sf::Keyboard::Key)(k + 1))
+	//	{
+	//		if (sf::Keyboard::isKeyPressed(k) && sf::Keyboard::isKeyPressed(sf::Keyboard::Q) != true)
+	//		{
+	//			rebind = k;
+	//			isRebind = false;
+	//		}
 
-		}
-		manager->RebindKeyboard(0, rebind);
+	//	}
+	//	_inputManager.RebindKeyboard(0, rebind);
 
-	}
+	//}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 		isRebind = true;

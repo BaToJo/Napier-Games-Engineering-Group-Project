@@ -1,7 +1,7 @@
 #include "SettingsScene.h"
 
 #include "../game.h"
-
+#include "../InputManager.h"
 
 void SettingsScene::UpdatePositions()
 {
@@ -9,10 +9,20 @@ void SettingsScene::UpdatePositions()
 
 	for (int i = 0; i < _uiElements.size(); i++)
 	{
-		_uiElements[i].first.setPosition(sf::Vector2f(
-			(Engine::getWindowSize().x / 2.f) + _settingsTitle.getGlobalBounds().width / 2.f,
-			_uiElements[i].second.getPosition().y + _uiElements[i].second.getGlobalBounds().height / 2.f + _uiElements[i].first.getSize().y / 4.f)
-		);
+		if (i < 7)
+		{
+			_uiElements[i].first.setPosition(sf::Vector2f(
+				(Engine::getWindowSize().x / 2.f) + _settingsTitle.getGlobalBounds().width / 2.f,
+				_uiElements[i].second.getPosition().y + _uiElements[i].second.getGlobalBounds().height / 2.f + _uiElements[i].first.getSize().y / 4.f)
+			);
+		}
+		else
+		{
+			_uiElements[i].first.setPosition(sf::Vector2f(
+				(Engine::getWindowSize().x / 2.f),
+				_uiElements[i].second.getPosition().y + _uiElements[i].second.getGlobalBounds().height / 2.f + _uiElements[i].first.getSize().y / 4.f)
+			);
+		}
 
 		_uiElements[i].second.setPosition(sf::Vector2f(
 			(Engine::getWindowSize().x / 2.f) - _settingsTitle.getGlobalBounds().width / 2.f,
@@ -20,7 +30,12 @@ void SettingsScene::UpdatePositions()
 		)));
 	}
 
+	//_controlsText.setPosition(sf::Vector2f(
+	//	_uiElements[_uiElements.size() - 1].second.getPosition().x,
+	//	_uiElements[_uiElements.size() - 1].second.getPosition().y + 40.f		
+	//));
 }
+
 
 void SettingsScene::Load()
 {
@@ -68,35 +83,16 @@ void SettingsScene::Load()
 
 		}
 
-		//for (int i = 0; i < 3; i++)
-		//{
-		//	sf::Text buttonText;
-		//	buttonText.setFont(_buttonFont);
-		//	buttonText.setCharacterSize(25);
-		//	buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
-		//	buttonText.setOutlineThickness(1.2f);
-
-		//	buttonText.setString(_resolutions[i].first);
-		//	buttonText.setFillColor(rustColor);
-
-		//	buttonText.setPosition(sf::Vector2f(
-		//		_uiElements[i].first.getPosition().x + 50.f,
-		//		_uiElements[i].second.getPosition().y
-		//	));
-
-		//	sf::RectangleShape rect;
-		//	rect.setSize(sf::Vector2f(20, 20));
-		//	rect.setOrigin(sf::Vector2f(rect.getSize().x / 2.f, rect.getSize().y / 2.f));
-		//	rect.setOutlineColor(sf::Color::White);
-		//	rect.setOutlineThickness(1.2f);
-		//	rect.setPosition(sf::Vector2f(
-		//		buttonText.getGlobalBounds().top,
-		//		buttonText.getGlobalBounds().left
-		//	));
-
-		//	_uiElements.push_back(std::pair < sf::RectangleShape, sf::Text>(rect, buttonText));
-		//}
+		for (int i = 0; i < InputManager::keyboardControls.size(); i++)
+		{
+			auto scan = sf::Keyboard::delocalize(InputManager::keyboardControls[i]);
+			buttonText.setString(sf::Keyboard::getDescription(scan).toAnsiString());
+			_uiElements.push_back(std::pair<sf::RectangleShape, sf::Text>(rect, buttonText));
+		}
+		//_controlsText = buttonText;
+		//_controlsText.setString("CONTROLS");
 	}
+
 
 
 }
@@ -158,18 +154,24 @@ void SettingsScene::Update(const double& dt)
 					unsigned int width, height;
 					char x;
 					ss >> width >> x >> height;
+
 					sf::Vector2u newSize = sf::Vector2u(width, height);
 					Engine::getWindow().create(sf::VideoMode(newSize), "CARTHARSIS");
+
 					ss.clear();
 				}
+
 			}
 		}
 		else
 		{
-			if (_settings[i].second == false)
-				pair.first.setFillColor(sf::Color::Transparent);
-			else
-				pair.first.setFillColor(sf::Color::Red);
+			if (i < 7)
+			{
+				if (_settings[i].second == false)
+					pair.first.setFillColor(sf::Color::Transparent);
+				else
+					pair.first.setFillColor(sf::Color::Red);
+			}
 		}
 		i++;
 	}
@@ -199,6 +201,8 @@ void SettingsScene::Render()
 		Engine::getWindow().draw(pair.first);
 		Engine::getWindow().draw(pair.second);
 	}
+
+	Engine::getWindow().draw(_controlsText);
 	
 }
 

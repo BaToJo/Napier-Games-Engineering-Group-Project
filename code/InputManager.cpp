@@ -1,25 +1,26 @@
 #include "InputManager.h"
 
-InputManager::InputManager()
+XINPUT_STATE InputManager::state;
+float InputManager::deadzoneX = 0.2f;
+float InputManager::deadzoneY = 0.2f;
+bool InputManager::isControllerConnected = false;
+bool InputManager::isDPadEnabled = true;
+int InputManager::gamepadMovement;
+
+std::vector<sf::Keyboard::Key> InputManager::keyboardControls
 {
-	// Setting up a list of default controls
-	keyboardControls = {
-		sf::Keyboard::W,
-		sf::Keyboard::A,
-		sf::Keyboard::S,
-		sf::Keyboard::D
-	};
-	
-	IsControllerConnected();
-}
-
-
+	sf::Keyboard::W,
+	sf::Keyboard::A,
+	sf::Keyboard::S,
+	sf::Keyboard::D
+};
 void InputManager::RebindKeyboard(const int index, const sf::Keyboard::Key key)
 {
 	if (index >= keyboardControls.size()) return;
 
 	if (key == sf::Keyboard::Unknown) return;
 
+	
 	keyboardControls[index] = key;
 }
 

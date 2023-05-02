@@ -11,27 +11,28 @@
 class InputManager 
 {
 private:
-	XINPUT_STATE state;
-	float deadzoneX = 0.2f;
-	float deadzoneY = 0.2f;
+	static XINPUT_STATE state;
+	static float deadzoneX;
+	static float deadzoneY;
 
-	bool isControllerConnected = false;
-	bool isDPadEnabled = true;
-	int gamepadMovement;
+	static bool isControllerConnected;
+	static bool isDPadEnabled;
+	static int gamepadMovement;
+
 public:
-	InputManager();
-	std::vector<sf::Keyboard::Key> keyboardControls;
+	InputManager() = delete;
+	static std::vector<sf::Keyboard::Key> keyboardControls;
 
-	void RebindKeyboard(const int index, const sf::Keyboard::Key key);
+	static void RebindKeyboard(const int index, const sf::Keyboard::Key key);
 
-	float IsMovingForward();
-	float IsMovingBack();
-	float IsMovingLeft();
-	float IsMovingRight();
+	static float IsMovingForward();
+	static float IsMovingBack();
+	static float IsMovingLeft();
+	static float IsMovingRight();
 
-	float CalculateYAxisValueWithDeadZone();
-	float CalculateXAxisValueWithDeadZone();
+	static float CalculateYAxisValueWithDeadZone();
+	static float CalculateXAxisValueWithDeadZone();
 
-	bool IsMoving();
-	void IsControllerConnected();
+	static bool IsMoving();
+	static void IsControllerConnected();
 };

@@ -10,6 +10,7 @@ private:
 
 	std::vector<std::string> _settingsNames{"FULLSCREEN", "VSYNC", "BGM", "EFFECTS"};
 
+	sf::Text _controlsText;
 	sf::Font _font;
 	sf::Font _buttonFont;
 
