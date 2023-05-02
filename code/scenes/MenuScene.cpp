@@ -129,7 +129,7 @@ void MenuScene::Update(const double& dt)
 
 void MenuScene::Render()
 {
-	
+
 	Engine::getWindow().draw(_gameTitle);
 
 	for (auto& pair : _uiElements)
@@ -137,7 +137,7 @@ void MenuScene::Render()
 		Engine::getWindow().draw(pair.first);
 		Engine::getWindow().draw(pair.second);
 	}
-		
+
 
 	Scene::Render();
 }

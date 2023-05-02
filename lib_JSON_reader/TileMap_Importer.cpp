@@ -201,6 +201,101 @@ namespace TileMap_Importer
 		return nullptr;
 	}
 
+	std::vector<sf::Keyboard::Key> TileMap_Importer::KeyboardControls_LoadFromFile(std::string file_name)
+	{
+		std::ifstream f(file_name);
+		json keyboard_controls_json = json::parse(f);
+
+		std::vector<sf::Keyboard::Key> controls;
+
+		controls.push_back(keyboard_controls_json["compressionlevel"]);
+
+		return controls;
+	}
+
+	void TileMap_Importer::KeyboardControls_WriteToFile(std::string file_name, std::vector<sf::Keyboard::Key> controls)
+	{
+		std::ofstream f(file_name);
+		json keyboard_controls_json;
+
+		keyboard_controls_json["controls"] = controls;
+
+		// Write the controls to the file
+		f << std::setw(4) << keyboard_controls_json << std::endl;
+	}
+
+	void TileMap_Importer::Settings_WriteToFile(std::string file_name, bool vsync_enabled, bool fullscreen_enabled, bool backgroundMusic_enabled, bool soundEffects_enabled, std::string resolution)
+	{
+		std::ofstream f(file_name);
+		json settings_json;
+
+		settings_json["vsync_enabled"] = vsync_enabled;
+		settings_json["fullscreen_enabled"] = fullscreen_enabled;
+		settings_json["backgroundMusic_enabled"] = backgroundMusic_enabled;
+		settings_json["soundEffects_enabled"] = soundEffects_enabled;
+		if (resolution != "")
+		{
+			settings_json["resolution"] = resolution;
+		}
+		else
+		{
+			settings_json["resolution"] = "1280 x 720";
+		}
+
+		// Write the controls to the file
+		f << std::setw(4) << settings_json << std::endl;
+	}
+
+	std::vector<std::pair<std::string, bool>> TileMap_Importer::Settings_ReadFromFile(std::string file_name)
+	{
+		std::ifstream f(file_name);
+		json settings_json = json::parse(f);
+
+		std::vector<std::pair<std::string, bool>> settings{
+	{"FULLSCREEN", settings_json["fullscreen_enabled"]},
+	{"VSYNC", settings_json["vsync_enabled"]},
+	{"BGM", settings_json["backgroundMusic_enabled"]},
+	{"EFFECTS", settings_json["soundEffects_enabled"]},
+		};
+
+		std::string resolution = currentResolution = "1280 x 720";
+		if (settings_json.contains("resolution")) {
+			std::string resolution = settings_json["resolution"];
+			currentResolution = resolution;
+		}
+
+		if (resolution == "1920 x 1080")
+		{
+			settings.push_back({ "1920 x 1080", true });
+		}
+		else
+		{
+			settings.push_back({ "1920 x 1080", false });
+		}
+		if (resolution == "1280 x 720")
+		{
+			settings.push_back({ "1280 x 720", true });
+		}
+		else
+		{
+			settings.push_back({ "1280 x 720", false });
+		}
+		if (resolution == "800 x 600")
+		{
+			settings.push_back({ "800 x 600", true });
+		}
+		else
+		{
+			settings.push_back({ "800 x 600", false });
+		}
+
+		f.close();
+
+		return settings;
+
+
+	}
+
 } // namespace Tilemap_Importer
 
 

@@ -16,7 +16,6 @@ auto currentWindowStyle = sf::Style::Default;
 Vector2u persistentWindowSize = Vector2u(800, 600);
 
 
-
 void Engine::Update(double dt)
 {
 	//float dt = clock.restart().asSeconds();
@@ -37,9 +36,17 @@ void Engine::WindowResize(float x, float y)
 	_activeScene->PlayerCamera = sf::View(visibleArea);
 }
 
-void Engine::Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn)
+void Engine::Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn, bool fullscreen)
 {
 
+	if (fullscreen)
+	{
+		currentWindowStyle = sf::Style::Fullscreen;
+	}
+	else
+	{
+		currentWindowStyle = sf::Style::Default;
+	}
 	RenderWindow window(VideoMode(Vector2u(width, height)), gameName, currentWindowStyle);
 	// window.setFramerateLimit(60.0f);
 	//window.setFramerateLimit(60);

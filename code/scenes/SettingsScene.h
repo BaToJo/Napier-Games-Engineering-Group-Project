@@ -8,7 +8,7 @@ class SettingsScene : public Scene
 private:
 	sf::Text _settingsTitle;
 
-	std::vector<std::string> _settingsNames{"FULLSCREEN", "VSYNC", "BGM", "EFFECTS"};
+	std::vector<std::string> _settingsNames{ "FULLSCREEN", "VSYNC", "BGM", "EFFECTS" };
 
 	sf::Font _font;
 	sf::Font _buttonFont;
@@ -28,6 +28,14 @@ private:
 	void UpdatePositions();
 
 	sf::Clock settingsClock;
+
+	bool vsync_enabled = false;
+	bool fullscreen_enabled = false;
+	bool backgroundMusic_enabled = true;
+	bool soundEffects_enabled = true;
+
+	// std::string currentResolution = "";
+
 public:
 	void Load() override;
 

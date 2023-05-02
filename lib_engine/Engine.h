@@ -26,7 +26,7 @@ class Engine
 public:
 	Engine() = delete;
 
-	static void Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn);
+	static void Start(unsigned int width, unsigned int height, const std::string& gameName, Scene* scn, bool fullscreen);
 	static sf::RenderWindow& getWindow();
 	static sf::Vector2u getWindowSize();
 	static void ChangeScene(Scene*);
