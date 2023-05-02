@@ -1,0 +1,50 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "C:/Users/Jonathan/University/GamesEng/Napier-Games-Engineering-Group-Project/res/textures/tilemap.tsx": {
+            "dynamicWrapping": false
+        },
+        "city.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 34.333333333333314,
+                "y": 49.333333333333314
+            }
+        },
+        "test_large.tmx": {
+            "scale": 1,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 17.5,
+                "y": -4
+            }
+        },
+        "test_tile_reading.tmx": {
+            "scale": 5.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 25.727272727272727,
+                "y": 19.090909090909086
+            }
+        }
+    },
+    "last.exportedFilePath": "C:/Users/Jonathan/University/GamesEng/Napier-Games-Engineering-Group-Project/res/levels",
+    "map.fixedSize": false,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "openFiles": [
+    ],
+    "project": "Test_Map.tiled-project",
+    "property.type": "object",
+    "recentFiles": [
+    ]
+}

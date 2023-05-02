@@ -50,6 +50,13 @@ add_library(lib_engine STATIC ${SOURCE_FILES})
 target_include_directories(lib_engine INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm" PUBLIC SYSTEM ${B2D_INCS})
 target_link_libraries(lib_engine PRIVATE lib_tile_level_loader lib_maths lib_ecm Box2D sfml-graphics sfml-audio)
 
+# # JSON Reader lib
+file(GLOB_RECURSE SOURCE_FILES lib_JSON_reader/*.hpp lib_JSON_reader/*.h lib_JSON_reader/*.cpp)
+add_library(lib_JSON_reader STATIC ${SOURCE_FILES})
+target_include_directories(lib_JSON_reader INTERFACE "${CMAKE_SOURCE_DIR}/lib_JSON_reader/")
+set_target_properties(lib_JSON_reader PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(lib_JSON_reader lib_maths)
+
 function(copy_sfml_dll MyTarget)
     add_custom_command(TARGET ${MyTarget} POST_BUILD # Adds a post-build event to MyTest
         COMMAND ${CMAKE_COMMAND} -E copy_directory # which executes "cmake - E copy_if_different..."
