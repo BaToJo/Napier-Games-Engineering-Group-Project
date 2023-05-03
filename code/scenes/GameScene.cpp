@@ -175,8 +175,6 @@ void GameScene::Load()
 	//	waypoint_shape->getShape().setOrigin(Vector2f(waypoint_trigger_radius, waypoint_trigger_radius));
 	//}
 
-	//_contactListener = new ContactListener();
-	//Physics::GetWorld()->SetContactListener(_contactListener);
 	manager = new InputManager();
 
 	// Player Setup
