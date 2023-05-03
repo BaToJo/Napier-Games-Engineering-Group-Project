@@ -25,7 +25,7 @@ void SettingsScene::UpdatePositions()
 
 void SettingsScene::Load()
 {
-	TileMap_Importer::Settings_ReadFromFile("./player_settings.json");
+	TileMap_Importer::Settings_ReadFromFile("res/player_settings/player_settings.json");
 
 
 	Engine::getWindow().setView(Engine::getWindow().getDefaultView());
@@ -109,7 +109,8 @@ void SettingsScene::Load()
 void SettingsScene::Unload()
 {
 	// Write settings to disk.
-	TileMap_Importer::Settings_WriteToFile("./player_settings.json", vsync_enabled, fullscreen_enabled, backgroundMusic_enabled, soundEffects_enabled, TileMap_Importer::currentResolution);
+	_uiElements.clear();
+	TileMap_Importer::Settings_WriteToFile("res/player_settings/player_settings.json", vsync_enabled, fullscreen_enabled, backgroundMusic_enabled, soundEffects_enabled, TileMap_Importer::currentResolution);
 	Scene::Unload();
 }
 
@@ -173,7 +174,7 @@ void SettingsScene::Update(const double& dt)
 					std::stringstream ss(pair.second.getString());
 					if (ss.str() != "")
 					{
-						TileMap_Importer::currentResolution = ss.str();
+						//TileMap_Importer::currentResolution = ss.str();
 						unsigned int width, height;
 						char x;
 						ss >> width >> x >> height;
@@ -200,6 +201,9 @@ void SettingsScene::Update(const double& dt)
 		if (_settings[i].first.find(currentWindowWidth) != std::string::npos)
 		{
 			_settings[i].second = true;
+			std::stringstream ss(_settings[i].first);
+			if (ss.str() != "")
+				TileMap_Importer::currentResolution = ss.str();
 		}
 		else
 		{

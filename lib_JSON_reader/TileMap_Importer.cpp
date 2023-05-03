@@ -264,7 +264,7 @@ namespace TileMap_Importer
 			currentResolution = resolution;
 		}
 
-		if (resolution == "1920 x 1080")
+		if (currentResolution == "1920 x 1080")
 		{
 			settings.push_back({ "1920 x 1080", true });
 		}
@@ -272,7 +272,7 @@ namespace TileMap_Importer
 		{
 			settings.push_back({ "1920 x 1080", false });
 		}
-		if (resolution == "1280 x 720")
+		if (currentResolution == "1280 x 720")
 		{
 			settings.push_back({ "1280 x 720", true });
 		}
@@ -280,7 +280,7 @@ namespace TileMap_Importer
 		{
 			settings.push_back({ "1280 x 720", false });
 		}
-		if (resolution == "800 x 600")
+		if (currentResolution == "800 x 600")
 		{
 			settings.push_back({ "800 x 600", true });
 		}

@@ -25,7 +25,7 @@ int main()
 	// Seed the random number generator from the system time.
 	srand(time(0));
 
-	_settings = TileMap_Importer::Settings_ReadFromFile("./player_settings.json");
+	_settings = TileMap_Importer::Settings_ReadFromFile("res/player_settings/player_settings.json");
 
 	sf::Vector2u resolution = sf::Vector2u(1280, 720);
 	if (_settings[4].second)

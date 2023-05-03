@@ -56,7 +56,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	Renderer::Initialise(window);
 	Physics::Initialise();
 	ChangeScene(scn);
-	if (currentWindowStyle = sf::Style::Default)
+	if (currentWindowStyle == sf::Style::Default)
 		WindowResize(window.getSize().x, window.getSize().y);
 	else
 		WindowResize(sf::VideoMode::getDesktopMode().size.y, sf::VideoMode::getDesktopMode().size.y);
