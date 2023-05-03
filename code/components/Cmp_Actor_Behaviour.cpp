@@ -15,6 +15,7 @@ sf::CircleShape debug_sensor;
 AIBehaviourComponent::AIBehaviourComponent(Entity* p) : Component(p)
 {
 	//parent = _parent;
+	_defaultColor = _parent->getComponents<ShapeComponent>()[0]->getShape().getFillColor();
 }
 
 AIBehaviourComponent::~AIBehaviourComponent()
@@ -46,6 +47,20 @@ void AIBehaviourComponent::Update(double dt)
 
 	// If the NPC's waypoint only allows one vehicle en-route to it and there's already a vehicle en-route, then halt and wait until that vehicle is no longer en-route to it.
 
+
+	// Flashing white animation. When car is struck it will flash white
+	if (_parent->getComponents<ActorPhysicsComponent>().size() < 1) return;
+	if (_parent->getComponents<ShapeComponent>().size() < 1) return;
+	b2Body* body = _parent->getComponents<ActorPhysicsComponent>()[0]->getBody();
+
+	if (body->GetAngularVelocity() > 2.f)
+	{
+		_parent->getComponents<ShapeComponent>()[0]->getShape().setFillColor(sf::Color::White);
+	}
+	else
+	{
+		_parent->getComponents<ShapeComponent>()[0]->getShape().setFillColor(_defaultColor);
+	}
 }
 
 sf::Angle AIBehaviourComponent::GetAngularOffset(sf::Angle azimuth)

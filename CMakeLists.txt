@@ -18,11 +18,11 @@ add_subdirectory("lib/sfml")
 set(SFML_INCS "lib/sfml/include")
 link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
 
-# add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
-# -E copy_directory
-# "${PROJECT_SOURCE_DIR}/res"
-# ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/res
-# )
+add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
+    -E copy_directory
+    "${PROJECT_SOURCE_DIR}/res"
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/res
+)
 add_subdirectory("lib/b2d/Box2D")
 set(B2D_INCS "lib/b2d/Box2D")
 link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
@@ -92,9 +92,9 @@ target_link_libraries(CARTHARSIS lib_engine)
 copy_sfml_dll(CARTHARSIS)
 copy_sfml_audio_dll(CARTHARSIS)
 
-# copy_settings_file(CARTHARSIS)
+copy_settings_file(CARTHARSIS)
 
-# add_dependencies(CARTHARSIS copy_resources)
+add_dependencies(CARTHARSIS copy_resources)
 set_target_properties(CARTHARSIS
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
