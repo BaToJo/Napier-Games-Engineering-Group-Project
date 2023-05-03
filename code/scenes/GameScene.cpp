@@ -6,7 +6,6 @@
 #include "../code/components/Cmp_Waypoint.h"
 #include "../code/components/Cmp_Actor_Behaviour.h"
 #include "../lib_engine/System_Physics.h"
-#include <SFML/Graphics.hpp>
 
 #include "../lib_engine/Audio.h"
 #include "../game.h"
@@ -329,6 +328,18 @@ void GameScene::Load()
 
 
 	Engine::getWindow().setView(PlayerCamera);
+	
+	if (_font.loadFromFile("res/fonts/ChakraPetch-Regular.ttf"))
+	{
+		_score.setFont(_font);
+		_score.setFillColor(rustColor);
+		_score.setOutlineThickness(1.2);
+		_score.setOutlineColor(sf::Color::White);
+		_score.setCharacterSize(40);
+		_score.setString(std::to_string(_scoreNumber));
+
+		_score.setOrigin(_score.getGlobalBounds().getSize() / 2.f + _score.getLocalBounds().getPosition());
+	}
 }
 
 void GameScene::Unload()
@@ -351,8 +362,11 @@ void GameScene::Unload()
 
 void GameScene::Render()
 {
+
 	ls::Render(Engine::getWindow());
+	
 	Engine::getWindow().draw(line);
+	Engine::getWindow().draw(_score);
 	Scene::Render();
 }
 
@@ -367,14 +381,23 @@ void GameScene::Update(const double& dt)
 		{
 			//std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
 			edge->contact->GetFixtureA()->GetBody()->SetAngularVelocity(ballBody->GetLinearVelocity().Length());
+			_scoreNumber++;
 		}
 		
 	}
+
 
 	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
 	PlayerCamera.move(movement * (float)dt * 5.f);
 	PlayerCamera.setCenter(player->getPosition());
 
 	line.append(sf::Vertex(player->getPosition()));
+
+	sf::Vector2i viewPos = sf::Vector2i(Engine::getWindowSize().x / 2.f,
+		80.f);
+
+	sf::Vector2f worldPos = Engine::getWindow().mapPixelToCoords(viewPos);
+	_score.setPosition(worldPos);
+	_score.setString(std::to_string(_scoreNumber));
 	Scene::Update(dt);
 }
