@@ -28,6 +28,7 @@ private:
 
 	void UpdatePositions();
 	void UpdateKeys();
+	void UpdateResolution();
 	sf::Clock settingsClock;
 
 	bool isMousePressed = false;
