@@ -7,13 +7,16 @@ using namespace Physics;
 
 bool isPressed = false;
 
+// The code implemented in this component has been partially taken from this source https://www.iforce2d.net/b2dtut/top-down-car
 void PlayerPhysicsComponent::HandleDriving()
 {
 	float desiredSpeed = 0;
 
+	// These multipliers are used to calculate how much a stick is being pressed. It defaults to 1 when keyboard is used
 	float multiplierForward = _inputManager->IsMovingForward();
 	float multiplierBack = _inputManager->IsMovingBack();
 
+	// The multipliers are then used as a criteria for movement and also as a proper calculation that will influence the speed
 	if (multiplierForward)
 	{
 		desiredSpeed = _maxVelocity * multiplierForward;

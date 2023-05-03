@@ -26,6 +26,7 @@ protected:
 
 	// Skidding threshold
 	float maxLateralImpulse = 0.1f;
+
 	// Functions
 	void HandleDriving();
 	void HandleSteering();
@@ -35,6 +36,7 @@ protected:
 	b2Vec2 getLateralVelocity(b2Body* body);
 	b2Vec2 getForwardVelocity(b2Body* body);
 
+	// References to the bodies attached to the car
 	std::shared_ptr<Entity> _wreckingBall;
 	std::vector<std::shared_ptr<Entity>> _chain;
 

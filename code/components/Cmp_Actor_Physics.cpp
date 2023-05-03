@@ -1,14 +1,18 @@
 #include "Cmp_Actor_Physics.h"
 #include "..\lib_engine\System_Physics.h"
+
+// Constructor for polygon shapes
 ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vector2f& size) : Component(p), _dynamic(dyn)
 {
 	// Body Definition
 	b2BodyDef BodyDef;
+
 	// Is it dynamic or static? (Maybe Kinetic for player movement?)
 	BodyDef.type = _dynamic ? b2_dynamicBody : b2_staticBody;
 	BodyDef.position = Physics::Sv2_to_bv2(Physics::Invert_height(p->getPosition()));
 	_body = Physics::GetWorld()->CreateBody(&BodyDef);
 	_body->SetActive(true);
+
 	// Shape Settings
 	b2PolygonShape Shape;
 	Shape.SetAsBox(Physics::Sv2_to_bv2(size).x * 0.5f, Physics::Sv2_to_bv2(size).y * 0.5f);
@@ -23,6 +27,7 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 	_fixture = _body->CreateFixture(&FixtureDef);
 }
 
+// Constructor for sphere shapes
 ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const float& radius) : Component(p), _dynamic(dyn)
 {
 	b2BodyDef BodyDef;

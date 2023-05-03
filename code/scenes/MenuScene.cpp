@@ -5,6 +5,7 @@
 #include <cmath>
 #include "..\game.h"
 
+// Updating the positions of every UI element to keep everything centered
 void MenuScene::UpdatePositions()
 {
 	_gameTitle.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 80.f));
@@ -19,16 +20,18 @@ void MenuScene::UpdatePositions()
 
 void MenuScene::Load()
 {
+	// Setting view to default
 	Engine::getWindow().setView(Engine::getWindow().getDefaultView());
-	Engine::getWindow().setKeyRepeatEnabled(false);
 	menuClock = sf::Clock();
 
 
+	// Blueprint for every button in the scene
 	sf::RectangleShape buttonBlueprint;
 	buttonBlueprint.setSize(sf::Vector2f(Engine::getWindowSize().x / 6.4f, Engine::getWindowSize().y / 9.6f));
 	buttonBlueprint.setOrigin(sf::Vector2f(buttonBlueprint.getSize().x / 2.f, buttonBlueprint.getSize().y / 2.f));
 	buttonBlueprint.setFillColor(navyColor);
 
+	// Title text
 	if (_font.loadFromFile("res/fonts/ChakraPetch-Regular.ttf"))
 	{
 		_gameTitle.setFont(_font);
@@ -49,28 +52,34 @@ void MenuScene::Load()
 
 	if (_buttonFont.loadFromFile("res/fonts/BrunoAce-Regular.ttf"))
 	{
+		// Setting the color and size of every button
+		sf::RectangleShape shape;
+		shape.setFillColor(buttonBlueprint.getFillColor());
+		shape.setSize(buttonBlueprint.getSize());
+		shape.setOrigin(buttonBlueprint.getOrigin());
+		
+
+		// Setting the color and the outline of every text
+		sf::Text buttonText;
+		buttonText.setFont(_buttonFont);
+
+		buttonText.setCharacterSize(26);
+		buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
+		buttonText.setOutlineThickness(1.2f);
+
+		buttonText.setFillColor(rustColor);
+
+		// Initialising both text and buttons
 		for (int i = 0; i < 3; i++)
 		{
-			sf::RectangleShape shape;
-			shape.setFillColor(buttonBlueprint.getFillColor());
-			shape.setSize(buttonBlueprint.getSize());
-			shape.setOrigin(buttonBlueprint.getOrigin());
 			shape.setPosition(sf::Vector2f(Engine::getWindowSize().x / 2.f, 240.f + (i * (buttonBlueprint.getSize().y + 50.f))));
-
-			sf::Text buttonText;
-			buttonText.setFont(_buttonFont);
-
-			buttonText.setCharacterSize(26);
-			buttonText.setOutlineColor(sf::Color(255, 255, 255, 0));
-			buttonText.setOutlineThickness(1.2f);
-
-			buttonText.setFillColor(rustColor);
 
 			buttonText.setPosition(sf::Vector2f(shape.getPosition()));
 			buttonText.setString(_buttonNames[i]);
 			_uiElements.push_back(std::pair<sf::RectangleShape, sf::Text>(shape, buttonText));
 		}
 
+		// Setting the origin of every text so that it will be centered
 		for (auto& pair : _uiElements)
 			pair.second.setOrigin(pair.second.getGlobalBounds().getSize() / 2.f + pair.second.getLocalBounds().getPosition());
 
@@ -87,15 +96,20 @@ void MenuScene::Unload()
 
 void MenuScene::Update(const double& dt)
 {
+	// This snippet of code will simply make the title pulse
 	const float alpha = alphaAmplitude * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffset;
 	_gameTitle.setFillColor(sf::Color(rustColor.r, rustColor.g, rustColor.b, alpha));
 
 	for (auto& pair : _uiElements)
 	{
+		// Check if the mouse is on a button
 		if (pair.first.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(Engine::getWindow()))))
 		{
+			// If it is, start the animation
 			const float outlineAlpha = alphaOffsetFromZero * std::sin(menuClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffsetFromZero;
 			pair.second.setOutlineColor(sf::Color(255, 255, 255, outlineAlpha));
+			
+			// Change scene depending on the button
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
 				if (pair.second.getString() == "PLAY")
@@ -118,10 +132,10 @@ void MenuScene::Update(const double& dt)
 		}
 		else
 		{
+			// If nothing is selected, just set the outline to white
 			pair.second.setOutlineColor(sf::Color(255, 255, 255, 0));
 		}
 	}
-
 
 	UpdatePositions();
 	Scene::Update(dt);
