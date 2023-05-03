@@ -150,6 +150,9 @@ void HSPtoRGB(
 
 bool isRebind = false;
 bool hasBeenLoaded = false;
+int most_recent_score_threshold = 0;
+
+
 void GameScene::Load()
 {
 	if (!hasBeenLoaded)
@@ -313,8 +316,10 @@ void GameScene::Load()
 	}
 	if (_settings[2].second)
 	{
+		// Authored by rucisko, 2019, https://freesound.org/people/rucisko/sounds/462493/ (creative commons)
 		Audio::Music_Load_from_file("res/audio/music_ambience_city_2.ogg", "ambience_city_2");
 		Audio::Music_Play("ambience_city_2", 0.4, 1.0);
+		// Authored by theplax, 2021, https://freesound.org/people/theplax/sounds/553998/ (creative commons)
 		Audio::Music_Load_from_file("res/audio/music_ambience_city_1.ogg", "ambience_city_1");
 		Audio::Music_Play("ambience_city_1", 0.2, 1.0);
 	}
@@ -322,15 +327,52 @@ void GameScene::Load()
 
 	if (_settings[3].second)
 	{
+		// Player car engine sounds
+		// Authored by FreeCarSoundsGaming, 2020, https://freesound.org/people/FreeCarSoundsGaming/sounds/535041/ (creative commons)
 		Audio::Sound_Load_from_file("res/audio/sound_engine_rev_loop.ogg", "engine_rev");
+		// Authored by C-V, 2021, https://freesound.org/people/C-V/sounds/565597/ (creative commons)
 		Audio::Sound_Load_from_file("res/audio/sound_engine_idle_fastest_loop.ogg", "engine_idle");
 		Audio::Sound_Play_Looping("engine_rev", 0.0f, 1.0f);
 		Audio::Sound_Play_Looping("engine_idle", 0.0f, 1.0f);
+
+		// Collision impact sounds
+		// Authored by Pol, 2017, https://freesound.org/people/P%C3%B3l/sounds/385937/ (creative commons)
+		Audio::Sound_Load_from_file("res/audio/sound_collisionSmall_single.ogg", "sound_collisionSmall_single");
+		// Authored by qubodup, 2012, https://freesound.org/people/qubodup/sounds/151624/ (creative commons)
+		Audio::Sound_Load_from_file("res/audio/sound_collisionBig_single.ogg", "sound_collisionBig_single");
+		// Composited from files authored by sandydb (2010, https://freesound.org/people/sandyrb/sounds/95078/) and jsbarrett (2015, https://freesound.org/people/jsbarrett/sounds/321139/)
+		Audio::Sound_Load_from_file("res/audio/sound_collisionBiggest_single.ogg", "sound_collisionBiggest_single");
+
+
+		// Voice announcer, eg. "Multi smash!"
+		// Authored by us.
+		Audio::Sound_Load_from_file("res/audio/announcer_cantStopSmashing.ogg", "announcer_cantStopSmashing");
+		Audio::Sound_Load_from_file("res/audio/announcer_criticalCrash.ogg", "announcer_criticalCrash");
+		Audio::Sound_Load_from_file("res/audio/announcer_doubleSmash.ogg", "announcer_doubleSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_holySmash.ogg", "announcer_holySmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_humiliationSmash.ogg", "announcer_humiliationSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_hyperSmash.ogg", "announcer_hyperSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_impossibleSmash.ogg", "announcer_impossibleSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_kingSmash.ogg", "announcer_kingSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_ludicrousSmash.ogg", "announcer_ludicrousSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_masterSmash.ogg", "announcer_masterSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_monsterSmash.ogg", "announcer_monsterSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_multiSmash.ogg", "announcer_multiSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_mysteriousSmash.ogg", "announcer_mysteriousSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_oneHitKill.ogg", "announcer_oneHitKill");
+		Audio::Sound_Load_from_file("res/audio/announcer_overSmash.ogg", "announcer_overSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_rampage.ogg", "announcer_rampage");
+		Audio::Sound_Load_from_file("res/audio/announcer_smashacre.ogg", "announcer_smashacre");
+		Audio::Sound_Load_from_file("res/audio/announcer_smashingSpree.ogg", "announcer_smashingSpree");
+		Audio::Sound_Load_from_file("res/audio/announcer_smashpocalypse.ogg", "announcer_smashpocalypse");
+		Audio::Sound_Load_from_file("res/audio/announcer_smashtacular.ogg", "announcer_smashtacular");
+		Audio::Sound_Load_from_file("res/audio/announcer_ultimateSmash.ogg", "announcer_ultimateSmash");
+		Audio::Sound_Load_from_file("res/audio/announcer_wickedSmash.ogg", "announcer_wickedSmash");
 	}
 
 
 	Engine::getWindow().setView(PlayerCamera);
-	
+
 	if (_font.loadFromFile("res/fonts/ChakraPetch-Regular.ttf"))
 	{
 		_score.setFont(_font);
@@ -366,10 +408,20 @@ void GameScene::Render()
 {
 
 	ls::Render(Engine::getWindow());
-	
+
 	Engine::getWindow().draw(line);
 	Engine::getWindow().draw(_score);
 	Scene::Render();
+}
+
+void Announcer(int scoreThreshold, int index, string announcer_line, int scorenumber)
+{
+	if (scorenumber > scoreThreshold && most_recent_score_threshold < index)
+	{
+		Audio::Sound_Play(announcer_line, 1.0f, 1.0f);
+		most_recent_score_threshold = index;
+	}
+
 }
 
 void GameScene::Update(const double& dt)
@@ -381,13 +433,49 @@ void GameScene::Update(const double& dt)
 	{
 		if (edge->contact->IsTouching())
 		{
-			//std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
-			edge->contact->GetFixtureA()->GetBody()->SetAngularVelocity(ballBody->GetLinearVelocity().Length());
-			_scoreNumber++;
+			float32 collided_body_mass = (edge->contact->GetFixtureA()->GetBody()->GetMass());
+			if (collided_body_mass >= (float32)1.0f)
+			{
+				//std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
+				edge->contact->GetFixtureA()->GetBody()->SetAngularVelocity(ballBody->GetLinearVelocity().Length());
+
+				auto impact_speed = ballBody->GetLinearVelocity().Length();
+				// Increase the score on a hit, with points being exponentially better the higher speed your impact.
+				_scoreNumber += impact_speed * impact_speed * dt * 100;
+
+				// Play 3 layered audio collision sounds, adjusting their volume and pitch to scale with 3 different powers of the impact speed. This lets us have small "ding!" sounds for low impact collisons, that transition through a deeper metal impact sound to the biggest smash with broken glass.
+				auto audio_impact_strength = impact_speed / 50;
+				Audio::Sound_Play("sound_collisionSmall_single", audio_impact_strength, 1 - (audio_impact_strength / 2));
+				audio_impact_strength = (impact_speed * impact_speed) / 450;
+				Audio::Sound_Play("sound_collisionBig_single", audio_impact_strength, 1 - (audio_impact_strength / 2));
+				audio_impact_strength = (impact_speed * impact_speed * impact_speed) / 20000;
+				Audio::Sound_Play("sound_collisionBiggest_single", audio_impact_strength, 1 - (audio_impact_strength / 3));
+
+			}
+
 		}
 
 	}
 
+	Announcer(13300, 19, "announcer_cantStopSmashing", _scoreNumber);
+	Announcer(12000, 18, "announcer_mysteriousSmash", _scoreNumber);
+	Announcer(10800, 17, "announcer_ultimateSmash", _scoreNumber);
+	Announcer(9700, 16, "announcer_smashpocalypse", _scoreNumber);
+	Announcer(8700, 15, "announcer_smashacre", _scoreNumber);
+	Announcer(7800, 14, "announcer_humiliationSmash", _scoreNumber);
+	Announcer(6900, 13, "announcer_rampage", _scoreNumber);
+	Announcer(6100, 12, "announcer_holySmash", _scoreNumber);
+	Announcer(5400, 11, "announcer_monsterSmash", _scoreNumber);
+	Announcer(4700, 10, "announcer_wickedSmash", _scoreNumber);
+	Announcer(4100, 9, "announcer_masterSmash", _scoreNumber);
+	Announcer(3500, 8, "announcer_kingSmash", _scoreNumber);
+	Announcer(3000, 7, "announcer_smashingSpree", _scoreNumber);
+	Announcer(2500, 6, "announcer_smashtacular", _scoreNumber);
+	Announcer(2000, 5, "announcer_impossibleSmash", _scoreNumber);
+	Announcer(1600, 4, "announcer_ludicrousSmash", _scoreNumber);
+	Announcer(1200, 3, "announcer_hyperSmash", _scoreNumber);
+	Announcer(800, 2, "announcer_overSmash", _scoreNumber);
+	Announcer(500, 1, "announcer_criticalCrash", _scoreNumber);
 
 	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
 	PlayerCamera.move(movement * (float)dt * 5.f);

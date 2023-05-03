@@ -125,11 +125,11 @@ float AIBehaviourComponent::HowCloseIsNearestCar()
 	sf::Vector2f sensor_position = _parent->getPosition() + offset;
 
 	// TODO: Remove this debugging visualisation before release!
-	debug_sensor = sf::CircleShape(vision_radius);
-	debug_sensor.setFillColor(sf::Color::White);
-	debug_sensor.setOrigin(sf::Vector2f(vision_radius, vision_radius));
-	debug_sensor.setPosition(sensor_position);
-	Renderer::Queue(&debug_sensor);
+	//debug_sensor = sf::CircleShape(vision_radius);
+	//debug_sensor.setFillColor(sf::Color::White);
+	//debug_sensor.setOrigin(sf::Vector2f(vision_radius, vision_radius));
+	//debug_sensor.setPosition(sensor_position);
+	//Renderer::Queue(&debug_sensor);
 
 	float shortest_distance = std::numeric_limits<float>::infinity();
 
