@@ -175,7 +175,7 @@ void AIBehaviourComponent::MoveToTargetOneTick(sf::Vector2f target, float move_s
 
 void AIBehaviourComponent::PhysicsDriveForwards(float desired_velocity, double dt)
 {
-	float movement_power = 1.0f;
+	float movement_power = 1.5f;
 
 	desired_velocity = -desired_velocity * movement_power;
 
