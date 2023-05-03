@@ -142,3 +142,8 @@ void MenuScene::Render()
 	Scene::Render();
 }
 
+void MenuScene::HandleEvents()
+{
+	Scene::HandleEvents();
+}
+

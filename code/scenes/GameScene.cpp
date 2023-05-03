@@ -141,6 +141,11 @@ void GameScene::Render()
 	Scene::Render();
 }
 
+void GameScene::HandleEvents()
+{
+	Scene::HandleEvents();
+}
+
 void GameScene::Update(const double& dt)
 {
 	Engine::getWindow().setView(PlayerCamera);

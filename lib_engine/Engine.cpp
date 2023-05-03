@@ -58,24 +58,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 		accumulator += frameTime;
 
-		Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == Event::Closed)
-			{
-				window.close();
-			}
-			if (Keyboard::isKeyPressed(Keyboard::Escape))
-			{
-				ChangeScene(&menuScene);
-			}
-			if (event.type == Event::Resized)
-			{
-				sf::FloatRect visibleArea(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
-				window.setView(sf::View(visibleArea));
-			}
-		}
-
+		_activeScene->HandleEvents();
 		window.clear();
 
 		while (accumulator >= dt)
@@ -143,6 +126,28 @@ void Scene::Update(const double& dt)
 void Scene::Render()
 {
 	ents.Render();
+}
+
+void Scene::HandleEvents()
+{
+	Event event;
+	while (Engine::getWindow().pollEvent(event))
+	{
+		if (event.type == Event::Closed)
+		{
+			Engine::getWindow().close();
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Escape))
+		{
+			Engine::ChangeScene(&menuScene);
+		}
+		if (event.type == Event::Resized)
+		{
+			sf::FloatRect visibleArea(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
+			Engine::getWindow().setView(sf::View(visibleArea));
+		}
+	}
+
 }
 
 std::shared_ptr<Entity> Scene::MakeEntity()

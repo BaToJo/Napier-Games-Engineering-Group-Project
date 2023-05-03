@@ -36,6 +36,17 @@ void SettingsScene::UpdatePositions()
 	//));
 }
 
+void SettingsScene::UpdateKeys()
+{
+	for (int i = 0; i < InputManager::keyboardControls.size(); i++)
+	{
+		int uiIndex = _uiElements.size() - (4 - i);
+		auto scan = sf::Keyboard::delocalize(InputManager::keyboardControls[i]);
+
+ 		_uiElements[uiIndex].second.setString(sf::Keyboard::getDescription(scan).toAnsiString());
+	}
+}
+
 
 void SettingsScene::Load()
 {
@@ -108,15 +119,21 @@ void SettingsScene::Update(const double& dt)
 	const float alpha = alphaAmplitude * std::sin(settingsClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffset;
 	_settingsTitle.setFillColor(sf::Color(rustColor.r, rustColor.g, rustColor.b, alpha));
 
+	if (isRebinding && currentKeyPressed != sf::Keyboard::Unknown)
+	{
+		InputManager::RebindKeyboard(indexRebind, currentKeyPressed);
+		currentKeyPressed = sf::Keyboard::Unknown;
+		indexRebind = 0;
+		isRebinding = false;
+	}
+
 	int i = 0;
 	for (auto& pair : _uiElements)
 	{
 		
 		if (pair.first.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(Engine::getWindow()))))
 		{
-			sf::Event event;
-			Engine::getWindow().waitEvent(event);
-			if (event.type == sf::Event::MouseButtonPressed)
+			if (isMousePressed)
 			{
 				if (pair.second.getString() == _settings[0].first)
 				{
@@ -161,6 +178,16 @@ void SettingsScene::Update(const double& dt)
 					ss.clear();
 				}
 
+				for (int j = 0; j < InputManager::keyboardControls.size(); j++)
+				{
+					auto scan = sf::Keyboard::delocalize(InputManager::keyboardControls[j]);
+					if (pair.second.getString() == sf::Keyboard::getDescription(scan).toAnsiString())
+					{
+						isRebinding = true;
+						indexRebind = j;
+					}
+				}
+				isMousePressed = false;
 			}
 		}
 		else
@@ -190,6 +217,7 @@ void SettingsScene::Update(const double& dt)
 
 	}
 
+	UpdateKeys();
 	UpdatePositions();
 }
 
@@ -207,3 +235,32 @@ void SettingsScene::Render()
 }
 
 
+void SettingsScene::HandleEvents()
+{
+	sf::Event event;
+	while (Engine::getWindow().pollEvent(event))
+	{
+		if (event.type == sf::Event::MouseButtonPressed)
+		{
+			isMousePressed = true;
+		}
+		if (event.type == sf::Event::KeyPressed && isRebinding)
+		{
+			currentKeyPressed = event.key.code;
+		}
+		if (event.type == sf::Event::Closed)
+		{
+			Engine::getWindow().close();
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+		{
+			Engine::ChangeScene(&menuScene);
+		}
+		if (event.type == sf::Event::Resized)
+		{
+			sf::FloatRect visibleArea(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
+			Engine::getWindow().setView(sf::View(visibleArea));
+		}
+	}
+	//Scene::HandleEvents();
+}

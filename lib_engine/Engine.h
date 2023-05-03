@@ -12,7 +12,7 @@ public:
 	virtual void Unload();
 	virtual void Update(const double& dt);
 	virtual void Render();
-
+	virtual void HandleEvents();
 	std::shared_ptr<Entity> MakeEntity();
 
 	EntityManager ents;
