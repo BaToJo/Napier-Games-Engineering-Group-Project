@@ -2,9 +2,12 @@
 
 #include "..\lib_engine\Engine.h"
 #include "../InputManager.h"
+#include "../ContactListener.h"
 
 class GameScene : public Scene
 {
+private:
+	ContactListener* _contactListener;
 public:
 	void Load() override;
 

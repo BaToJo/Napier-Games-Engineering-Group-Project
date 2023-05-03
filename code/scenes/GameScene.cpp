@@ -5,15 +5,9 @@
 #include "..\components\Cmp_Player_Physics.h"
 #include "../code/components/Cmp_Waypoint.h"
 #include "../code/components/Cmp_Actor_Behaviour.h"
-
+#include "../lib_engine/System_Physics.h"
 #include <SFML/Graphics.hpp>
 
-
-#include <Windows.h>
-#include <Xinput.h>
-
-
-#pragma comment(lib, "XInput.lib")
 #include "../lib_engine/Audio.h"
 #include "../game.h"
 using namespace std;
@@ -181,7 +175,8 @@ void GameScene::Load()
 	//	waypoint_shape->getShape().setOrigin(Vector2f(waypoint_trigger_radius, waypoint_trigger_radius));
 	//}
 
-
+	//_contactListener = new ContactListener();
+	//Physics::GetWorld()->SetContactListener(_contactListener);
 	manager = new InputManager();
 
 	// Player Setup
@@ -231,6 +226,7 @@ void GameScene::Load()
 	auto wreckingBallPhysics = wreckingBall->addComponent<ActorPhysicsComponent>(true, radius);
 
 	wreckingBallPhysics->setMass(5.f);
+	wreckingBallPhysics->setRestitution(1.f);
 	// Player Physics Component
 	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, manager, wreckingBall, chains);
 	playerPhysics->setMass(20.f);
@@ -252,7 +248,6 @@ void GameScene::Load()
 
 
 
-
 	// Make a test NPC
 	test_NPC = MakeEntity();
 	test_NPC->setPosition(sf::Vector2f(10.f * tileSize, -3.5f * tileSize));
@@ -267,7 +262,8 @@ void GameScene::Load()
 
 	// Test NPC Physics Body Component
 	auto physicsCompNPC = test_NPC->addComponent<ActorPhysicsComponent>(true, sizeNPC);
-
+	physicsCompNPC->setMass(5.f);
+	physicsCompNPC->setRestitution(0.1f);
 	// Test NPC AI component
 	auto AIcompNPC = test_NPC->addComponent<AIBehaviourComponent>();
 	// Give them an arbitrary target waypoint to start them off.
@@ -350,7 +346,7 @@ void GameScene::Unload()
 		e.reset();
 	}
 	chains.clear();
-
+	delete _contactListener;
 	Audio::UnloadAll();
 	ls::Unload();
 	Scene::Unload();
@@ -367,24 +363,17 @@ void GameScene::Update(const double& dt)
 {
 	Engine::getWindow().setView(PlayerCamera);
 
-	if (isRebind)
+	auto ballBody = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
+	for (b2ContactEdge* edge = ballBody->GetContactList(); edge; edge = edge->next)
 	{
-		sf::Keyboard::Key rebind = sf::Keyboard::Unknown;
-		for (sf::Keyboard::Key k = (sf::Keyboard::Key)0; k != sf::Keyboard::KeyCount; k = (sf::Keyboard::Key)(k + 1))
+		if (edge->contact->IsTouching())
 		{
-			if (sf::Keyboard::isKeyPressed(k) && sf::Keyboard::isKeyPressed(sf::Keyboard::Q) != true)
-			{
-				rebind = k;
-				isRebind = false;
-			}
-
+			//std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
+			edge->contact->GetFixtureA()->GetBody()->SetAngularVelocity(ballBody->GetLinearVelocity().Length());
 		}
-		manager->RebindKeyboard(0, rebind);
-
+		
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-		isRebind = true;
 	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
 	PlayerCamera.move(movement * (float)dt * 5.f);
 	PlayerCamera.setCenter(player->getPosition());

@@ -9,7 +9,6 @@ ActorPhysicsComponent::ActorPhysicsComponent(Entity* p, bool dyn, const sf::Vect
 	BodyDef.position = Physics::Sv2_to_bv2(Physics::Invert_height(p->getPosition()));
 	_body = Physics::GetWorld()->CreateBody(&BodyDef);
 	_body->SetActive(true);
-
 	// Shape Settings
 	b2PolygonShape Shape;
 	Shape.SetAsBox(Physics::Sv2_to_bv2(size).x * 0.5f, Physics::Sv2_to_bv2(size).y * 0.5f);
