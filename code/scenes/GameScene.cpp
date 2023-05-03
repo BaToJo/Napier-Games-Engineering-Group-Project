@@ -161,7 +161,7 @@ void GameScene::Load()
 	float tileSize = 50.f;
 
 	//ls::LoadLevelFile_OLD("res/levels/pacman.txt", 50.f);
-	ls::LoadLevelFile("res/levels/test_large_embeddedTileset.tmj", this, tileSize);
+	ls::LoadLevelFile("res/levels/demo.tmj", this, tileSize);
 
 	// TODO: Remove this debugging to visualise waypoints before release.
 	// Spawn a green circle on top of every waypoint for debugging purposes.
@@ -275,7 +275,7 @@ void GameScene::Load()
 	shared_ptr<AIBehaviourComponent> aiCompTrafficNPC;
 	for (auto& waypoint_pair : ls::GetWaypoints())
 	{
-		float random_chance_of_spawning_NPC = .4f;
+		float random_chance_of_spawning_NPC = .3f;
 		if (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) > random_chance_of_spawning_NPC) continue;
 
 		auto& waypoint = waypoint_pair.second;
@@ -316,6 +316,8 @@ void GameScene::Load()
 	{
 		Audio::Music_Load_from_file("res/audio/music_ambience_city_2.ogg", "ambience_city_2");
 		Audio::Music_Play("ambience_city_2", 0.4, 1.0);
+		Audio::Music_Load_from_file("res/audio/music_ambience_city_1.ogg", "ambience_city_1");
+		Audio::Music_Play("ambience_city_1", 0.2, 1.0);
 	}
 
 
@@ -368,7 +370,7 @@ void GameScene::Update(const double& dt)
 			//std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
 			edge->contact->GetFixtureA()->GetBody()->SetAngularVelocity(ballBody->GetLinearVelocity().Length());
 		}
-		
+
 	}
 
 	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();

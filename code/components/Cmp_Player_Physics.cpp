@@ -33,10 +33,10 @@ void PlayerPhysicsComponent::HandleDriving()
 	if (_settings[3].second)
 	{
 		float top_speed = 30;
-		Audio::Sound_Set_Volume("engine_rev", (currSpeed / top_speed));
-		Audio::Sound_Set_Volume("engine_idle", (1 - (currSpeed / top_speed)) * 0.2);
-		Audio::Sound_Set_Pitch("engine_rev", (currSpeed / top_speed) / 2 + 0.5);
-		Audio::Sound_Set_Pitch("engine_idle", (currSpeed / top_speed) / 2 + 0.5);
+		Audio::Sound_Set_Volume("engine_rev", abs(currSpeed / top_speed));
+		Audio::Sound_Set_Volume("engine_idle", abs(1 - (currSpeed / top_speed)) * 0.2);
+		Audio::Sound_Set_Pitch("engine_rev", abs(currSpeed / top_speed) / 2 + 0.5);
+		Audio::Sound_Set_Pitch("engine_idle", abs(currSpeed / top_speed) / 2 + 0.5);
 	}
 
 

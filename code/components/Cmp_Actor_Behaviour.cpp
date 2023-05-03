@@ -101,10 +101,10 @@ void AIBehaviourComponent::AimTowardsTargetOneTick(sf::Angle azimuth, double dt)
 }
 float AIBehaviourComponent::HowCloseIsNearestCar()
 {
-	float vision_radius = 50.0f;
+	float vision_radius = 120.0f;
 
 
-	float magnitude = vision_radius + 45.0f;
+	float magnitude = vision_radius - 40.0f;
 	sf::Angle angle = _parent->getRotation();
 	sf::Vector2f offset = sf::Vector2f(magnitude * cos(angle.asRadians()), magnitude * sin(angle.asRadians()));
 	sf::Vector2f sensor_position = _parent->getPosition() + offset;
