@@ -1,6 +1,6 @@
 #pragma once
 #include "Ecm.h"
-#include "Box2D/Box2D.h"
+#include "../lib/b2d/Box2D/Box2D/Box2D.h"
 class ActorPhysicsComponent : public Component
 {
 protected:

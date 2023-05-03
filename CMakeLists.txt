@@ -30,8 +30,8 @@ link_directories("${CMAKE_BINARY_DIR}/lib/sfml/lib")
 # # Tile loader lib
 file(GLOB_RECURSE SOURCE_FILES lib_tile_level_loader/*.cpp lib_tile_level_loader/*.h)
 add_library(lib_tile_level_loader STATIC ${SOURCE_FILES})
-target_include_directories(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib_tile_level_loader/")
-target_link_libraries(lib_tile_level_loader sfml-graphics lib_maths)
+target_include_directories(lib_tile_level_loader INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm" PUBLIC SYSTEM ${B2D_INCS})
+target_link_libraries(lib_tile_level_loader lib_ecm Box2D sfml-graphics lib_maths)
 
 # # Entity Component Model library
 file(GLOB_RECURSE SOURCE_FILES lib_ecm/*.cpp lib_ecm/*.h)

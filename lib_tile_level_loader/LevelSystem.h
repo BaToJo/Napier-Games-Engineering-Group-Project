@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include "../lib_ecm/Ecm.h"
+#include "../lib/b2d/Box2D/Box2D/Box2D.h"
 
 #define ls LevelSystem
 
@@ -64,6 +65,9 @@ protected:
 	static sf::Vector2f _offset;
 
 	static std::vector<std::unique_ptr<sf::RectangleShape>> _sprites;
+	static std::vector<b2Body*> _colliders_bodies;
+	static std::vector<b2Fixture*> _colliders_fixtures;
+
 
 	static void BuildSprites(bool optimise = true);
 	static float _tileSize; // for rendering

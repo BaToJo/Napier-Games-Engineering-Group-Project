@@ -15,6 +15,8 @@ public:
 		int imageheight = -1;
 		int imagewidth = -1;
 		sf::Texture texture;
+		std::string audio_on_drive = "";
+		bool solid = false;
 	};
 
 	struct Grid

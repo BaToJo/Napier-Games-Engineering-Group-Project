@@ -5,6 +5,7 @@
 #include "../lib_JSON_reader/TileMap_Importer.h"
 #include "../lib_engine/Engine.h"
 #include "../code/components/Cmp_Waypoint.h"
+#include "../lib_engine/System_Physics.h"
 // #include "../code/components/Cmp_Sprite.h"
 
 using namespace std;
@@ -46,7 +47,12 @@ size_t LevelSystem::_height;
 float LevelSystem::_tileSize(100.f);
 Vector2f LevelSystem::_offset(0.0f, 30.0f);
 // Vector2f LevelSystem::_offset(0,0);
-vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
+std::vector<std::unique_ptr<sf::RectangleShape>> LevelSystem::_sprites;
+std::vector<b2Body*> LevelSystem::_colliders_bodies;
+std::vector<b2Fixture*> LevelSystem::_colliders_fixtures;
+
+
+
 
 void LevelSystem::LoadWaypoints(Scene* scene, float tileSize)
 {
@@ -146,7 +152,8 @@ void LevelSystem::LoadTileMap(float tileSize)
 			tile->setOrigin(Vector2f(tileSize / 2, tileSize / 2));
 
 			tile->setPosition(sf::Vector2f(tile_x * tileSize, tile_y * tileSize));
-			tile->setSize(sf::Vector2f(tileSize, tileSize));
+			sf::Vector2f tile_dimensions = sf::Vector2f(tileSize, tileSize);
+			tile->setSize(tile_dimensions);
 			if (mirrored)
 			{
 				tile->scale(sf::Vector2f(-1, 1));
@@ -178,9 +185,44 @@ void LevelSystem::LoadTileMap(float tileSize)
 			}
 
 			_sprites.push_back(move(tile));
+
+			if (TileMap_Importer::GetTileSolid(&tileMap, tile_type))
+			{
+				// Now to make a collider for solid walls.
+				// Define a body for it, which will be static.
+				b2BodyDef body_def;
+				body_def.type = b2_staticBody;
+
+				// Put it in the right place in the world.
+				body_def.position = Physics::Sv2_to_bv2(Physics::Invert_height(sf::Vector2f(tile_x * tileSize, tile_y * tileSize)));
+
+				// Instantiate it and store it in our collection of colliders.
+				b2Body* collider_body = Physics::GetWorld()->CreateBody(&body_def);
+				collider_body->SetActive(true);
+
+				// Shape Settings
+				b2PolygonShape Shape;
+				Shape.SetAsBox(Physics::Sv2_to_bv2(tile_dimensions).x * 0.5, Physics::Sv2_to_bv2(tile_dimensions).y * 0.5);
+
+				// Fixture Settings
+				b2FixtureDef fixture_def;
+				fixture_def.friction = 0.8f;
+				fixture_def.restitution = 0.2;
+				fixture_def.density = 1.f;
+				fixture_def.shape = &Shape;
+
+				b2Fixture* collider_fixture = collider_body->CreateFixture(&fixture_def);
+
+				//std::unique_ptr<b2Body> collider(collider_pointer);
+				_colliders_bodies.push_back(collider_body);
+				_colliders_fixtures.push_back(collider_fixture);
+			}
+			//else
+			//{
+			//	cout << "no collider spawned for type " + std::to_string(tile_type);
+			//}
 		}
 	}
-
 }
 
 void LevelSystem::LoadLevelFile(const std::string& path, Scene* scene, float tileSize)

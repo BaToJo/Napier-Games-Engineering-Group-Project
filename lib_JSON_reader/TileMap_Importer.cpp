@@ -167,6 +167,20 @@ namespace TileMap_Importer
 				tile_instance.image = tile["image"];
 				tile_instance.imageheight = tile["imageheight"];
 				tile_instance.imagewidth = tile["imagewidth"];
+				for (const auto& property : tile["properties"])
+				{
+
+					string property_name = property["name"];
+
+					if (property_name == "audio_on_drive")
+					{
+						tile_instance.audio_on_drive = property["value"];
+					}
+					if (property_name == "solid")
+					{
+						tile_instance.solid = property["value"];
+					}
+				}
 
 				sf::Texture tile_texture = sf::Texture();
 				tile_texture.loadFromFile(tile_instance.image);
@@ -199,6 +213,38 @@ namespace TileMap_Importer
 			}
 		}
 		return nullptr;
+	}
+
+	bool GetTileSolid(TileMap* tileMap, int id)
+	{
+		if (tileMap->tilesets.size() <= 0)
+		{
+			throw std::logic_error("Tried to get a boolean from a tileMap, but the tileMap didn't have a tileset!\n\nHas the tileMap been initialized correctly? Has the tileMap been lost after being created (eg. garbage collected when it goes out of scope)?");
+		}
+		for (TileMap::Tile& tile : tileMap->tilesets[0].tiles)
+		{
+			if (tile.id == id - 1)
+			{
+				return tile.solid;
+			}
+		}
+		return false;
+	}
+
+	std::string GetTileAudioDriveOn(TileMap* tileMap, int id)
+	{
+		if (tileMap->tilesets.size() <= 0)
+		{
+			throw std::logic_error("Tried to get a string from a tileMap, but the tileMap didn't have a tileset!\n\nHas the tileMap been initialized correctly? Has the tileMap been lost after being created (eg. garbage collected when it goes out of scope)?");
+		}
+		for (TileMap::Tile& tile : tileMap->tilesets[0].tiles)
+		{
+			if (tile.id == id - 1)
+			{
+				return tile.audio_on_drive;
+			}
+		}
+		return "";
 	}
 
 	std::vector<sf::Keyboard::Key> TileMap_Importer::KeyboardControls_LoadFromFile(std::string file_name)
@@ -297,16 +343,3 @@ namespace TileMap_Importer
 	}
 
 } // namespace Tilemap_Importer
-
-
-
-
-
-
-
-
-
-
-
-
-

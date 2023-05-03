@@ -3,12 +3,16 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "test_large.tmx",
     "expandedProjectPaths": [
+        "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "C:/Users/Jonathan/University/GamesEng/Napier-Games-Engineering-Group-Project/res/textures/tilemap.tsx": {
-            "dynamicWrapping": false
+            "dynamicWrapping": false,
+            "scaleInDock": 3,
+            "scaleInEditor": 8
         },
         "city.tmx": {
             "scale": 1.5,
@@ -22,8 +26,8 @@
             "scale": 1,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 17.5,
-                "y": -4
+                "x": 16.5,
+                "y": -7
             }
         },
         "test_tile_reading.tmx": {
@@ -42,9 +46,13 @@
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "openFiles": [
+        "test_large.tmx",
+        "C:/Users/Jonathan/University/GamesEng/Napier-Games-Engineering-Group-Project/res/textures/tilemap.tsx"
     ],
     "project": "Test_Map.tiled-project",
-    "property.type": "object",
+    "property.type": "string",
     "recentFiles": [
+        "C:/Users/Jonathan/University/GamesEng/Napier-Games-Engineering-Group-Project/res/textures/tilemap.tsx",
+        "test_large.tmx"
     ]
 }
