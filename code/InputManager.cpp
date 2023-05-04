@@ -187,7 +187,7 @@ bool InputManager::IsMoving()
 	IsControllerConnected();
 	if (!isControllerConnected)
 	{
-		for (int i = 0; i < keyboardControls[i]; i++)
+		for (int i = 0; i < keyboardControls.size(); i++)
 		{
 			if (sf::Keyboard::isKeyPressed(keyboardControls[i]))
 			{
