@@ -35,7 +35,7 @@ void GameScene::Load()
 	ls::LoadLevelFile("res/levels/pacman.txt", 50.f);
 
 
-
+	InputManager::IsControllerConnected();
 	// Player Setup
 	player = MakeEntity();
 	player->setPosition(Vector2f(0.f, 0.f));
