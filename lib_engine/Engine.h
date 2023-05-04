@@ -31,11 +31,11 @@ public:
 	static sf::Vector2u getWindowSize();
 	static void ChangeScene(Scene*);
 	static Scene* GetActiveScene();
+	static void WindowResize(float x, float y);
 
 private:
 	static Scene* _activeScene;
 	static std::string _gameName;
 	static void Update(double dt);
 	static void Render(sf::RenderWindow& window);
-	static void WindowResize(float x, float y);
 };

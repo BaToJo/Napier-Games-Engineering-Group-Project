@@ -157,6 +157,8 @@ void GameScene::Load()
 {
 	if (!hasBeenLoaded)
 	{
+		auto window_size = Engine::getWindowSize();
+		Engine::WindowResize(window_size.x, window_size.y);
 		PlayerCamera.zoom(0.8);
 		hasBeenLoaded = true;
 	}
@@ -181,7 +183,7 @@ void GameScene::Load()
 
 	// Player Setup
 	player = MakeEntity();
-	player->setPosition(sf::Vector2f(2.f * tileSize, -5.0f * tileSize));
+	player->setPosition(sf::Vector2f(6.5f * tileSize, 6.0f * tileSize));
 
 	// Player Shape Component
 	auto shapeComp = player->addComponent<ShapeComponent>();
@@ -231,16 +233,28 @@ void GameScene::Load()
 	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, manager, wreckingBall, chains);
 	playerPhysics->setMass(20.f);
 
-	cube = MakeEntity();
-	cube->setPosition(Vector2f(player->getPosition().x + 200.f, player->getPosition().y - 400.f));
-	auto testShape = cube->addComponent<ShapeComponent>();
-	Vector2f testSize = Vector2f(50.f, 50.f);
-	testShape->setShape<RectangleShape>(testSize);
-	testShape->getShape().setFillColor(sf::Color::Yellow);
-	testShape->getShape().setOrigin(Vector2f(testSize.x / 2.f, testSize.y / 2.f));
+	// Some boxes to knock around for fun.
+	for (int cube_x = 0; cube_x < 2; cube_x++)
+	{
+		for (int cube_y = 0; cube_y < 2; cube_y++)
+		{
+			cube = MakeEntity();
+			cube->setPosition(Vector2f((-13.f + cube_x) * tileSize, (9.0f + cube_y) * tileSize));
+			auto cubeShape = cube->addComponent<ShapeComponent>();
+			Vector2f testSize = Vector2f(tileSize, tileSize);
+			cubeShape->setShape<RectangleShape>(testSize);
+			cubeShape->getShape().setFillColor(sf::Color::Yellow);
+			cubeShape->getShape().setOrigin(Vector2f(testSize.x / 2.f, testSize.y / 2.f));
 
-	auto testPhysics = cube->addComponent<ActorPhysicsComponent>(true, testSize);
-	testPhysics->setMass(100.f);
+			auto cubePhysics = cube->addComponent<ActorPhysicsComponent>(true, testSize);
+			cubePhysics->setMass(100.f);
+			cubePhysics->getBody()->SetLinearDamping(2.0f);
+			cubePhysics->getBody()->SetAngularDamping(2.0f);
+			traffic_NPCs.push_back(cube);
+		}
+	}
+
+
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 
