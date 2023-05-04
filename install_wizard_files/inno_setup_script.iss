@@ -27,6 +27,9 @@ SetupIconFile=C:\Users\Jonathan\University\GamesEng\Napier-Games-Engineering-Gro
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+WizardImageFile=./banner.bmp
+WizardSmallImageFile=./icon.bmp
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -46,4 +49,3 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-
