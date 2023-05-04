@@ -228,6 +228,7 @@ float InputManager::CalculateYAxisValueWithDeadZone()
 {
 	// Code taken from reference. This snippet of code will calculate how much a stick is moved in a range between [-1, 1].
 	// This will also include a deadzone calculation that will avoid the stick from being far too sensitive 
+	IsControllerConnected();
 	float normLY = fmaxf(-1, (float)state.Gamepad.sThumbLY / 32767);
 
 	float leftStickY = (abs(normLY) < deadzoneY ? 0 : normLY);
@@ -241,6 +242,7 @@ float InputManager::CalculateYAxisValueWithDeadZone()
 float InputManager::CalculateXAxisValueWithDeadZone()
 {
 	// Same as before but on different axis
+	IsControllerConnected();
 	float normLX = fmaxf(-1, (float)state.Gamepad.sThumbLX / 32767);
 	float leftStickX = (abs(normLX) < deadzoneX ? 0 : normLX);
 
