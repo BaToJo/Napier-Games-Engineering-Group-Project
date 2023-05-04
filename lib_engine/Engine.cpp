@@ -71,8 +71,6 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 	double currentTime = clock.getElapsedTime().asSeconds();
 	double accumulator = 0.0f;
 
-	bool hotkeyDown_AltEnter = false;
-
 	while (window.isOpen())
 	{
 
@@ -176,6 +174,12 @@ void Scene::HandleEvents()
 		{
 			sf::FloatRect visibleArea(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
 			Engine::getWindow().setView(sf::View(visibleArea));
+			Engine::WindowResize(event.size.width, event.size.height);
+		}
+		if (event.type == Event::MouseWheelScrolled)
+		{
+			float zoomDelta = 1 + (event.mouseWheelScroll.delta * -0.1);
+			Engine::_activeScene->PlayerCamera.zoom(zoomDelta);
 		}
 	}
 
