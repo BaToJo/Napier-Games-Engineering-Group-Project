@@ -327,13 +327,16 @@ void GameScene::Load()
 
 	if (_settings[3].second)
 	{
-		// Player car engine sounds
+		// Player car sounds
 		// Authored by FreeCarSoundsGaming, 2020, https://freesound.org/people/FreeCarSoundsGaming/sounds/535041/ (creative commons)
 		Audio::Sound_Load_from_file("res/audio/sound_engine_rev_loop.ogg", "engine_rev");
 		// Authored by C-V, 2021, https://freesound.org/people/C-V/sounds/565597/ (creative commons)
 		Audio::Sound_Load_from_file("res/audio/sound_engine_idle_fastest_loop.ogg", "engine_idle");
+		// Authored by craigsmith, 2019, https://freesound.org/people/craigsmith/sounds/481668/ (creative commons)
+		Audio::Sound_Load_from_file("res/audio/sound_tire_screech_loop.ogg", "sound_tire_screech_loop");
 		Audio::Sound_Play_Looping("engine_rev", 0.0f, 1.0f);
 		Audio::Sound_Play_Looping("engine_idle", 0.0f, 1.0f);
+		Audio::Sound_Play_Looping("sound_tire_screech_loop", 0.0f, 1.0f);
 
 		// Collision impact sounds
 		// Authored by Pol, 2017, https://freesound.org/people/P%C3%B3l/sounds/385937/ (creative commons)

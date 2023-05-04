@@ -213,6 +213,12 @@ void PlayerPhysicsComponent::Update(double dt)
 		}
 	}
 
+
+	auto lateral_speed = _wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody()->GetLinearVelocity().Length();
+
+	Audio::Sound_Set_Volume("sound_tire_screech_loop", lateral_speed * lateral_speed / 1800);
+	Audio::Sound_Set_Pitch("sound_tire_screech_loop", lateral_speed * lateral_speed / 650);
+
 	ActorPhysicsComponent::Update(dt);
 }
 
