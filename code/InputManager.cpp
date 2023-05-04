@@ -6,15 +6,14 @@ float InputManager::deadzoneX = 0.2f;
 float InputManager::deadzoneY = 0.2f;
 bool InputManager::isControllerConnected = false;
 bool InputManager::isDPadEnabled = true;
-int InputManager::gamepadMovement;
-InputManager::gamepadMovement;
 
 // Setting up a list of default controls
 std::vector<sf::Keyboard::Key> InputManager::keyboardControls{
 	sf::Keyboard::W,
 	sf::Keyboard::A,
 	sf::Keyboard::S,
-	sf::Keyboard::D};
+	sf::Keyboard::D
+};
 
 // Function to rebind the current controls
 void InputManager::RebindKeyboard(const int index, const sf::Keyboard::Key key)
@@ -33,6 +32,7 @@ void InputManager::RebindKeyboard(const int index, const sf::Keyboard::Key key)
 
 float InputManager::IsMovingForward()
 {
+	IsControllerConnected();
 	// State machine that handles how the input movement is processed based on what is currently connected or used in terms of dpad or stick.
 	if (!isControllerConnected)
 	{
@@ -70,6 +70,7 @@ float InputManager::IsMovingForward()
 
 float InputManager::IsMovingBack()
 {
+	IsControllerConnected();
 	if (!isControllerConnected)
 	{
 		if (sf::Keyboard::isKeyPressed(keyboardControls[2]))
@@ -107,6 +108,7 @@ float InputManager::IsMovingBack()
 
 float InputManager::IsMovingLeft()
 {
+	IsControllerConnected();
 	if (!isControllerConnected)
 	{
 		if (sf::Keyboard::isKeyPressed(keyboardControls[1]))
@@ -144,6 +146,7 @@ float InputManager::IsMovingLeft()
 
 float InputManager::IsMovingRight()
 {
+	IsControllerConnected();
 	if (!isControllerConnected)
 	{
 		if (sf::Keyboard::isKeyPressed(keyboardControls[3]))
@@ -181,6 +184,7 @@ float InputManager::IsMovingRight()
 // This function is used to check if the player is currently moving. It is going to be used in the player physics code
 bool InputManager::IsMoving()
 {
+	IsControllerConnected();
 	if (!isControllerConnected)
 	{
 		for (int i = 0; i < keyboardControls[i]; i++)
@@ -228,7 +232,6 @@ float InputManager::CalculateYAxisValueWithDeadZone()
 {
 	// Code taken from reference. This snippet of code will calculate how much a stick is moved in a range between [-1, 1].
 	// This will also include a deadzone calculation that will avoid the stick from being far too sensitive
-	IsControllerConnected();
 	float normLY = fmaxf(-1, (float)state.Gamepad.sThumbLY / 32767);
 
 	float leftStickY = (abs(normLY) < deadzoneY ? 0 : normLY);
@@ -243,7 +246,6 @@ float InputManager::CalculateYAxisValueWithDeadZone()
 float InputManager::CalculateXAxisValueWithDeadZone()
 {
 	// Same as before but on different axis
-	IsControllerConnected();
 	float normLX = fmaxf(-1, (float)state.Gamepad.sThumbLX / 32767);
 	float leftStickX = (abs(normLX) < deadzoneX ? 0 : normLX);
 

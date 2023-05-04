@@ -131,7 +131,7 @@ void SettingsScene::Unload()
 	Scene::Unload();
 }
 
-void SettingsScene::Update(const double &dt)
+void SettingsScene::Update(const double& dt)
 {
 	// This snippet of code makes the title pulse
 	const float alpha = alphaAmplitude * std::sin(settingsClock.getElapsedTime().asSeconds() * 1.f * M_PI) + alphaOffset;
@@ -148,7 +148,7 @@ void SettingsScene::Update(const double &dt)
 
 	int i = 0;
 	// Checking every pair in the elements. A pair is composed by a "checkbox" (Rectangle Shape) and the corresponding sf::Text
-	for (auto &pair : _uiElements)
+	for (auto& pair : _uiElements)
 	{
 
 		// First of all we check if we're actually inside one of the checkboxes
@@ -213,21 +213,22 @@ void SettingsScene::Update(const double &dt)
 						ss.clear();
 					}
 
-					// This checks what key are we changing in the keyboard controls based on the corresponding sf::Text
-					for (int j = 0; j < InputManager::keyboardControls.size(); j++)
-					{
-						auto scan = sf::Keyboard::delocalize(InputManager::keyboardControls[j]);
-						if (pair.second.getString() == sf::Keyboard::getDescription(scan).toAnsiString())
-						{
-							// We store the state and the index of the keyboardControls that we are going to change
-							isRebinding = true;
-							indexRebind = j;
-						}
-					}
 
-					// We only want one mouse click to happen every frame
-					isMousePressed = false;
 				}
+
+				// This checks what key are we changing in the keyboard controls based on the corresponding sf::Text
+				for (int j = 0; j < InputManager::keyboardControls.size(); j++)
+				{
+					auto scan = sf::Keyboard::delocalize(InputManager::keyboardControls[j]);
+					if (pair.second.getString() == sf::Keyboard::getDescription(scan).toAnsiString())
+					{
+						// We store the state and the index of the keyboardControls that we are going to change
+						isRebinding = true;
+						indexRebind = j;
+					}
+				}
+				// We only want one mouse click to happen every frame
+				isMousePressed = false;
 			}
 		}
 		else
@@ -259,11 +260,11 @@ void SettingsScene::Update(const double &dt)
 			_settings[i].second = false;
 		}
 	}
-		UpdateResolution();
-		UpdateKeys();
-		UpdatePositions();
+	UpdateResolution();
+	UpdateKeys();
+	UpdatePositions();
 
-
+}
 	void SettingsScene::Render()
 	{
 		Engine::getWindow().draw(_settingsTitle);

@@ -483,7 +483,7 @@ void GameScene::Update(const double &dt)
 	Engine::getWindow().setView(PlayerCamera);
 
 	auto ballBody = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	for (b2ContactEdge *edge = ballBody->GetContactList(); edge; edge = edge->next)
+	for (b2ContactEdge* edge = ballBody->GetContactList(); edge; edge = edge->next)
 	{
 		if (edge->contact->IsTouching())
 		{
@@ -505,38 +505,40 @@ void GameScene::Update(const double &dt)
 				audio_impact_strength = (impact_speed * impact_speed * impact_speed) / 20000;
 				Audio::Sound_Play("sound_collisionBiggest_single", audio_impact_strength, 1 - (audio_impact_strength / 3));
 			}
-
-			Announcer(13300, 19, "announcer_cantStopSmashing", _scoreNumber);
-			Announcer(12000, 18, "announcer_mysteriousSmash", _scoreNumber);
-			Announcer(10800, 17, "announcer_ultimateSmash", _scoreNumber);
-			Announcer(9700, 16, "announcer_smashpocalypse", _scoreNumber);
-			Announcer(8700, 15, "announcer_smashacre", _scoreNumber);
-			Announcer(7800, 14, "announcer_humiliationSmash", _scoreNumber);
-			Announcer(6900, 13, "announcer_rampage", _scoreNumber);
-			Announcer(6100, 12, "announcer_holySmash", _scoreNumber);
-			Announcer(5400, 11, "announcer_monsterSmash", _scoreNumber);
-			Announcer(4700, 10, "announcer_wickedSmash", _scoreNumber);
-			Announcer(4100, 9, "announcer_masterSmash", _scoreNumber);
-			Announcer(3500, 8, "announcer_kingSmash", _scoreNumber);
-			Announcer(3000, 7, "announcer_smashingSpree", _scoreNumber);
-			Announcer(2500, 6, "announcer_smashtacular", _scoreNumber);
-			Announcer(2000, 5, "announcer_impossibleSmash", _scoreNumber);
-			Announcer(1600, 4, "announcer_ludicrousSmash", _scoreNumber);
-			Announcer(1200, 3, "announcer_hyperSmash", _scoreNumber);
-			Announcer(800, 2, "announcer_overSmash", _scoreNumber);
-			Announcer(500, 1, "announcer_criticalCrash", _scoreNumber);
-
-			Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
-			PlayerCamera.move(movement * (float)dt * 5.f);
-			PlayerCamera.setCenter(player->getPosition());
-
-			line.append(sf::Vertex(player->getPosition()));
-
-			sf::Vector2i viewPos = sf::Vector2i(Engine::getWindowSize().x / 2.f,
-												80.f);
-
-			sf::Vector2f worldPos = Engine::getWindow().mapPixelToCoords(viewPos);
-			_score.setPosition(worldPos);
-			_score.setString(std::to_string(_scoreNumber));
-			Scene::Update(dt);
 		}
+	}
+
+	Announcer(13300, 19, "announcer_cantStopSmashing", _scoreNumber);
+	Announcer(12000, 18, "announcer_mysteriousSmash", _scoreNumber);
+	Announcer(10800, 17, "announcer_ultimateSmash", _scoreNumber);
+	Announcer(9700, 16, "announcer_smashpocalypse", _scoreNumber);
+	Announcer(8700, 15, "announcer_smashacre", _scoreNumber);
+	Announcer(7800, 14, "announcer_humiliationSmash", _scoreNumber);
+	Announcer(6900, 13, "announcer_rampage", _scoreNumber);
+	Announcer(6100, 12, "announcer_holySmash", _scoreNumber);
+	Announcer(5400, 11, "announcer_monsterSmash", _scoreNumber);
+	Announcer(4700, 10, "announcer_wickedSmash", _scoreNumber);
+	Announcer(4100, 9, "announcer_masterSmash", _scoreNumber);
+	Announcer(3500, 8, "announcer_kingSmash", _scoreNumber);
+	Announcer(3000, 7, "announcer_smashingSpree", _scoreNumber);
+	Announcer(2500, 6, "announcer_smashtacular", _scoreNumber);
+	Announcer(2000, 5, "announcer_impossibleSmash", _scoreNumber);
+	Announcer(1600, 4, "announcer_ludicrousSmash", _scoreNumber);
+	Announcer(1200, 3, "announcer_hyperSmash", _scoreNumber);
+	Announcer(800, 2, "announcer_overSmash", _scoreNumber);
+	Announcer(500, 1, "announcer_criticalCrash", _scoreNumber);
+
+	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
+	PlayerCamera.move(movement * (float)dt * 5.f);
+	PlayerCamera.setCenter(player->getPosition());
+
+	line.append(sf::Vertex(player->getPosition()));
+
+	sf::Vector2i viewPos = sf::Vector2i(Engine::getWindowSize().x / 2.f,
+										80.f);
+
+	sf::Vector2f worldPos = Engine::getWindow().mapPixelToCoords(viewPos);
+	_score.setPosition(worldPos);
+	_score.setString(std::to_string(_scoreNumber));
+	Scene::Update(dt);
+}
