@@ -1,28 +1,31 @@
 #include "InputManager.h"
 
 // The code in this manager is partly taken from https://katyscode.wordpress.com/2013/08/30/xinput-tutorial-part-1-adding-gamepad-support-to-your-windows-game/#:~:text=To%20use%20this%2C%20you%20need,lib%20as%20the%20linker%20input).
-InputManager::InputManager()
-{
-	// Setting up a list of default controls
-	keyboardControls = {
-		sf::Keyboard::W,
-		sf::Keyboard::A,
-		sf::Keyboard::S,
-		sf::Keyboard::D
-	};
-	
-	IsControllerConnected();
-}
+XINPUT_STATE InputManager::state;
+float InputManager::deadzoneX = 0.2f;
+float InputManager::deadzoneY = 0.2f;
+bool InputManager::isControllerConnected = false;
+bool InputManager::isDPadEnabled = true;
+int InputManager::gamepadMovement;
+InputManager::gamepadMovement;
 
+// Setting up a list of default controls
+std::vector<sf::Keyboard::Key> InputManager::keyboardControls{
+	sf::Keyboard::W,
+	sf::Keyboard::A,
+	sf::Keyboard::S,
+	sf::Keyboard::D};
 
 // Function to rebind the current controls
 void InputManager::RebindKeyboard(const int index, const sf::Keyboard::Key key)
 {
 	// If the index is out of bounds, just return
-	if (index >= keyboardControls.size()) return;
+	if (index >= keyboardControls.size())
+		return;
 
 	// If the key is unkown, just return
-	if (key == sf::Keyboard::Unknown) return;
+	if (key == sf::Keyboard::Unknown)
+		return;
 
 	// Replacing the control at given index with given key
 	keyboardControls[index] = key;
@@ -38,7 +41,7 @@ float InputManager::IsMovingForward()
 		else
 			return 0;
 	}
-	else if(isControllerConnected && !isDPadEnabled)
+	else if (isControllerConnected && !isDPadEnabled)
 	{
 		float leftStickY = CalculateYAxisValueWithDeadZone();
 
@@ -186,7 +189,6 @@ bool InputManager::IsMoving()
 			{
 				return true;
 			}
-			
 		}
 
 		return false;
@@ -208,7 +210,6 @@ bool InputManager::IsMoving()
 	return false;
 }
 
-
 void InputManager::IsControllerConnected()
 {
 	// Checks if a controller is connected
@@ -217,24 +218,24 @@ void InputManager::IsControllerConnected()
 	{
 		isControllerConnected = true;
 	}
-	else 
+	else
 	{
 		isControllerConnected = false;
 	}
 }
 
-
 float InputManager::CalculateYAxisValueWithDeadZone()
 {
 	// Code taken from reference. This snippet of code will calculate how much a stick is moved in a range between [-1, 1].
-	// This will also include a deadzone calculation that will avoid the stick from being far too sensitive 
+	// This will also include a deadzone calculation that will avoid the stick from being far too sensitive
 	IsControllerConnected();
 	float normLY = fmaxf(-1, (float)state.Gamepad.sThumbLY / 32767);
 
 	float leftStickY = (abs(normLY) < deadzoneY ? 0 : normLY);
 	leftStickY = (abs(normLY) < deadzoneY ? 0 : (abs(normLY) - deadzoneY) * (normLY / abs(normLY)));
 
-	if (deadzoneY > 0) leftStickY /= 1 - deadzoneY;
+	if (deadzoneY > 0)
+		leftStickY /= 1 - deadzoneY;
 
 	return leftStickY;
 }
@@ -248,7 +249,8 @@ float InputManager::CalculateXAxisValueWithDeadZone()
 
 	leftStickX = (abs(normLX) < deadzoneX ? 0 : (abs(normLX) - deadzoneX) * (normLX / abs(normLX)));
 
-	if (deadzoneX > 0) leftStickX /= 1 - deadzoneX;
+	if (deadzoneX > 0)
+		leftStickX /= 1 - deadzoneX;
 
 	return leftStickX;
 }

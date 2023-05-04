@@ -22,9 +22,7 @@ static shared_ptr<Entity> cube;
 float npc_traffic_linear_damping = 8.0f;
 float npc_traffic_angular_damping = 20.0f;
 
-
 VertexArray line;
-InputManager* manager;
 
 //  public domain function by Darel Rex Finley, 2006
 //
@@ -34,44 +32,61 @@ InputManager* manager;
 //  See description/examples at alienryderflex.com/hsp.html
 
 void RGBtoHSP(
-	double  R, double  G, double  B,
-	double* H, double* S, double* P) {
+	double R, double G, double B,
+	double *H, double *S, double *P)
+{
 
 	//  Calculate the Perceived brightness.
 	*P = sqrt(R * R * Pr + G * G * Pg + B * B * Pb);
 
 	//  Calculate the Hue and Saturation.  (This part works
 	//  the same way as in the HSV/B and HSL systems???.)
-	if (R == G && R == B) {
-		*H = 0.; *S = 0.; return;
+	if (R == G && R == B)
+	{
+		*H = 0.;
+		*S = 0.;
+		return;
 	}
-	if (R >= G && R >= B) {   //  R is largest
-		if (B >= G) {
-			*H = 6. / 6. - 1. / 6. * (B - G) / (R - G); *S = 1. - G / R;
+	if (R >= G && R >= B)
+	{ //  R is largest
+		if (B >= G)
+		{
+			*H = 6. / 6. - 1. / 6. * (B - G) / (R - G);
+			*S = 1. - G / R;
 		}
-		else {
-			*H = 0. / 6. + 1. / 6. * (G - B) / (R - B); *S = 1. - B / R;
-		}
-	}
-	else if (G >= R && G >= B) {   //  G is largest
-		if (R >= B) {
-			*H = 2. / 6. - 1. / 6. * (R - B) / (G - B); *S = 1. - B / G;
-		}
-		else {
-			*H = 2. / 6. + 1. / 6. * (B - R) / (G - R); *S = 1. - R / G;
+		else
+		{
+			*H = 0. / 6. + 1. / 6. * (G - B) / (R - B);
+			*S = 1. - B / R;
 		}
 	}
-	else {   //  B is largest
-		if (G >= R) {
-			*H = 4. / 6. - 1. / 6. * (G - R) / (B - R); *S = 1. - R / B;
+	else if (G >= R && G >= B)
+	{ //  G is largest
+		if (R >= B)
+		{
+			*H = 2. / 6. - 1. / 6. * (R - B) / (G - B);
+			*S = 1. - B / G;
 		}
-		else {
-			*H = 4. / 6. + 1. / 6. * (R - G) / (B - G); *S = 1. - G / B;
+		else
+		{
+			*H = 2. / 6. + 1. / 6. * (B - R) / (G - R);
+			*S = 1. - R / G;
+		}
+	}
+	else
+	{ //  B is largest
+		if (G >= R)
+		{
+			*H = 4. / 6. - 1. / 6. * (G - R) / (B - R);
+			*S = 1. - R / B;
+		}
+		else
+		{
+			*H = 4. / 6. + 1. / 6. * (R - G) / (B - G);
+			*S = 1. - G / B;
 		}
 	}
 }
-
-
 
 //  public domain function by Darel Rex Finley, 2006
 //
@@ -86,72 +101,112 @@ void RGBtoHSP(
 //  See description/examples at alienryderflex.com/hsp.html
 
 void HSPtoRGB(
-	double  H, double  S, double  P,
-	double* R, double* G, double* B) {
+	double H, double S, double P,
+	double *R, double *G, double *B)
+{
 
-	double  part, minOverMax = 1. - S;
+	double part, minOverMax = 1. - S;
 
-	if (minOverMax > 0.) {
-		if (H < 1. / 6.) {   //  R>G>B
-			H = 6. * (H - 0. / 6.); part = 1. + H * (1. / minOverMax - 1.);
+	if (minOverMax > 0.)
+	{
+		if (H < 1. / 6.)
+		{ //  R>G>B
+			H = 6. * (H - 0. / 6.);
+			part = 1. + H * (1. / minOverMax - 1.);
 			*B = P / sqrt(Pr / minOverMax / minOverMax + Pg * part * part + Pb);
-			*R = (*B) / minOverMax; *G = (*B) + H * ((*R) - (*B));
+			*R = (*B) / minOverMax;
+			*G = (*B) + H * ((*R) - (*B));
 		}
-		else if (H < 2. / 6.) {   //  G>R>B
-			H = 6. * (-H + 2. / 6.); part = 1. + H * (1. / minOverMax - 1.);
+		else if (H < 2. / 6.)
+		{ //  G>R>B
+			H = 6. * (-H + 2. / 6.);
+			part = 1. + H * (1. / minOverMax - 1.);
 			*B = P / sqrt(Pg / minOverMax / minOverMax + Pr * part * part + Pb);
-			*G = (*B) / minOverMax; *R = (*B) + H * ((*G) - (*B));
+			*G = (*B) / minOverMax;
+			*R = (*B) + H * ((*G) - (*B));
 		}
-		else if (H < 3. / 6.) {   //  G>B>R
-			H = 6. * (H - 2. / 6.); part = 1. + H * (1. / minOverMax - 1.);
+		else if (H < 3. / 6.)
+		{ //  G>B>R
+			H = 6. * (H - 2. / 6.);
+			part = 1. + H * (1. / minOverMax - 1.);
 			*R = P / sqrt(Pg / minOverMax / minOverMax + Pb * part * part + Pr);
-			*G = (*R) / minOverMax; *B = (*R) + H * ((*G) - (*R));
+			*G = (*R) / minOverMax;
+			*B = (*R) + H * ((*G) - (*R));
 		}
-		else if (H < 4. / 6.) {   //  B>G>R
-			H = 6. * (-H + 4. / 6.); part = 1. + H * (1. / minOverMax - 1.);
+		else if (H < 4. / 6.)
+		{ //  B>G>R
+			H = 6. * (-H + 4. / 6.);
+			part = 1. + H * (1. / minOverMax - 1.);
 			*R = P / sqrt(Pb / minOverMax / minOverMax + Pg * part * part + Pr);
-			*B = (*R) / minOverMax; *G = (*R) + H * ((*B) - (*R));
+			*B = (*R) / minOverMax;
+			*G = (*R) + H * ((*B) - (*R));
 		}
-		else if (H < 5. / 6.) {   //  B>R>G
-			H = 6. * (H - 4. / 6.); part = 1. + H * (1. / minOverMax - 1.);
+		else if (H < 5. / 6.)
+		{ //  B>R>G
+			H = 6. * (H - 4. / 6.);
+			part = 1. + H * (1. / minOverMax - 1.);
 			*G = P / sqrt(Pb / minOverMax / minOverMax + Pr * part * part + Pg);
-			*B = (*G) / minOverMax; *R = (*G) + H * ((*B) - (*G));
+			*B = (*G) / minOverMax;
+			*R = (*G) + H * ((*B) - (*G));
 		}
-		else {   //  R>B>G
-			H = 6. * (-H + 6. / 6.); part = 1. + H * (1. / minOverMax - 1.);
+		else
+		{ //  R>B>G
+			H = 6. * (-H + 6. / 6.);
+			part = 1. + H * (1. / minOverMax - 1.);
 			*G = P / sqrt(Pr / minOverMax / minOverMax + Pb * part * part + Pg);
-			*R = (*G) / minOverMax; *B = (*G) + H * ((*R) - (*G));
+			*R = (*G) / minOverMax;
+			*B = (*G) + H * ((*R) - (*G));
 		}
 	}
-	else {
-		if (H < 1. / 6.) {   //  R>G>B
-			H = 6. * (H - 0. / 6.); *R = sqrt(P * P / (Pr + Pg * H * H)); *G = (*R) * H; *B = 0.;
+	else
+	{
+		if (H < 1. / 6.)
+		{ //  R>G>B
+			H = 6. * (H - 0. / 6.);
+			*R = sqrt(P * P / (Pr + Pg * H * H));
+			*G = (*R) * H;
+			*B = 0.;
 		}
-		else if (H < 2. / 6.) {   //  G>R>B
-			H = 6. * (-H + 2. / 6.); *G = sqrt(P * P / (Pg + Pr * H * H)); *R = (*G) * H; *B = 0.;
+		else if (H < 2. / 6.)
+		{ //  G>R>B
+			H = 6. * (-H + 2. / 6.);
+			*G = sqrt(P * P / (Pg + Pr * H * H));
+			*R = (*G) * H;
+			*B = 0.;
 		}
-		else if (H < 3. / 6.) {   //  G>B>R
-			H = 6. * (H - 2. / 6.); *G = sqrt(P * P / (Pg + Pb * H * H)); *B = (*G) * H; *R = 0.;
+		else if (H < 3. / 6.)
+		{ //  G>B>R
+			H = 6. * (H - 2. / 6.);
+			*G = sqrt(P * P / (Pg + Pb * H * H));
+			*B = (*G) * H;
+			*R = 0.;
 		}
-		else if (H < 4. / 6.) {   //  B>G>R
-			H = 6. * (-H + 4. / 6.); *B = sqrt(P * P / (Pb + Pg * H * H)); *G = (*B) * H; *R = 0.;
+		else if (H < 4. / 6.)
+		{ //  B>G>R
+			H = 6. * (-H + 4. / 6.);
+			*B = sqrt(P * P / (Pb + Pg * H * H));
+			*G = (*B) * H;
+			*R = 0.;
 		}
-		else if (H < 5. / 6.) {   //  B>R>G
-			H = 6. * (H - 4. / 6.); *B = sqrt(P * P / (Pb + Pr * H * H)); *R = (*B) * H; *G = 0.;
+		else if (H < 5. / 6.)
+		{ //  B>R>G
+			H = 6. * (H - 4. / 6.);
+			*B = sqrt(P * P / (Pb + Pr * H * H));
+			*R = (*B) * H;
+			*G = 0.;
 		}
-		else {   //  R>B>G
-			H = 6. * (-H + 6. / 6.); *R = sqrt(P * P / (Pr + Pb * H * H)); *B = (*R) * H; *G = 0.;
+		else
+		{ //  R>B>G
+			H = 6. * (-H + 6. / 6.);
+			*R = sqrt(P * P / (Pr + Pb * H * H));
+			*B = (*R) * H;
+			*G = 0.;
 		}
 	}
 }
 
-
-
-
-bool isRebind = false;
 bool hasBeenLoaded = false;
 int most_recent_score_threshold = 0;
-
 
 void GameScene::Load()
 {
@@ -160,14 +215,14 @@ void GameScene::Load()
 		PlayerCamera.zoom(0.8);
 		hasBeenLoaded = true;
 	}
-	float tileSize = 50.f;
 
-	//ls::LoadLevelFile_OLD("res/levels/pacman.txt", 50.f);
+	float tileSize = 50.f;
+	// ls::LoadLevelFile_OLD("res/levels/pacman.txt", 50.f);
 	ls::LoadLevelFile("res/levels/demo.tmj", this, tileSize);
 
 	// TODO: Remove this debugging to visualise waypoints before release.
 	// Spawn a green circle on top of every waypoint for debugging purposes.
-	//for (auto& waypoint : ls::GetWaypoints())
+	// for (auto& waypoint : ls::GetWaypoints())
 	//{
 	//	// Create a component
 	//	auto waypoint_shape = waypoint.second->addComponent<ShapeComponent>();
@@ -177,8 +232,7 @@ void GameScene::Load()
 	//	waypoint_shape->getShape().setOrigin(Vector2f(waypoint_trigger_radius, waypoint_trigger_radius));
 	//}
 
-	manager = new InputManager();
-
+	InputManager::IsControllerConnected();
 	// Player Setup
 	player = MakeEntity();
 	player->setPosition(sf::Vector2f(2.f * tileSize, -5.0f * tileSize));
@@ -206,10 +260,9 @@ void GameScene::Load()
 		// Chain Physics
 		auto chainPhysics = chain->addComponent<ActorPhysicsComponent>(true, size);
 		chainPhysics->setMass(20.f - (i * 5));
-		//chainPhysics->setFriction(.1f);
+		// chainPhysics->setFriction(.1f);
 		chains.push_back(chain);
 	}
-
 
 	// Ball Setup
 	wreckingBall = MakeEntity();
@@ -228,7 +281,7 @@ void GameScene::Load()
 	wreckingBallPhysics->setMass(5.f);
 	wreckingBallPhysics->setRestitution(1.f);
 	// Player Physics Component
-	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, manager, wreckingBall, chains);
+	auto playerPhysics = player->addComponent<PlayerPhysicsComponent>(size, wreckingBall, chains);
 	playerPhysics->setMass(20.f);
 
 	cube = MakeEntity();
@@ -244,43 +297,40 @@ void GameScene::Load()
 	// Camera setup
 	PlayerCamera.setCenter(player->getPosition());
 
-
-
-
-
 	//// Make a test NPC
-	//test_NPC = MakeEntity();
-	//test_NPC->setPosition(sf::Vector2f(10.f * tileSize, -3.5f * tileSize));
-	//test_NPC->setRotation(sf::degrees(180));
+	// test_NPC = MakeEntity();
+	// test_NPC->setPosition(sf::Vector2f(10.f * tileSize, -3.5f * tileSize));
+	// test_NPC->setRotation(sf::degrees(180));
 
 	//// Test NPC Shape Component
-	//auto shapeCompNPC = test_NPC->addComponent<ShapeComponent>();
-	//sf::Vector2f sizeNPC = Vector2f(100.f, 45.f);
-	//shapeCompNPC->setShape<sf::RectangleShape>(sizeNPC);
-	//shapeCompNPC->getShape().setFillColor(Color::Red);
-	//shapeCompNPC->getShape().setOrigin(Vector2f(sizeNPC.x / 2, sizeNPC.y / 2));
+	// auto shapeCompNPC = test_NPC->addComponent<ShapeComponent>();
+	// sf::Vector2f sizeNPC = Vector2f(100.f, 45.f);
+	// shapeCompNPC->setShape<sf::RectangleShape>(sizeNPC);
+	// shapeCompNPC->getShape().setFillColor(Color::Red);
+	// shapeCompNPC->getShape().setOrigin(Vector2f(sizeNPC.x / 2, sizeNPC.y / 2));
 
 	//// Test NPC Physics Body Component
-	//auto physicsCompNPC = test_NPC->addComponent<ActorPhysicsComponent>(true, sizeNPC);
-	//physicsCompNPC->setMass(5.f);
-	//physicsCompNPC->setRestitution(0.1f);
+	// auto physicsCompNPC = test_NPC->addComponent<ActorPhysicsComponent>(true, sizeNPC);
+	// physicsCompNPC->setMass(5.f);
+	// physicsCompNPC->setRestitution(0.1f);
 	//// Test NPC AI component
-	//auto AIcompNPC = test_NPC->addComponent<AIBehaviourComponent>();
+	// auto AIcompNPC = test_NPC->addComponent<AIBehaviourComponent>();
 	//// Give them an arbitrary target waypoint to start them off.
 	//// Tiled starts waypoints indexed from 1, not zero.
-	//AIcompNPC->waypoint_destination = ls::GetWaypoints().at(3);
-	//AIcompNPC->waypoint_most_recently_touched = ls::GetWaypoints().at(4);
+	// AIcompNPC->waypoint_destination = ls::GetWaypoints().at(3);
+	// AIcompNPC->waypoint_most_recently_touched = ls::GetWaypoints().at(4);
 
 	// Make extra traffic NPCs
 	shared_ptr<ShapeComponent> shapeCompTrafficNPC;
 	sf::Vector2f sizeTrafficNPC = Vector2f(100.f, 45.f);
 	shared_ptr<AIBehaviourComponent> aiCompTrafficNPC;
-	for (auto& waypoint_pair : ls::GetWaypoints())
+	for (auto &waypoint_pair : ls::GetWaypoints())
 	{
 		float random_chance_of_spawning_NPC = .3f;
-		if (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) > random_chance_of_spawning_NPC) continue;
+		if (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) > random_chance_of_spawning_NPC)
+			continue;
 
-		auto& waypoint = waypoint_pair.second;
+		auto &waypoint = waypoint_pair.second;
 
 		// Make a traffic NPC
 		shared_ptr<Entity> npc = MakeEntity();
@@ -291,7 +341,7 @@ void GameScene::Load()
 		shapeCompTrafficNPC = npc->addComponent<ShapeComponent>();
 		shapeCompTrafficNPC->setShape<sf::RectangleShape>(sizeTrafficNPC);
 		double red, green, blue, hue, saturation, lightness;
-		hue = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		hue = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 		saturation = 0.7;
 		lightness = 0.7;
 		HSPtoRGB(hue, saturation, lightness, &red, &green, &blue);
@@ -324,7 +374,6 @@ void GameScene::Load()
 		Audio::Music_Play("ambience_city_1", 0.2, 1.0);
 	}
 
-
 	if (_settings[3].second)
 	{
 		// Player car sounds
@@ -345,7 +394,6 @@ void GameScene::Load()
 		Audio::Sound_Load_from_file("res/audio/sound_collisionBig_single.ogg", "sound_collisionBig_single");
 		// Composited from files authored by sandydb (2010, https://freesound.org/people/sandyrb/sounds/95078/) and jsbarrett (2015, https://freesound.org/people/jsbarrett/sounds/321139/)
 		Audio::Sound_Load_from_file("res/audio/sound_collisionBiggest_single.ogg", "sound_collisionBiggest_single");
-
 
 		// Voice announcer, eg. "Multi smash!"
 		// Authored by us.
@@ -373,7 +421,6 @@ void GameScene::Load()
 		Audio::Sound_Load_from_file("res/audio/announcer_wickedSmash.ogg", "announcer_wickedSmash");
 	}
 
-
 	Engine::getWindow().setView(PlayerCamera);
 
 	if (_font.loadFromFile("res/fonts/ChakraPetch-Regular.ttf"))
@@ -394,10 +441,10 @@ void GameScene::Unload()
 	player.reset();
 	wreckingBall.reset();
 	cube.reset();
-	for (auto& e : chains)
+	for (auto &e : chains)
 		e.reset();
-	//test_NPC.reset();
-	for (auto& e : traffic_NPCs)
+	// test_NPC.reset();
+	for (auto &e : traffic_NPCs)
 	{
 		e.reset();
 	}
@@ -424,22 +471,26 @@ void Announcer(int scoreThreshold, int index, string announcer_line, int scorenu
 		Audio::Sound_Play(announcer_line, 1.0f, 1.0f);
 		most_recent_score_threshold = index;
 	}
-
 }
 
-void GameScene::Update(const double& dt)
+void GameScene::HandleEvents()
+{
+	Scene::HandleEvents();
+}
+
+void GameScene::Update(const double &dt)
 {
 	Engine::getWindow().setView(PlayerCamera);
 
 	auto ballBody = wreckingBall->getComponents<ActorPhysicsComponent>()[0]->getBody();
-	for (b2ContactEdge* edge = ballBody->GetContactList(); edge; edge = edge->next)
+	for (b2ContactEdge *edge = ballBody->GetContactList(); edge; edge = edge->next)
 	{
 		if (edge->contact->IsTouching())
 		{
 			float32 collided_body_mass = (edge->contact->GetFixtureA()->GetBody()->GetMass());
 			if (collided_body_mass >= (float32)1.0f)
 			{
-				//std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
+				// std::cout << ballBody->GetLinearVelocity().Length() << std::endl;
 				edge->contact->GetFixtureA()->GetBody()->SetAngularVelocity(ballBody->GetLinearVelocity().Length());
 
 				auto impact_speed = ballBody->GetLinearVelocity().Length();
@@ -453,44 +504,39 @@ void GameScene::Update(const double& dt)
 				Audio::Sound_Play("sound_collisionBig_single", audio_impact_strength, 1 - (audio_impact_strength / 2));
 				audio_impact_strength = (impact_speed * impact_speed * impact_speed) / 20000;
 				Audio::Sound_Play("sound_collisionBiggest_single", audio_impact_strength, 1 - (audio_impact_strength / 3));
-
 			}
 
+			Announcer(13300, 19, "announcer_cantStopSmashing", _scoreNumber);
+			Announcer(12000, 18, "announcer_mysteriousSmash", _scoreNumber);
+			Announcer(10800, 17, "announcer_ultimateSmash", _scoreNumber);
+			Announcer(9700, 16, "announcer_smashpocalypse", _scoreNumber);
+			Announcer(8700, 15, "announcer_smashacre", _scoreNumber);
+			Announcer(7800, 14, "announcer_humiliationSmash", _scoreNumber);
+			Announcer(6900, 13, "announcer_rampage", _scoreNumber);
+			Announcer(6100, 12, "announcer_holySmash", _scoreNumber);
+			Announcer(5400, 11, "announcer_monsterSmash", _scoreNumber);
+			Announcer(4700, 10, "announcer_wickedSmash", _scoreNumber);
+			Announcer(4100, 9, "announcer_masterSmash", _scoreNumber);
+			Announcer(3500, 8, "announcer_kingSmash", _scoreNumber);
+			Announcer(3000, 7, "announcer_smashingSpree", _scoreNumber);
+			Announcer(2500, 6, "announcer_smashtacular", _scoreNumber);
+			Announcer(2000, 5, "announcer_impossibleSmash", _scoreNumber);
+			Announcer(1600, 4, "announcer_ludicrousSmash", _scoreNumber);
+			Announcer(1200, 3, "announcer_hyperSmash", _scoreNumber);
+			Announcer(800, 2, "announcer_overSmash", _scoreNumber);
+			Announcer(500, 1, "announcer_criticalCrash", _scoreNumber);
+
+			Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
+			PlayerCamera.move(movement * (float)dt * 5.f);
+			PlayerCamera.setCenter(player->getPosition());
+
+			line.append(sf::Vertex(player->getPosition()));
+
+			sf::Vector2i viewPos = sf::Vector2i(Engine::getWindowSize().x / 2.f,
+												80.f);
+
+			sf::Vector2f worldPos = Engine::getWindow().mapPixelToCoords(viewPos);
+			_score.setPosition(worldPos);
+			_score.setString(std::to_string(_scoreNumber));
+			Scene::Update(dt);
 		}
-
-	}
-
-	Announcer(13300, 19, "announcer_cantStopSmashing", _scoreNumber);
-	Announcer(12000, 18, "announcer_mysteriousSmash", _scoreNumber);
-	Announcer(10800, 17, "announcer_ultimateSmash", _scoreNumber);
-	Announcer(9700, 16, "announcer_smashpocalypse", _scoreNumber);
-	Announcer(8700, 15, "announcer_smashacre", _scoreNumber);
-	Announcer(7800, 14, "announcer_humiliationSmash", _scoreNumber);
-	Announcer(6900, 13, "announcer_rampage", _scoreNumber);
-	Announcer(6100, 12, "announcer_holySmash", _scoreNumber);
-	Announcer(5400, 11, "announcer_monsterSmash", _scoreNumber);
-	Announcer(4700, 10, "announcer_wickedSmash", _scoreNumber);
-	Announcer(4100, 9, "announcer_masterSmash", _scoreNumber);
-	Announcer(3500, 8, "announcer_kingSmash", _scoreNumber);
-	Announcer(3000, 7, "announcer_smashingSpree", _scoreNumber);
-	Announcer(2500, 6, "announcer_smashtacular", _scoreNumber);
-	Announcer(2000, 5, "announcer_impossibleSmash", _scoreNumber);
-	Announcer(1600, 4, "announcer_ludicrousSmash", _scoreNumber);
-	Announcer(1200, 3, "announcer_hyperSmash", _scoreNumber);
-	Announcer(800, 2, "announcer_overSmash", _scoreNumber);
-	Announcer(500, 1, "announcer_criticalCrash", _scoreNumber);
-
-	Vector2f movement = player->getPosition() - PlayerCamera.getCenter();
-	PlayerCamera.move(movement * (float)dt * 5.f);
-	PlayerCamera.setCenter(player->getPosition());
-
-	line.append(sf::Vertex(player->getPosition()));
-
-	sf::Vector2i viewPos = sf::Vector2i(Engine::getWindowSize().x / 2.f,
-		80.f);
-
-	sf::Vector2f worldPos = Engine::getWindow().mapPixelToCoords(viewPos);
-	_score.setPosition(worldPos);
-	_score.setString(std::to_string(_scoreNumber));
-	Scene::Update(dt);
-}

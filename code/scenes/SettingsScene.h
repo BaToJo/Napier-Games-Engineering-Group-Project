@@ -10,6 +10,7 @@ private:
 
 	std::vector<std::string> _settingsNames{ "FULLSCREEN", "VSYNC", "BGM", "EFFECTS" };
 
+	sf::Text _controlsText;
 	sf::Font _font;
 	sf::Font _buttonFont;
 
@@ -26,7 +27,8 @@ private:
 	const float alphaOffset = alphaAmplitude + alphaLowerBound;
 
 	void UpdatePositions();
-
+	void UpdateKeys();
+	void UpdateResolution();
 	sf::Clock settingsClock;
 
 	bool vsync_enabled = false;
@@ -36,6 +38,11 @@ private:
 
 	// std::string currentResolution = "";
 
+
+	bool isMousePressed = false;
+	bool isRebinding = false;
+	int indexRebind = -1;
+	sf::Keyboard::Key currentKeyPressed = sf::Keyboard::Unknown;
 public:
 	void Load() override;
 
@@ -44,4 +51,7 @@ public:
 	void Update(const double& dt) override;
 
 	void Render() override;
+
+	void HandleEvents() override;
+
 };

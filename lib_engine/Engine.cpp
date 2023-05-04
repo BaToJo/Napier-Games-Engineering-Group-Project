@@ -84,62 +84,7 @@ void Engine::Start(unsigned int width, unsigned int height, const std::string& g
 
 		accumulator += frameTime;
 
-		Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == Event::Closed)
-			{
-				window.close();
-			}
-			if (event.type == Event::Resized)
-			{
-				WindowResize(event.size.width, event.size.height);
-			}
-			if (Keyboard::isKeyPressed(Keyboard::Escape))
-			{
-				ChangeScene(&menuScene);
-			}
-			if (event.type == Event::Resized)
-			{
-				sf::FloatRect visibleArea(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
-				window.setView(sf::View(visibleArea));
-			}
-
-			if (event.type == Event::MouseWheelScrolled)
-			{
-				float zoomDelta = 1 + (event.mouseWheelScroll.delta * -0.1);
-				_activeScene->PlayerCamera.zoom(zoomDelta);
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
-			{
-				if (!hotkeyDown_AltEnter)
-				{
-					hotkeyDown_AltEnter = true;
-					if (currentWindowStyle == sf::Style::Default)
-					{
-						persistentWindowSize = Vector2u(window.getSize());
-						currentWindowStyle = sf::Style::Fullscreen;
-					}
-					else
-					{
-						currentWindowStyle = sf::Style::Default;
-					}
-					window.create(VideoMode(persistentWindowSize), gameName, currentWindowStyle);
-					if (currentWindowStyle == sf::Style::Default)
-						WindowResize(window.getSize().x, window.getSize().y);
-					else
-						WindowResize(sf::VideoMode::getDesktopMode().size.y, sf::VideoMode::getDesktopMode().size.y);
-				}
-			}
-			else
-			{
-				hotkeyDown_AltEnter = false;
-			}
-
-
-
-		}
-
+		_activeScene->HandleEvents();
 		window.clear();
 
 		while (accumulator >= dt)
@@ -212,6 +157,28 @@ void Scene::Update(const double& dt)
 void Scene::Render()
 {
 	ents.Render();
+}
+
+void Scene::HandleEvents()
+{
+	Event event;
+	while (Engine::getWindow().pollEvent(event))
+	{
+		if (event.type == Event::Closed)
+		{
+			Engine::getWindow().close();
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Escape))
+		{
+			Engine::ChangeScene(&menuScene);
+		}
+		if (event.type == Event::Resized)
+		{
+			sf::FloatRect visibleArea(sf::Vector2f(0.f, 0.f), sf::Vector2f(event.size.width, event.size.height));
+			Engine::getWindow().setView(sf::View(visibleArea));
+		}
+	}
+
 }
 
 std::shared_ptr<Entity> Scene::MakeEntity()

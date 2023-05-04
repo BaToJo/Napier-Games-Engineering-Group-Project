@@ -20,4 +20,6 @@ public:
 
 	void Render() override;
 
+	void HandleEvents() override;
+
 };
