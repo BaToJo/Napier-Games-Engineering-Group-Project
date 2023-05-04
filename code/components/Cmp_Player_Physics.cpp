@@ -13,8 +13,8 @@ void PlayerPhysicsComponent::HandleDriving()
 	float desiredSpeed = 0;
 
 	// These multipliers are used to calculate how much a stick is being pressed. It defaults to 1 when keyboard is used
-	float multiplierForward = _inputManager->IsMovingForward();
-	float multiplierBack = _inputManager->IsMovingBack();
+	float multiplierForward = InputManager::IsMovingForward();
+	float multiplierBack = InputManager::IsMovingBack();
 
 	// The multipliers are then used as a criteria for movement and also as a proper calculation that will influence the speed
 	if (multiplierForward)
@@ -67,8 +67,8 @@ void PlayerPhysicsComponent::HandleSteering()
 {
 	float desiredTorque = 0;
 	//b2Vec2 desiredVel = b2Vec2(0.f, 0.f);
-	float multiplierRight = _inputManager->IsMovingRight();
-	float multiplierLeft = _inputManager->IsMovingLeft();
+	float multiplierRight = InputManager::IsMovingRight();
+	float multiplierLeft = InputManager::IsMovingLeft();
 
 	if (multiplierRight)
 	{
@@ -85,7 +85,7 @@ void PlayerPhysicsComponent::HandleSteering()
 	_body->ApplyTorque(-desiredTorque, true);
 }
 
-PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _inputManager(inputManager), _wreckingBall(wreckingBall), _chain(chain)
+PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain) : ActorPhysicsComponent(p, true, size), _wreckingBall(wreckingBall), _chain(chain)
 {
 	// Setting up Car's Body
 	_size = Sv2_to_bv2(size, true);
@@ -129,7 +129,7 @@ PlayerPhysicsComponent::PlayerPhysicsComponent(Entity* p, const sf::Vector2f& si
 void PlayerPhysicsComponent::Update(double dt)
 {
 	// Checking if any key is being pressed
-	bool isAnyPressed = _inputManager->IsMoving();
+	bool isAnyPressed = InputManager::IsMoving();
 
 	// If no keys are being pressed
 	if (!isAnyPressed)
@@ -146,8 +146,8 @@ void PlayerPhysicsComponent::Update(double dt)
 	}
 
 	// If we're not pressing A and D
-	float movingLeft = _inputManager->IsMovingLeft();
-	float movingRight = _inputManager->IsMovingRight();
+	float movingLeft = InputManager::IsMovingLeft();
+	float movingRight = InputManager::IsMovingRight();
 	if (!movingLeft && !movingRight)
 	{
 		// Get every chain

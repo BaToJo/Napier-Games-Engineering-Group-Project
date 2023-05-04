@@ -46,7 +46,7 @@ protected:
 	b2RevoluteJoint* _ballJoint;
 
 public:
-	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, InputManager* inputManager, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain);
+	explicit PlayerPhysicsComponent(Entity* p, const sf::Vector2f& size, std::shared_ptr<Entity>& wreckingBall, std::vector<std::shared_ptr<Entity>>& chain);
 	PlayerPhysicsComponent() = delete;
 
 	void Update(double dt) override;
